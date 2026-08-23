@@ -1,0 +1,51 @@
+\chapter*{Introduzione}
+\addcontentsline{toc}{chapter}{Introduzione}
+\setcounter{chapter}{0}
+
+% ---------------------------------------------------------------------
+% Scritta il 2026-08-18.
+%
+% Questo file era vuoto (tre righe di intestazione). L'anticipazione dei
+% risultati stava in fondo al Cap. 1, dove faceva danno: il lettore
+% arrivava al Cap. 6 -- che e' il capitolo in cui il lavoro vero viene
+% fatto -- avendone gia' sentito la conclusione, e lo leggeva come un
+% riassunto.
+%
+% Qui l'anticipazione e' al posto giusto per convenzione, e il Cap. 1
+% torna a fare il suo mestiere: porre la domanda.
+%
+% REGOLA per il Cap. 1: puo' dire "l'esito e' nel Capitolo X", non puo'
+% dire il numero.
+% ---------------------------------------------------------------------
+
+Una persona anziana su cinque cade almeno una volta all'anno, e sei cadute su dieci avvengono in casa~\cite{passi}. È l'ambiente in cui si cade di più ed è, insieme, quello in cui può non esserci nessuno ad accorgersene: la gravità delle conseguenze non dipende soltanto dall'impatto, ma dal tempo che la persona trascorre a terra prima del soccorso.
+
+Questo lavoro affronta il problema con una telecamera e un dispositivo di calcolo da poche decine di euro. Il sistema classifica cadute contro attività quotidiane a partire dalla \emph{posa} della persona --- un insieme di coordinate di giunti --- invece che dai fotogrammi: l'immagine viene scartata alla fonte, e ciò che il classificatore riceve non contiene volto, abbigliamento né sfondo. È un \emph{privacy-by-design} architetturale e non dichiarativo, ed è la condizione perché un sistema di questo tipo sia accettabile in un'abitazione privata.
+
+L'ipotesi da verificare è duplice. Da un lato che l'intera catena --- stima della posa, costruzione delle feature, classificazione --- possa girare in tempo reale su un nodo \emph{edge} a basso costo, rendendo superflui sia un server con GPU sia la trasmissione dei dati fuori dall'abitazione. Dall'altro che una rete ricorrente compatta sia la scelta appropriata per il classificatore, come il prototipo di partenza assumeva.
+
+\section*{Che cosa il lavoro ha trovato}
+
+La prima ipotesi regge. L'intera catena gira su una board da circa cento euro a 26,5 fotogrammi al secondo, senza che alcun dato lasci il dispositivo. Il costo si distribuisce però in modo inatteso: la stima della posa occupa l'88,4\% del tempo di calcolo, il classificatore il 5,8\%. Tutto il lavoro di confronto fra architetture agisce quindi su un ventesimo del problema.
+
+La seconda ipotesi non regge, ma non nel modo previsto. Cinque architetture confrontate a parità di protocollo --- due ricorrenti, una bidirezionale, un \emph{encoder} basato su attenzione e un classificatore non sequenziale --- si collocano tutte entro $0{,}042$ della metrica di riferimento, contro una dispersione fra soggetti di $\pm 0{,}08$--$0{,}11$: nessuna coppia è distinguibile. Il confronto che invece separa nettamente vale $0{,}438$, ed è quello fra due posizioni della telecamera. La variabile che decide non è il modello, è dove si monta l'ottica.
+
+\section*{Il risultato che non era fra le domande}
+
+La validazione in ambiente domestico ha prodotto la conclusione che questo lavoro considera il proprio contributo principale, e che non era fra gli obiettivi di partenza.
+
+Alcuni interventi progettati per rendere il sistema robusto in una casa \emph{peggiorano} la metrica calcolata sul dataset di riferimento, e la migliorano di due ordini di grandezza in una casa vera. La causa è verificabile e non dipende dal modello: nei due insiemi le persone orizzontali \emph{che non sono cadute} sono di tipo opposto --- a terra in laboratorio, dove sdraiarsi sul pavimento è una delle attività registrate; su un divano in casa, un torso e mezzo più in alto. La condizione che quegli interventi servono a gestire non è rappresentata nell'insieme su cui li si giudicava.
+
+Ne segue un enunciato che si ritiene valga oltre il caso particolare:
+
+\begin{quote}
+Un insieme di verifica non può misurare un miglioramento su una condizione che non rappresenta. E se lo si impiega ugualmente, non si limita a sovrastimare le prestazioni: \textbf{ordina in modo errato le alternative}, indicando la direzione sbagliata con la stessa apparente sicurezza con cui indicherebbe quella giusta.
+\end{quote}
+
+È la formulazione sperimentale dell'osservazione da cui il lavoro ha preso avvio --- i sistemi che dichiarano risultati eccellenti e falliscono nella pratica --- con un'aggravante che l'osservazione originale non conteneva: il numero dichiarato non è soltanto ottimistico, è \emph{fuorviante nella scelta}.
+
+\section*{Struttura dell'elaborato}
+
+Il Capitolo~\ref{cap:contesto} inquadra il problema clinico, argomenta la scelta della rappresentazione basata sulla posa e stabilisce perché i risultati pubblicati su dataset controllati non dicano cosa accada in un'abitazione. Il Capitolo~\ref{cap:metodologia} descrive la catena che porta dal video alle grandezze in ingresso al classificatore. Il Capitolo~\ref{cap:protocollo} costruisce il protocollo di misura, ed è il capitolo da cui dipende l'interpretabilità di ogni numero successivo. Il Capitolo~\ref{cap:risultati} riporta i confronti sperimentali, il Capitolo~\ref{cap:edge} il \emph{porting} sul dispositivo e la caratterizzazione del suo costo, il Capitolo~\ref{cap:campo} la validazione in abitazioni reali. Il Capitolo~\ref{cap:conclusioni} discute contributi e limiti.
+
+Tre risultati di questo lavoro sono \emph{negativi} rispetto alle scelte che lo avevano orientato: l'acceleratore neurale del dispositivo non viene utilizzato, l'architettura ricorrente di partenza non è giustificata dai dati, e un filtro geometrico progettato per ridurre i falsi allarmi peggiora il bilancio complessivo. Sono riportati come tali, perché una scelta verificata e smentita è un risultato, mentre una scelta assunta e mai messa alla prova non lo è.

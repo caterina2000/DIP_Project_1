@@ -1,0 +1,174 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ---------------------------------------------------------------
+% CODIFICA E LINGUA
+% Un solo inputenc: il preambolo ne caricava due con codifiche
+% opposte (utf8 e poi latin1). Vinceva il secondo, e su file salvati
+% in UTF-8 -- come fa Overleaf -- le lettere accentate risultavano
+% corrotte: "perche'" diventava "perchA©".
+% ---------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+
+% ---------------------------------------------------------------
+% LAYOUT
+% ---------------------------------------------------------------
+\usepackage{geometry}
+\geometry{top=2cm, bottom=2cm, left=3.5cm, right=3.5cm}
+\usepackage{parskip}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+
+% ---------------------------------------------------------------
+% MATEMATICA
+% ---------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amscd}
+\usepackage{mathtools}
+\usepackage{latexsym}
+\usepackage{bm}
+
+% ---------------------------------------------------------------
+% FIGURE E TABELLE
+% ---------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{adjustbox}
+\usepackage{placeins}
+\usepackage{booktabs}   % \toprule \midrule \bottomrule: tabelle senza righe verticali
+\usepackage{siunitx}    % \SI{33.34}{\milli\second}, allineamento sui decimali
+\usepackage{multirow}
+
+% ---------------------------------------------------------------
+% VARIE
+% ---------------------------------------------------------------
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{chngcntr}
+\usepackage{tikz}
+\usetikzlibrary{topaths,calc}
+
+% Impostazioni dell'interlinea
+\renewcommand{\baselinestretch}{1.5}
+
+\oddsidemargin=42pt \evensidemargin=20pt
+
+\pagestyle{fancy}\addtolength{\headwidth}{20pt}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+\cfoot{}
+
+\linespread{1.3}
+\textheight 22.5cm
+\topmargin -0.3cm
+
+\lstset{basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  breaklines=true,
+  escapeinside={(*@}{@*)}
+}
+
+% Cifre decimali con la virgola, come da uso italiano
+\sisetup{output-decimal-marker={,}, group-separator={.}}
+\newtheorem{Thm}{Teorema}[section]
+\newtheorem{Lem}[Thm]{Lemma}
+\newtheorem{Prop}[Thm]{Proposizione}
+\newtheorem{Cor}[Thm]{Corollario}
+
+
+\newtheorem{Exer}[Thm]{Esercizio} %comando abbreviato per scrivere Esercizio, basta scrivere Exer
+\newtheorem{Def}[Thm]{Definizione}
+\newtheorem{Conj}[Thm]{Congettura}
+\newtheorem{ST}[Thm]{Stato Terminale}
+\newtheorem{Ques}{Domanda}[chapter]
+\newtheorem{Rmk}[Thm]{Osservazione}
+
+\theoremstyle{definition}
+\newtheorem{Ex}{Esempio}[section]
+\newtheorem{Oss}[Thm]{Osservazione}
+\newtheorem{Not}[Thm]{Notazione}
+
+\newcommand{\RR}{{\mathbb{R}}} %comando abbreviato per scrivere R nel formato numeri reali, basta scrivere \RR
+\newcommand{\ZZ}{{\mathbb{Z}}}
+\newcommand{\NN}{{\mathbb{N}}}
+\newcommand{\HH}{{\mathcal{H}}} %comando abbreviato per scrivere H in corsivo, basta scrivere \HH
+\newcommand{\MM}{{\mathcal{M}}}
+\newcommand{\VV}{{\mathcal{V}}}
+\newcommand{\PP}{{\mathbb{P}}}
+%\newcommand{\TT}{{\mathcal{T}}}
+\newcommand{\FF}{{\mathcal{F}}}
+\newcommand{\CC}{{\mathcal{C}}}
+\newcommand{\PPP}{{\mathbb{P}}}
+     \newcommand{\CCC}{{\mathbb{C}}}
+     
+\newcommand{\BB}{{\mathcal B}}
+%\newcommand{\TT}{{\mathbb T}}
+
+
+
+
+\def\cA{\mathcal A}
+\def\cR{\mathcal R}
+\def\cG{\mathcal G}
+\def\cT{\mathcal T}
+
+
+\newcommand{\bx}{{\mathbf x}}
+\newcommand{\by}{{\mathbf y}}%comando abbreviato per scrivere la lettera x in grassetto, basta scrivere \bx
+\newcommand{\bp}{{\mathbf p}}
+\newcommand{\bq}{{\mathbf q}}
+\newcommand{\bb}{{\mathbf b}}
+\newcommand{\bc}{{\mathbf c}}
+\newcommand{\ba}{{\mathbf a}}
+\newcommand{\bv}{{\mathbf v}}
+\newcommand{\bt}{{\mathbf t}}
+
+
+
+\hyphenation{sot-to-in-sie-me}
+\hyphenation{proiet-ti-vi}
+
+\begin{document}
+
+\newpage
+\pagestyle{empty}
+\input{Frontespizio}
+
+\newpage
+\pagestyle{plain}\pagenumbering{roman}
+\tableofcontents
+
+\input Introduzione
+\newpage
+\pagestyle{myheadings}
+
+
+
+\pagenumbering{arabic}
+\include{Cap1}
+\include{Cap2}
+\include{Cap3}
+\include{Cap4}
+\include{Cap5}
+\include{Cap6}
+\include{Cap7}
+
+
+\addcontentsline{toc}{chapter}{\textit{\bibname}}
+
+% Il file si chiama Bibliografia.tex con la B maiuscola. Su Overleaf, che
+% compila su Linux, \include{bibliografia} in minuscolo NON trova il file:
+% i nomi sono sensibili alle maiuscole. Su Windows funzionava per caso.
+\include{Bibliografia}
+\addcontentsline{toc}{chapter}{Ringraziamenti}
+\include{Ringraziamenti}
+\end{document}
+

@@ -1,0 +1,98 @@
+% =====================================================================
+%  Sezione 2.7 — L'altezza del bacino dal pavimento
+%  Segue la sezione sulle grandezze integrali.
+% =====================================================================
+
+\section{L'altezza del bacino dal pavimento}
+\label{sec:pavimento}
+
+La rappresentazione riferita al corpo descritta nella
+Sezione~\ref{sec:rappresentazioni} normalizza ogni grandezza rispetto al
+bacino e alla lunghezza del tronco. È il suo pregio — rende le grandezze
+indipendenti dalla distanza dalla telecamera e dalla corporatura — ma comporta
+una conseguenza che è opportuno rendere esplicita: \textbf{cancella per
+costruzione l'informazione su dove il corpo si trovi nella stanza}.
+
+\subsection{Perché serve}
+
+Il modello, disponendo delle sole grandezze riferite al corpo, apprende una
+regola posturale: un tronco orizzontale implica una caduta. È una regola
+corretta su un dataset in cui nessuno si sdraia su un divano, e sbagliata in
+un'abitazione reale, dove la posizione orizzontale è una condizione ordinaria.
+
+La misura rende la differenza quantitativa. Fra i fotogrammi negativi in cui il
+corpo è orizzontale, l'altezza mediana del bacino vale $+0{,}02$ lunghezze di
+torso nel dataset di laboratorio e $+1{,}47$ nelle registrazioni domestiche.
+Nel primo caso la persona è \emph{a terra} — sdraiarsi sul pavimento è una delle
+attività registrate come normali — nel secondo è su un supporto rialzato. La
+grandezza «corpo orizzontale» non distingue nulla nel primo insieme e distingue
+tutto nel secondo.
+
+\subsection{Come viene stimata}
+
+Il piano del pavimento non viene fornito da nessuno: il sistema lo stima da sé,
+osservando che quando una persona è in piedi il bordo inferiore della sua sagoma
+coincide con il pavimento a quella distanza dalla telecamera.
+
+Si selezionano quindi i fotogrammi in cui il soggetto risulta eretto — rapporto
+altezza/larghezza del riquadro superiore a una soglia, angolo del tronco
+prossimo alla verticale, posa valida — e si raccolgono le coppie (posizione
+orizzontale del bacino, bordo inferiore del riquadro). Su queste si adatta una
+retta
+
+\[
+y_{\text{pav}}(x) = a\,x + c,
+\]
+
+che rappresenta il pavimento nell'immagine, prospettiva compresa: in una ripresa
+non frontale il pavimento non è una riga orizzontale, e la pendenza $a$ ne tiene
+conto.
+
+L'altezza del bacino è quindi la distanza verticale dal piano stimato,
+normalizzata sulla lunghezza del tronco:
+
+\[
+h_{\text{pav}} = \frac{y_{\text{pav}}(x_{\text{bacino}}) - y_{\text{bacino}}}
+                      {L_{\text{tronco}}} .
+\]
+
+La normalizzazione rende la grandezza adimensionale e quindi confrontabile fra
+stanze diverse e fra persone di corporatura diversa. Ciò che resta specifico
+dell'installazione è soltanto il riferimento, cioè i coefficienti $a$ e $c$, e
+il sistema li stima senza chiedere nulla all'utente.
+
+\subsection{Un limite dipendente dal punto di vista}
+
+La grandezza funziona però soltanto se la telecamera vede il pavimento come un
+piano distinto dalla posizione della persona, cioè se è collocata
+approssimativamente all'altezza del busto.
+
+La misura sulle due telecamere del dataset lo mostra con chiarezza. Sulla vista
+laterale la separazione fra le mediane di caduta e non-caduta vale
+$+1{,}43$ lunghezze di torso; sulla vista frontale rialzata vale $-0{,}18$, cioè
+è assente e di segno opposto. Una telecamera zenitale non distingue chi è a
+terra da chi è in piedi, perché entrambi si proiettano nella stessa regione
+dell'immagine.
+
+L'altezza dal pavimento è quindi una grandezza \emph{condizionata
+all'installazione}, e va dichiarata come tale: aggiunge informazione quando la
+telecamera è montata di profilo, non ne aggiunge — e può fuorviare — quando è
+montata in alto.
+
+\subsection{Una conferma arrivata per altra via}
+
+Un riscontro indipendente di quanto questa informazione conti è emerso dalla
+verifica sulle occlusioni riportata nel Capitolo~\ref{cap:sperimentale}.
+Mascherando i \emph{landmark} delle anche — cioè proprio il riferimento rispetto
+a cui la rappresentazione riferita al corpo normalizza tutto — il risultato non
+peggiora ma \textbf{migliora} lievemente.
+
+La spiegazione è che, con il bacino congelato in una posizione fissa, l'altezza
+della testa smette di essere misurata rispetto al bacino e viene misurata
+rispetto a un punto fisso nella stanza: la rappresentazione riferita al corpo si
+trasforma, di fatto, in una rappresentazione riferita all'ambiente. Con
+telecamera fissa, un riferimento fisso è più informativo di uno che si sposta
+insieme alla persona.
+
+È la stessa informazione che $h_{\text{pav}}$ fornisce esplicitamente, ottenuta
+per caso da un esperimento che aveva un altro scopo.

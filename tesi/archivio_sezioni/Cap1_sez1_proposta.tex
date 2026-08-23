@@ -1,0 +1,60 @@
+% =====================================================================
+% PROPOSTA PER LA SEZIONE 1.1 — da rivedere e incollare in Cap1.tex
+%
+% Struttura in cinque paragrafi:
+%   1. demografia e frequenza          (tuo, con i numeri gia' messi)
+%   2. DOVE avvengono: la casa          <- AGGIUNTO
+%   3. quanto costano                   <- AGGIUNTO, ma manca il dato di spesa
+%   4. long-lie: il tempo a terra       (tuo)
+%   5. AAL e limiti degli indossabili   (tuo)
+%
+% NUMERI VERIFICATI su Epicentro/ISS, sorveglianza PASSI d'Argento:
+%   20% degli over 65 caduto nei 12 mesi precedenti (biennio 2023-2024)
+%    6% nei 30 giorni precedenti
+%   16% fra i 65-74 anni, 33% oltre gli 85
+%   25% fra le donne contro 16% fra gli uomini
+%   30% fra chi ha difficolta' economiche contro 19% fra chi non ne ha
+%   60% delle cadute in casa, 19% in strada, 11% in giardino, 10% altrove
+%   14% delle cadute richiede almeno un giorno di ricovero
+%   frattura di femore: 46,5% dei ricoveri maschili per incidente domestico
+%                       e 55,3% di quelli femminili (analisi SDO)
+%
+% DA VERIFICARE PRIMA DI CONSEGNARE:
+%   - la quota ISTAT di over 65 sulla popolazione (hai scritto 25,1% al
+%     1 gennaio 2026: controlla sul comunicato, e cita quello preciso)
+%   - il costo sanitario delle cadute: NON l'ho trovato in fonte
+%     attendibile. Il paragrafo 3 lo lascia come frase qualitativa; se
+%     trovi la spesa annua o il costo medio di un ricovero per frattura
+%     di femore, quel paragrafo diventa molto piu' forte.
+%   - la quota di over 65 che vive sola (ISTAT la pubblica): rafforzerebbe
+%     il paragrafo 4, perche' e' la condizione in cui il tempo a terra si
+%     allunga davvero.
+% =====================================================================
+
+\section{Ambient Assisted Living}
+
+Il progressivo invecchiamento della popolazione e la carenza di personale sanitario negli ospedali e nelle Residenze Sanitarie Assistenziali rendono la gestione del rischio di cadute una questione clinica e logistica di rilievo. Secondo i dati ISTAT~\cite{istat2026}, al 1\textsuperscript{o} gennaio 2026 le persone di età pari o superiore a 65 anni rappresentano il 25,1\% della popolazione italiana. Su questa fascia, la sorveglianza \emph{PASSI d'Argento} dell'Istituto Superiore di Sanità rileva che il \textbf{20\% ha riferito almeno una caduta} nei dodici mesi precedenti l'intervista, e il 6\% nei soli trenta giorni precedenti~\cite{passi}.
+
+Il rischio non è distribuito in modo uniforme. Cresce marcatamente con l'età — dal 16\% nella fascia 65--74 anni al \textbf{33\% oltre gli 85} — ed è più alto fra le donne (25\% contro 16\%) e fra chi dichiara difficoltà economiche (30\% contro 19\%)~\cite{passi}. La popolazione più esposta è quindi anche quella con meno risorse per proteggersi.\subsection*{Dove avvengono}
+
+Il dato che orienta la progettazione di un sistema di monitoraggio non è quanto spesso si cada, ma \emph{dove}. Le cadute degli anziani avvengono in larga maggioranza \textbf{nell'abitazione}: il 60\%, contro il 19\% in strada, l'11\% in giardino e il 10\% altrove~\cite{passi}.
+
+È una proporzione che sposta il problema. Un sistema pensato per il reparto ospedaliero copre una frazione minoritaria degli eventi, e lo fa nell'ambiente in cui il soccorso è comunque più rapido perché il personale è presente. \textbf{L'ambiente domestico è insieme quello dove si cade di più e quello dove non c'è nessuno che se ne accorga}, ed è la ragione per cui la validazione sperimentale di questo lavoro (Capitolo~\ref{cap:campo}) è stata condotta in abitazioni private e non in struttura.
+
+\subsection*{Quanto costano}
+
+Le conseguenze non si esauriscono nell'evento. Il \textbf{14\% delle cadute richiede almeno un giorno di ricovero}~\cite{passi}, e fra i ricoveri per incidente domestico nella popolazione anziana la \textbf{frattura di femore} è la diagnosi più frequente: il 46,5\% nei maschi e il 55,3\% nelle femmine.
+
+Al costo sanitario diretto si somma quello, più difficile da quantificare, della perdita di autonomia: una frattura di femore in età avanzata comporta spesso una riduzione permanente della mobilità e il passaggio a un regime assistenziale più intenso. È il motivo per cui la prevenzione e il rilevamento tempestivo hanno un ritorno che eccede il singolo episodio.
+
+\subsection*{Il tempo a terra}
+
+L'impossibilità di garantire un monitoraggio continuo porta al fenomeno delle cadute non assistite e della \emph{long-lie syndrome}, associata a complicanze sistemiche gravi quali ipotermia, disidratazione e danno muscolare.
+
+Il problema non dipende soltanto dalla caduta in sé, ma dal \textbf{tempo} che la persona trascorre a terra prima del soccorso. È una grandezza che distingue nettamente i due scenari: in struttura il personale interviene in minuti, mentre una persona anziana che vive sola può restare a terra per ore. Ed è una grandezza che un sistema automatico \emph{può ridurre}, ragione per cui la latenza di rilevamento viene misurata esplicitamente nel Capitolo~\ref{cap:campo}.
+
+\subsection*{Le soluzioni esistenti}
+
+In questo scenario i sistemi di \emph{Ambient Assisted Living} (AAL) mirano a fornire un'infrastruttura di monitoraggio autonoma. Storicamente lo stato dell'arte si è basato su sensori indossabili quali accelerometri e giroscopi.
+
+Tali dispositivi presentano tuttavia criticità difficilmente superabili in contesti reali: richiedono una ricarica costante e, soprattutto, dipendono dalla \emph{compliance} del paziente. In soggetti affetti da deterioramento cognitivo il rifiuto o la dimenticanza nell'indossare il sensore vanifica l'intera architettura di sicurezza, e lo fa proprio nella popolazione più esposta al rischio.

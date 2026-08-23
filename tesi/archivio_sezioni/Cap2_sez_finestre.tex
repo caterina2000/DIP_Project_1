@@ -1,0 +1,130 @@
+% =====================================================================
+%  Sezione 2.10 — Finestre temporali e divisione dei dati
+%  Sostituisce la parte della vecchia sezione "Finestre temporali e
+%  labeling" relativa alle finestre e allo split. L'etichettatura e'
+%  trattata nella sezione successiva.
+% =====================================================================
+
+\section{Finestre temporali e divisione dei dati}
+\label{sec:finestre}
+
+Come discusso nella Sezione~\ref{sec:motion}, una caduta non è riconoscibile da
+un singolo fotogramma: alcune attività quotidiane — sedersi rapidamente,
+chinarsi a raccogliere un oggetto — producono in un istante una configurazione
+simile a quella di una caduta, e la differenza sta nella traiettoria temporale.
+Il classificatore lavora quindi su \textbf{finestre}, cioè su sequenze ordinate
+di vettori di grandezze.
+
+\subsection{Lunghezza della finestra}
+
+Detta $f_t$ la rappresentazione al fotogramma $t$, una finestra è
+$X_t = [\,f_t, f_{t+1}, \dots, f_{t+L-1}\,]$, con $L$ da scegliere.
+
+Il compromesso è noto: una finestra corta osserva solo un frammento del
+movimento e può non contenere abbastanza contesto per distinguere una caduta da
+un'attività rapida; una finestra lunga contiene più contesto ma diluisce
+l'evento fra molti fotogrammi normali, e aumenta la latenza decisionale perché
+il sistema deve attendere più fotogrammi prima di classificare.
+
+Il valore utilizzato è $L = 22$ campioni a 9 fotogrammi al secondo, pari a
+$2{,}44$ secondi. La scelta merita due precisazioni.
+
+La prima riguarda la sua origine. Il valore deriva da una scelta iniziale di 45
+campioni a 18 fotogrammi al secondo, riportata alla frequenza di esercizio del
+dispositivo mantenendo invariata la durata coperta. Quel 45 non era però
+giustificato da alcuna misura, ed è stato successivamente sottoposto a
+verifica.
+
+La seconda riguarda l'esito di quella verifica, riportato nel
+Capitolo~\ref{cap:sperimentale}. La durata mediana della fase di caduta è di
+$3{,}11$ secondi, quindi superiore alla finestra: l'ipotesi ragionevole era che
+allungarla migliorasse il risultato. Il confronto su quattro lunghezze — 22, 28,
+36 e 44 campioni, da $2{,}4$ a $4{,}9$ secondi — mostra invece che
+\textbf{nessuna differenza è statisticamente distinguibile}, e che l'andamento
+non è nemmeno monotono. La spiegazione più probabile è che la memoria effettiva
+del sistema non coincida con la finestra: ogni campione porta con sé le
+grandezze integrali accumulate sui 31 fotogrammi precedenti
+(Sezione~\ref{sec:integrali}), cioè $1{,}7$ secondi di storia aggiuntiva.
+
+Il valore 22 non è quindi un'eredità: è un valore verificato contro tre
+alternative.
+
+\subsection{Passo e sovrapposizione}
+
+Le finestre sono sovrapposte, con passo di 2 campioni. Il motivo è che una
+caduta può iniziare in un punto qualsiasi della sequenza: con finestre disgiunte
+l'evento potrebbe cadere a cavallo di due finestre e non essere contenuto per
+intero in nessuna delle due.
+
+La sovrapposizione introduce però una criticità di cui la sezione successiva si
+occupa: due finestre consecutive condividono venti campioni su ventidue e sono
+quindi quasi identiche.
+
+\subsection{La divisione dei dati}
+
+Questo è il punto in cui l'impostazione iniziale del lavoro conteneva un difetto
+di protocollo, ed è opportuno descriverlo perché condiziona
+l'interpretazione di tutti i risultati precedenti alla sua correzione.
+
+Nella prima versione la divisione fra addestramento e verifica avveniva
+\textbf{a livello di finestra}, con partizionamento casuale. Poiché le finestre
+si sovrappongono, finestre quasi identiche finivano da entrambe le parti: il
+modello veniva quindi valutato su sequenze praticamente già viste, e la stima
+delle prestazioni era ottimistica per costruzione.
+
+Una prima correzione ha spostato la divisione \textbf{a livello di video}, il
+che elimina il problema della sovrapposizione ma non quello dell'identità del
+soggetto. Con pochi soggetti, dividendo per video, la stessa persona compare
+nell'insieme di addestramento e in quello di verifica: il modello non viene
+valutato su persone nuove, ma su persone note in riprese diverse. Su un dataset
+a cinque soggetti la misura è netta — tutti e cinque i soggetti risultavano
+presenti da entrambe le parti.
+
+La divisione adottata è quindi \textbf{per soggetto}, secondo lo schema
+\emph{leave-one-subject-out}: in ciascuna ripetizione un soggetto costituisce
+l'insieme di verifica, un secondo quello di validazione e i restanti quello di
+addestramento, con i tre insiemi disgiunti per persona. La domanda che si
+misura diventa quella che interessa: \emph{il sistema funziona su una persona
+mai vista?}
+
+Due precisazioni completano il protocollo.
+
+\paragraph{Lo scaler.} I parametri di normalizzazione sono stimati sui soli
+fotogrammi di addestramento della ripetizione corrente, mai sull'intero
+dataset — altrimenti l'informazione sulla distribuzione dell'insieme di verifica
+rientrerebbe dalla porta di servizio. Sono inoltre stimati sui
+\emph{fotogrammi} e non sulle finestre: con passo 2 su finestre da 22, ogni
+fotogramma comparirebbe in undici finestre e peserebbe quindi undici volte, con
+un peso per giunta variabile agli estremi di ogni ripresa.
+
+\paragraph{I buchi di posa.} Le finestre non attraversano mai il confine fra due
+riprese, né un'interruzione della posa. Ventidue campioni presi a cavallo di
+un'interruzione descriverebbero un movimento mai avvenuto, e la finestra
+coprirebbe un intervallo di tempo maggiore di quello che dichiara. Ogni ripresa
+viene quindi suddivisa nei suoi tratti continui di posa valida, e le finestre si
+costruiscono all'interno di un singolo tratto.
+
+\subsection{La soglia decisionale}
+
+Un'ultima componente del protocollo riguarda la soglia oltre la quale la
+probabilità prodotta dal modello viene interpretata come allarme.
+
+Nella versione iniziale la soglia veniva scelta sullo stesso insieme su cui poi
+si misurava il risultato, il che equivale ad adattarsi a quei dati: il numero
+che ne esce non è una previsione di come il sistema si comporterà altrove. La
+soglia va quindi scelta su un terzo insieme — il validation — e applicata alla
+verifica una volta sola.
+
+Anche questa correzione, però, si è rivelata insufficiente, e la ragione è
+riportata nel Capitolo~\ref{cap:sperimentale}. Con un solo soggetto di
+validazione la stima della soglia è talmente rumorosa da essere
+controproducente: le soglie selezionate nelle dieci ripetizioni coprivano
+l'intero intervallo utile, da $0{,}01$ a $0{,}99$, con deviazione standard
+$0{,}37$. Il confronto fra sei regole di selezione mostra che una \textbf{soglia
+fissa, dichiarata a priori}, ottiene sia il risultato medio migliore sia la
+dispersione minore, semplicemente perché non stima nulla dai dati e quindi non
+può sovradattarsi.
+
+La soglia utilizzata è quindi $0{,}50$, fissata prima di osservare i dati e
+identica per tutte le ripetizioni e tutte le configurazioni. Il validation
+conserva il proprio ruolo nell'arresto dell'addestramento, non nella decisione.

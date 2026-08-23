@@ -1,0 +1,259 @@
+\chapter{Il protocollo di valutazione}
+\label{cap:protocollo}
+
+% ---------------------------------------------------------------------
+% STRUTTURA — 4 sezioni invece delle 6 previste. Due accorpamenti:
+%
+%  - "Perche' lo split per video non basta" e "Leave-One-Subject-Out"
+%    sono lo stesso argomento in due tempi: il problema e la sua
+%    soluzione. Separarli obbliga a ripetere due volte cos'e' il
+%    subject leakage.
+%
+%  - "Selezione della soglia" e "Metriche per applicazioni
+%    safety-critical" sono inseparabili: la soglia si sceglie
+%    MASSIMIZZANDO la metrica, e la metrica e' F-beta con beta=2 proprio
+%    perche' l'applicazione e' safety-critical.
+%
+% Tutti i numeri di questo capitolo vengono da EXP-010b, EXP-011 e dalla
+% run rf_A3_L22_cam1_deploy9fps. Verificati il 2026-08-09.
+% ---------------------------------------------------------------------
+
+Questo capitolo non descrive un modello. Descrive il metodo con cui i modelli del Capitolo~\ref{cap:risultati} sono stati misurati, e la ragione per cui nessuna delle metriche prodotte prima di questo metodo compare fra i risultati.
+
+La scelta di dedicargli un capitolo autonomo non è di comodo. In un dominio con dieci soggetti e classi fortemente sbilanciate, il protocollo di valutazione incide sul numero finale più di qualunque scelta architetturale: la differenza fra le due impostazioni descritte qui vale, sugli stessi identici dati e con lo stesso identico modello, il passaggio da un punteggio nullo a uno utilizzabile.
+
+\section{Sbilanciamento delle classi e scelta delle metriche}
+
+\subsection{I numeri del problema}
+
+Il sottoinsieme di UP-Fall utilizzato in questo lavoro comprende \num{57786} fotogrammi della telecamera laterale, distribuiti su 109 riprese e 10 soggetti, con posa valida sul \SI{91.6}{\percent} dei fotogrammi. L'etichettatura è a tre classi, assegnata fotogramma per fotogramma:
+
+\begin{center}
+\begin{tabular}{llrr}
+\toprule
+Etichetta & Significato & Fotogrammi & Quota \\
+\midrule
+0 & attività normale, pre-caduta & \num{25552} & 86{,}6\,\% \\
+1 & caduta in corso & \num{1463} & 5{,}0\,\% \\
+2 & soggetto a terra, post-caduta & \num{2483} & 8{,}4\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lo sbilanciamento è marcato ma non estremo. Diventa però severo dopo la finestratura: una finestra viene marcata positiva solo se contiene abbastanza fotogrammi di caduta, e sulle \num{11510} finestre prodotte dalla configurazione finale ne restano \num{1423} positive, cioè il \SI{12.36}{\percent}. Il numero di positivi disponibili per la verifica varia fra 76 e 171 a seconda del soggetto: è il primo segnale del fatto, ripreso più avanti, che la persona su cui si misura pesa quanto il metodo che si misura.
+
+Va anticipato subito che questa quota, per quanto bassa, è ancora enormemente superiore a quella di un impiego reale, dove le cadute sono eventi rari nell'arco di mesi. È una discrepanza che ha conseguenze precise sulla precision, discusse nel Capitolo~\ref{cap:campo}.
+
+\subsection{Perché l'accuratezza non è utilizzabile}
+
+Con l'\SI{94.55}{\percent} di finestre negative, un classificatore che risponda sempre \emph{«non è una caduta»} ottiene un'accuratezza superiore al \SI{94}{\percent} senza aver appreso nulla. L'accuratezza non è quindi soltanto poco informativa: è attivamente fuorviante, perché premia il comportamento degenere.
+
+Per lo stesso motivo ogni risultato di questo lavoro viene confrontato con una \emph{baseline di maggioranza} esplicita — il punteggio ottenuto rispondendo sempre con la classe più frequente — riportata accanto alle metriche di ciascun fold.
+
+\subsection{Perché $F_\beta$ con $\beta = 2$}
+
+I due errori possibili non hanno lo stesso costo.
+
+Un \textbf{falso negativo} è una caduta non rilevata: una persona resta a terra senza che nessuno lo sappia, ed è esattamente lo scenario della \emph{long-lie syndrome} descritta nel Capitolo~\ref{cap:contesto}. Un \textbf{falso positivo} è un allarme spurio: qualcuno accorre, non trova nulla, e il costo è il disturbo.
+
+La misura $F_1$ pesa precision e recall allo stesso modo, e presuppone quindi che i due errori si equivalgano. In fall detection non si equivalgono. Si adotta perciò la misura $F_\beta$
+
+\begin{equation}
+F_\beta = (1 + \beta^2)\,\frac{\mathrm{precision} \cdot \mathrm{recall}}{\beta^2 \cdot \mathrm{precision} + \mathrm{recall}}
+\end{equation}
+
+\noindent con $\beta = 2$, che assegna al recall un peso quadruplo rispetto alla precision.
+
+Due precisazioni sull'uso che se ne fa. La prima: $\beta = 2$ è stato \textbf{dichiarato prima} di osservare i dati di verifica, e non scelto a posteriori fra i valori che producevano il numero migliore. La seconda, più importante: $F_2$ resta una sintesi, e in alcune circostanze nasconde ciò che dovrebbe mostrare. Nel Capitolo~\ref{cap:risultati} si incontrerà un caso in cui $F_2$ varia entro la dispersione fra fold mentre il recall cala di quattro punti e le cadute non rilevate raddoppiano: la precision compensa e la sintesi resta stabile. Per questa ragione recall, falsi negativi e falsi positivi vengono riportati sempre in chiaro accanto a $F_2$, e nessuna decisione di questo lavoro è presa sulla sola sintesi.
+
+\subsection{Riequilibrio delle classi}
+
+Durante l'addestramento le classi vengono riequilibrate tramite pesi inversamente proporzionali alla frequenza, calcolati \textbf{sul solo insieme di addestramento di ciascun fold} e registrati nei metadati della run. L'alternativa del sottocampionamento della classe maggioritaria è stata scartata: con \num{344} finestre positive, ridurre le negative allo stesso numero avrebbe scartato oltre il \SI{94}{\percent} dei dati disponibili, in un contesto in cui il numero di soggetti è già il vincolo dominante.
+
+\section{Dallo split per video al Leave-One-Subject-Out}
+
+\subsection{Il difetto}
+
+L'impostazione iniziale del progetto ripartiva i dati fra addestramento e verifica sulla base dell'identificativo della \emph{ripresa}. Ogni soggetto compare però in più riprese: uno split che separa le riprese, ma non le persone, colloca lo stesso individuo su entrambi i lati della barriera.
+
+La misura di quanto ciò accadesse non lascia margini interpretativi: con lo split per ripresa, \textbf{tutti e cinque i soggetti risultavano contemporaneamente in addestramento e in verifica}. Il \emph{subject leakage} non era parziale, era totale.
+
+L'effetto è quello descritto da Scheurer et al.~\cite{scheurer}: il modello impara la corporatura, l'andatura e le abitudini posturali degli individui che dovrà poi riconoscere, e la metrica risultante risponde alla domanda \emph{«quanto è bravo su persone che ha già visto»}. Per un sistema destinato all'abitazione di una persona che non ha contribuito ai dati, la domanda pertinente è l'altra.
+
+\subsection{Un controllo che non poteva fallire}
+
+Vale la pena riportare un dettaglio, perché illustra un modo di sbagliare che nessun test automatico intercetta. Il codice conteneva un controllo esplicito contro il leakage, che sollevava un'eccezione se addestramento e verifica avessero condiviso dei dati. Non è mai scattato — e non poteva: verificava la sovrapposizione degli identificativi di \emph{ripresa}, che per costruzione dello split erano sempre disgiunti, mentre la grandezza da controllare era il soggetto.
+
+Un controllo che non può fallire non è un controllo: è una rassicurazione. La sua presenza aveva anzi reso più difficile sospettare del problema, perché sembrava già escluso.
+
+\subsection{Leave-One-Subject-Out}
+
+La correzione consiste nel ripartire per \textbf{soggetto} e nell'adottare una validazione \emph{leave-one-subject-out} (LOSO) a dieci fold. In ciascun fold un soggetto costituisce l'insieme di verifica, un secondo l'insieme di validazione, gli otto rimanenti l'addestramento:
+
+\begin{center}
+\begin{tabular}{llrr}
+\toprule
+Fold (verifica) & Validazione & Finestre di addestramento & Cadute nel test \\
+\midrule
+Subject\_01 & 2 & 9120 & 121 \\
+Subject\_02 & 3 & 9139 & 155 \\
+Subject\_03 & 4 & 9170 & 140 \\
+Subject\_04 & 5 & 9410 & 76 \\
+Subject\_05 & 6 & 9530 & 142 \\
+Subject\_06 & 7 & 9375 & 135 \\
+Subject\_07 & 8 & 9154 & 167 \\
+Subject\_08 & 9 & 9014 & 167 \\
+Subject\_09 & 10 & 9066 & 171 \\
+Subject\_10 & 1 & 9102 & 149 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Con dieci soggetti il LOSO costa dieci addestramenti invece di uno, ma è l'unico protocollo che restituisca una stima interpretabile. Uno split singolo produrrebbe un numero il cui valore dipende in modo determinante da quale soggetto sia finito nella verifica.
+
+\subsection{La statistica rilevante è la dispersione, non la media}
+
+Questo punto condiziona la lettura di tutto il Capitolo~\ref{cap:risultati} e merita di essere enunciato esplicitamente.
+
+La deviazione standard fra fold non è una nota a margine della media: è la misura di quanto il risultato dipenda da chi capita nella verifica. Nelle run di questo lavoro tale deviazione si colloca fra $\pm 0{,}05$ e $\pm 0{,}14$, ed è quindi dello stesso ordine di grandezza di molte delle differenze che si vorrebbero confrontare. Raddoppiare i soggetti da cinque a dieci non l'ha ridotta in modo apprezzabile, il che è di per sé un risultato: la variabilità non è rumore di campionamento che si media via, è differenza fra persone.
+
+La conseguenza è che una differenza di due o tre centesimi fra due configurazioni \textbf{non è una differenza}, ed è più corretto dichiararle indistinguibili che proclamare un vincitore. Nel Capitolo~\ref{cap:risultati} questo criterio verrà applicato con coerenza, anche quando porta a rinunciare a conclusioni che i numeri grezzi sembrerebbero autorizzare.
+
+\section{Normalizzazione stimata sul solo addestramento}
+
+\subsection{La causa accertata di un fallimento}
+
+La prima campagna sperimentale del progetto aveva prodotto, per la rete ricorrente, un punteggio $F_1$ esattamente pari a zero: nessun vero positivo su alcun fold. Un valore esattamente nullo non è un cattivo risultato, è il sintomo di un modello degenere che risponde sempre con la stessa classe.
+
+La causa è stata individuata misurando le scale delle feature in ingresso. Il vettore comprendeva grandezze eterogenee — angoli in gradi, rapporti adimensionali prossimi all'unità, ed energie cinetiche — e il rapporto fra le loro deviazioni standard raggiungeva un fattore \textbf{646}. La feature \texttt{energy} presentava media \num{11.58} e massimo \num{15499}, mentre altre variabili dello stesso vettore oscillavano attorno all'unità.
+
+In assenza di normalizzazione, la discesa del gradiente è dominata dalla variabile di scala maggiore: le rimanenti nove feature contribuiscono in modo trascurabile e il modello non dispone dell'informazione necessaria a separare le classi.
+
+\subsection{Due dettagli che non sono dettagli}
+
+La correzione consiste nell'applicare una standardizzazione, ma il modo in cui viene applicata conta quanto la sua presenza.
+
+\paragraph{La stima avviene sul solo addestramento.} Media e deviazione standard sono calcolate esclusivamente sui soggetti di addestramento di ciascun fold, e poi applicate invariate a validazione e verifica. Stimarle sull'intero dataset costituirebbe una forma di leakage sottile ma reale: i dati di verifica influenzerebbero la trasformazione applicata all'addestramento.
+
+\paragraph{La stima avviene sui fotogrammi, non sulle finestre.} È l'aspetto meno evidente. Le finestre sono sovrapposte — con passo 2 su finestre da 22 fotogrammi, ogni fotogramma compare in circa undici finestre — e stimare i parametri sulle finestre significherebbe pesare ogni fotogramma undici volte, con un peso che per giunta varia agli estremi di ciascuna ripresa. La stima viene quindi eseguita sulla tabella dei fotogrammi, prima della finestratura.
+
+Alle feature con distribuzione fortemente asimmetrica — energie e velocità, che presentano code lunghe — viene inoltre applicata una trasformazione $\mathrm{sgn}(x)\log(1+|x|)$ prima della standardizzazione. La trasformazione preserva il segno e comprime le code senza sopprimere la relazione d'ordine.
+
+\subsection{Effetto misurato}
+
+L'applicazione congiunta della normalizzazione e dello split per soggetto porta il rapporto fra le scale da \textbf{646} a un intervallo compreso fra \num{1.05} e \num{1.35}, e il numero di soggetti condivisi fra addestramento e verifica da dieci su dieci a \textbf{zero}. Sugli stessi dati e con lo stesso modello, $F_1$ passa da \num{0.0000} a \num{0.234}, con \num{144} veri positivi contro nessuno.
+
+Il valore di \num{0.234} resta modesto, e il Capitolo~\ref{cap:risultati} mostrerà che la ragione non risiede né nel modello né nel protocollo. Ciò che conta qui è che il modello ha smesso di essere degenere: da quel momento le sue metriche misurano qualcosa.
+
+\subsection{Lo scaler è parte del modello}
+
+I parametri della normalizzazione vengono salvati insieme al modello e distribuiti con esso. In inferenza le feature devono attraversare esattamente la stessa catena vista in addestramento — trasformazione logaritmica sulle stesse colonne, standardizzazione con gli stessi parametri, aggregazione nello stesso ordine — e una sola omissione produce un ingresso fuori distribuzione.
+
+Il rischio è che ciò accada in silenzio. Un vettore non normalizzato ha la stessa forma di uno normalizzato: il classificatore lo accetta e restituisce una probabilità, che semplicemente non significa nulla. Per questa ragione il pacchetto distribuito include un insieme di campioni di verifica con le predizioni attese, e la coincidenza viene controllata prima di ogni impiego.
+
+\section{La soglia decisionale}
+
+\subsection{Il difetto}
+
+Un classificatore probabilistico produce un punteggio continuo; la decisione richiede una soglia. Nell'impostazione iniziale del progetto tale soglia valeva \num{0.5} in un modulo, \num{0.7} in un altro, ed era oggetto di una esplorazione manuale in un terzo.
+
+Sono due problemi distinti. Sceglierla osservando l'insieme di verifica è una forma di leakage — l'insieme che dovrebbe fornire una stima imparziale viene usato per una decisione di progetto. Fissarla arbitrariamente rende invece le configurazioni non confrontabili, perché ciascuna viene valutata in un punto diverso della propria curva di funzionamento.
+
+\subsection{Il protocollo}
+
+Ogni fold dispone di tre insiemi disgiunti per soggetto, e la correzione immediata consiste nello scegliere la soglia \textbf{sul validation}, massimizzando $F_2$, per poi applicarla \textbf{una sola volta} alla verifica. Soglia e criterio di scelta vengono registrati nei metadati della run.
+
+Questa correzione, però, si è rivelata insufficiente, e le due sottosezioni che seguono documentano perché: con un solo soggetto di validazione la stima della soglia è talmente rumorosa da essere controproducente, e la scelta che il lavoro adotta è di non stimarla affatto.
+
+\subsection{Quanto la soglia varia fra i fold}
+
+I valori selezionati massimizzando $F_2$ sul validation, e il confronto fra il
+punteggio ottenuto sul validation e quello ottenuto sulla verifica, mostrano un
+comportamento che la procedura non prevedeva.
+
+La soglia selezionata \textbf{copre quasi l'intero intervallo utile}: fra le
+dieci ripetizioni si va da valori prossimi a zero a valori prossimi a uno, con
+una deviazione standard di $0{,}37$ su $[0, 1]$. Il valore ottimale dipende
+quindi in misura determinante da quale soggetto costituisca il validation, e
+con un solo soggetto il validation non è abbastanza rappresentativo perché la
+scelta si stabilizzi.
+
+Se ne osserva la conseguenza più netta nei fold in cui il punteggio sul
+validation e quello sulla verifica divergono ampiamente. Non è un errore di
+calcolo: è la manifestazione del fatto che le prestazioni su un soggetto mai
+visto non sono predette in modo affidabile dalle prestazioni su \emph{un altro}
+soggetto mai visto.
+
+\subsection{Sei regole a confronto, e perché vince non scegliere}
+\label{sec:sei-regole}
+
+Poiché la soglia è a tutti gli effetti un iperparametro, la domanda si è potuta
+porre in forma sperimentale: fra le regole ragionevoli per fissarla, quale
+produce il risultato migliore? Le probabilità per fold erano già state
+conservate, quindi il confronto non ha richiesto alcun riaddestramento.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Regola & $F_2$ media $\pm$ dev. & Recall & Soglia media $\pm$ dev. \\
+\midrule
+massimo $F_\beta$ sul validation & 0{,}810 $\pm$ 0{,}117 & 0{,}908 & 0{,}59 $\pm$ 0{,}37 \\
+massimo $F_1$                    & 0{,}790 $\pm$ 0{,}120 & 0{,}851 & 0{,}70 $\pm$ 0{,}34 \\
+indice di Youden                 & 0{,}808 $\pm$ 0{,}117 & 0{,}910 & 0{,}59 $\pm$ 0{,}37 \\
+pari alla prevalenza             & 0{,}787 $\pm$ 0{,}116 & 0{,}858 & 0{,}68 $\pm$ 0{,}35 \\
+prevalenza maggiorata            & 0{,}823 $\pm$ 0{,}136 & \textbf{0{,}972} & 0{,}43 $\pm$ 0{,}31 \\
+\midrule
+\textbf{fissa a 0{,}50, a priori} & $\mathbf{0{,}851 \pm 0{,}078}$ & 0{,}926 & 0{,}50 $\pm$ 0{,}00 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{La soglia fissa ottiene sia il risultato medio migliore sia la
+dispersione minore.} Tutte le regole adattive fanno peggio di quella che non
+adatta nulla.
+
+La spiegazione è nella colonna di destra. Stimare la soglia da un solo soggetto
+di validazione introduce una variabilità di $0{,}37$; una soglia dichiarata a
+priori ha variabilità nulla per costruzione. Quando la quantità di rumore che
+una stima aggiunge supera l'adattamento che porta, \textbf{non stimare è la
+scelta migliore} --- ed è un caso particolare di un principio generale, che il
+numero di parametri stimabili è vincolato dalla quantità di dati indipendenti
+disponibili.
+
+\paragraph{Un'avvertenza che conta più del risultato.} Confrontare sei regole
+sui fold di verifica e sceglierne una è, formalmente, selezione sull'insieme di
+verifica. Il valore $0{,}851$ non è quindi una stima imparziale, e non viene
+riportato come tale.
+
+Ciò che si può portare avanti non è «$0{,}50$ è la soglia migliore», che
+sarebbe una conclusione sui dati di verifica. È \textbf{«scegliere la soglia su
+un solo soggetto di validazione è una procedura dannosa»}, che è una
+conclusione sulla \emph{procedura} e regge indipendentemente da quale valore
+fisso si adotti. Da lì la scelta a priori difendibile è una soglia costante,
+perché non stima nulla e quindi non può sovradattarsi.
+
+\subsection{La soglia del modello distribuito}
+
+Il modello destinato all'impiego viene riaddestrato su tutti i soggetti
+disponibili --- la stima LOSO serviva a caratterizzare le prestazioni, non a
+produrre l'artefatto finale --- e non dispone perciò di un proprio insieme di
+validazione su cui scegliere la soglia.
+
+La sezione precedente rende la questione priva di oggetto: la soglia adottata è
+$0{,}50$, fissata prima di osservare i dati, identica per tutte le ripetizioni
+e per tutte le configurazioni confrontate in questo lavoro. Il validation
+conserva il proprio ruolo nell'arresto dell'addestramento, non nella decisione.
+
+\paragraph{Ciò che nessuna soglia risolve.} Anche a soglia fissa la quota di
+finestre in allarme varia da $5{,}5$ a $34{,}7$ per cento a seconda del
+soggetto, mentre i positivi veri stanno fra $6{,}7$ e $14{,}9$ per cento. La
+distribuzione dei punteggi si sposta da persona a persona: è uno spostamento di
+dominio fra individui, e non si corregge scegliendo un numero. Si affronta
+tarando il sistema sulle registrazioni dell'ambiente in cui verrà installato,
+come il Capitolo~\ref{cap:campo} descrive.
+
+\section{Tracciabilità delle run}
+
+Ogni esecuzione produce un descrittore in formato JSON contenente feature set, lunghezza della finestra, passo, tipo di split, soggetti assegnati a ciascun insieme, parametri della normalizzazione, pesi delle classi, soglia adottata \textbf{e criterio con cui è stata scelta}, conteggio delle finestre per classe e metriche per fold.
+
+L'ultimo campo è quello che rende gli altri utili. Una soglia registrata senza il criterio che l'ha prodotta non è riproducibile: non si distingue una scelta compiuta sul validation da una compiuta guardando la verifica, e la differenza fra le due è precisamente ciò che questo capitolo ha inteso stabilire.

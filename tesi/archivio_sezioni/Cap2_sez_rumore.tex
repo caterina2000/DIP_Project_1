@@ -1,0 +1,89 @@
+% =====================================================================
+%  Sezione 2.4 — Il rumore dei landmark
+%  Sostituisce la vecchia sezione "Rumore dei landmark e filtraggio
+%  temporale". Prepara la sezione sulle grandezze integrali.
+% =====================================================================
+
+\section{Il rumore dei \emph{landmark} e i suoi effetti}
+\label{sec:rumore}
+
+L'uso di una rappresentazione basata sulla posa introduce una criticità che
+attraversa tutto il resto del lavoro: i \emph{landmark} non sono misure dirette
+del corpo, ma stime prodotte automaticamente dal \emph{pose estimator}. Come
+tali sono soggetti a rumore, a instabilità e a perdita temporanea del
+tracciamento, soprattutto in presenza di occlusioni, di variazioni di
+illuminazione, di movimenti rapidi o di punti di vista sfavorevoli.
+
+\subsection{Due manifestazioni diverse}
+
+Il rumore si manifesta in due forme che richiedono trattamenti diversi.
+
+La prima è l'\textbf{assenza della posa}: in una frazione dei fotogrammi lo
+stimatore non produce alcuna stima. Sul dataset utilizzato riguarda il 4,5\%
+dei fotogrammi, e su un archivio esterno registrato in condizioni diverse
+arriva al 19\%. Il trattamento è dichiarativo: il fotogramma viene marcato come
+privo di posa e le grandezze valgono zero, ma la marcatura è essenziale perché
+uno zero non è un valore neutro. Un angolo del tronco pari a zero descrive un
+tronco \emph{orizzontale}, e una sequenza di zeri seguita da un valore reale
+produce una derivata di ampiezza arbitraria. Per la stessa ragione, lo stato
+temporale dell'estrattore viene azzerato a ogni interruzione, in modo che
+nessuna grandezza dinamica attraversi il buco.
+
+La seconda forma è il \textbf{rumore sulla posizione stimata}: il
+\emph{landmark} c'è, ma la sua coordinata oscilla anche quando il corpo è
+fermo. È la forma più insidiosa, perché non è rilevabile da un controllo di
+validità e si propaga silenziosamente a tutte le grandezze derivate.
+
+\subsection{Il filtraggio come prima risposta}
+
+La risposta immediata al secondo problema è il filtraggio temporale. Una media
+mobile esponenziale è la scelta naturale in un contesto \emph{edge}, perché è
+ricorsiva, non richiede di conservare la storia del segnale e si aggiorna a
+ogni fotogramma con una sola operazione:
+
+\[
+\tilde{x}_t = \alpha\,x_t + (1-\alpha)\,\tilde{x}_{t-1},
+\]
+
+dove $x_t$ è il valore stimato corrente e $\alpha$ regola il compromesso fra
+reattività e stabilità. Un valore elevato di $\alpha$ segue rapidamente i
+cambiamenti ma lascia passare il rumore; un valore basso stabilizza il segnale
+ma attenua proprio le variazioni rapide che caratterizzano una caduta.
+
+Va però dichiarato un fatto sull'implementazione. Nella versione iniziale di
+questo lavoro il filtro era \textbf{previsto ma non applicato}: il motore
+geometrico accettava i parametri $\alpha$ per posizione e velocità e non li
+utilizzava, mentre una diversa componente del sistema ne applicava uno proprio.
+Le grandezze utilizzate per l'addestramento e quelle prodotte in esercizio
+avevano quindi caratteristiche di segnale differenti. Il difetto è stato
+individuato in fase di revisione ed è documentato fra i difetti noti.
+
+\subsection{Perché il filtraggio non è la risposta}
+
+La correzione di quel difetto avrebbe reso coerente il sistema, ma non avrebbe
+risolto il problema di fondo, per una ragione che riguarda l'ordine delle
+operazioni.
+
+Il filtraggio agisce sulla \emph{posizione}; le grandezze che interessano sono
+\emph{derivate} della posizione. Filtrare prima di derivare riduce il rumore ma
+riduce anche l'ampiezza del segnale, perché la derivazione amplifica
+selettivamente le alte frequenze e il filtro le attenua entrambe senza
+distinguerle. Il compromesso fra reattività e stabilità non si risolve: si
+sposta.
+
+La misura riportata nella Sezione~\ref{sec:integrali} rende il problema
+quantitativo. L'autocorrelazione a un passo delle grandezze derivate si colloca
+fra $0{,}18$ e $0{,}44$, cioè in un intervallo in cui la componente incorrelata
+è dominante. Nessuna scelta di $\alpha$ porta quei valori nell'intervallo delle
+grandezze statiche, che si trovano intorno a $0{,}9$.
+
+La conseguenza pratica è stata osservata sul campo: il classificatore assegnava
+punteggio elevato anche a corpi completamente immobili, e la correlazione fra il
+punteggio prodotto e il movimento effettivamente presente era $+0{,}139$. Il
+modello non stava ignorando la dinamica per una scelta propria: \textbf{ciò che
+riceveva come dinamica era in gran parte rumore}.
+
+La risposta adottata non è quindi un filtro migliore, ma una formulazione
+diversa delle grandezze dinamiche, descritta nella
+Sezione~\ref{sec:integrali}: sostituire la derivazione con l'accumulazione su
+una finestra mobile.

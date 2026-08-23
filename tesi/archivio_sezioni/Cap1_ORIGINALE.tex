@@ -1,0 +1,35 @@
+\chapter{Il contesto clinico e le sfide tecnologiche nel Fall Detection, Background e stato dell'arte}
+
+\section{Ambient Assisted Living (ALL)}
+Il progressivo invecchiamento della popolazione e la cronica carenza di personale sanitario all'interno di ospedali e Residenze Sanitarie Assistenziali (RSA) rendono la gestione del rischio cadute un'emergenza clinica e logistica. L'impossibilità di garantire un monitoraggio continuo H24 porta al fenomeno delle cadute non assistite e della Long-Lie Syndrome, associata a gravi complicanze sistemiche (es. frattura del femore, ipotermia e disidratazione).
+
+In questo scenario, i sistemi di Ambient Assisted Living (AAL) mirano a fornire un'infrastruttura di monitoraggio autonoma. Storicamente, lo stato dell'arte si è basato su sensori indossabili (es. accelerometri e giroscopi). Tuttavia, tali dispositivi presentano criticità insormontabili in contesti reali: richiedono una ricarica costante e, soprattutto, dipendono dalla compliance del paziente. In soggetti affetti da deterioramento cognitivo (es. morbo di Alzheimer), il rifiuto o la dimenticanza nell'indossare il sensore vanifica l'intera architettura di sicurezza %[Gazem et al., 2025].
+
+\section{Visione Artificiale e il Paradigma "Privacy-by-Design" tramite Pose Estimation}
+Per superare i limiti di compliance dei sistemi indossabili, la ricerca si è orientata verso soluzioni basate su Computer Vision (telecamere RGB). L'installazione di ottiche ambientali risolve il problema dell'intrusività fisica, ma introduce un ostacolo normativo severo: la violazione della privacy (GDPR) e l'impossibilità di trasmettere flussi video continui contenenti dati biometrici sensibili a server centralizzati.
+
+Il presente lavoro supera questa dicotomia adottando un approccio privacy-by-design basato sulla Pose Estimation. Invece di analizzare i frame crudi tramite reti convoluzionali (CNN), il sistema sfrutta architetture come MediaPipe per estrarre esclusivamente le coordinate spaziali $(x,y,z)$ dei landmark corporei principali.
+Questa operazione agisce come un filtro irreversibile di anonimizzazione: la texture, l'abbigliamento, il volto e il background vengono scartati alla fonte. L'astrazione dello scheletro 3D trasforma il problema dell'Image Processing in un problema di analisi cinematica e topologica di serie temporali. Come dimostrato in letteratura [Asif et al., 2020], le rappresentazioni basate sulla posa (pose-based fall representations) non solo garantiscono la privacy, ma sono intrinsecamente invarianti alle caratteristiche estetiche del soggetto, riducendo l'overfitting.
+
+\section{Generalizzazione, Domain Shift e Occlusioni}
+Nonostante i modelli basati su scheletro ottengano risultati eccezionali in ambienti di laboratorio (es. Recall del 95\% su dataset controllati come l'UR Fall Detection Dataset), la loro applicazione in scenari clinici reali (in the wild) rivela profonde vulnerabilità algoritmiche.La letteratura scientifica più recente individua due limiti critici che impediscono il deployment industriale di questi sistemi e che costituiscono il perimetro di indagine di questa tesi:
+\begin{enumerate}
+    \item Il Domain Shift e l'Invarianza Prospettica: Modelli addestrati su dataset ristretti soffrono di un drastico calo di accuratezza quando esposti a nuovi domini (cross-dataset setting) [Liu et al., 2024]. Il posizionamento della telecamera ad altezze diverse (es. telecamera a soffitto in ospedale vs. telecamera frontale in laboratorio) altera la proiezione spaziale dei landmark, falsando il calcolo delle derivate cinematiche (es.la velocità verticale $v_y$). 
+    \item La Vulnerabilità alle Occlusioni: Negli ambienti domestici e clinici reali, i pazienti raramente cadono in campo aperto. La presenza di mobilio (letti, tavoli, sedie) genera occlusioni parziali del corpo. I sistemi standard di Pose Estimation tendono a fallire o a generare coordinate instabili ("tremolanti") quando non rilevano gli arti inferiori, inquinando il vettore delle feature e causando falsi negativi [Zobi et al., 2025; Asif et al., 2020].
+\end{enumerate}.
+
+\section{Obiettivi}
+Partendo dalla validazione di un'architettura ibrida neuro-simbolica (reti GRU accoppiate a metriche di Physics-Informed Machine Learning), l'obiettivo di questo elaborato è elevare il prototipo a un sistema robusto, generalizzabile e operante in tempo reale su architetture Edge a basso costo.
+In particolare, si proporrà:
+\begin{enumerate}
+    \item Un'analisi quantitativa del degrado delle performance (Domain Shift) tramite validazione cross-dataset.
+    \item L'implementazione di una logica di Signal Processing (Filtro di Resilienza) capace di sfruttare i metadati di confidenza dei landmark per mantenere un'alta accuratezza predittiva in condizioni di occlusione parziale severa.
+    \item Il porting e lo stress-test computazionale dell'intera pipeline inferenziale su un nodo Edge, per dimostrare la fattibilità di un calcolo locale distribuito e a latenza garantita.
+\end{enumerate}
+
+
+
+
+
+
+

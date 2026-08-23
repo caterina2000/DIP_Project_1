@@ -1,0 +1,158 @@
+% =====================================================================
+%  Sezione 2.9 — Selezione delle grandezze tramite DTW
+%  Sostituisce la sezione "Analisi di separabilita delle feature con DTW".
+% =====================================================================
+
+\section{Selezione delle grandezze tramite \emph{Dynamic Time Warping}}
+\label{sec:dtw}
+
+Costruito il bacino di trentadue grandezze candidate, resta da stabilire quali
+diano effettivamente una firma temporale distinguibile fra caduta e attività
+quotidiana. Una grandezza può essere geometricamente ben definita e
+computazionalmente economica senza per questo separare le due classi.
+
+\subsection{Perché il DTW}
+
+Il confronto avviene fra serie temporali di durata e velocità diverse: due
+cadute possono avere la stessa struttura dinamica e svolgersi in tempi
+differenti, oppure presentare il picco di una grandezza qualche fotogramma prima
+o dopo. Una distanza punto per punto, come quella euclidea, giudicherebbe
+diverse due curve che hanno la stessa forma ma sono sfasate.
+
+Il \emph{Dynamic Time Warping} confronta invece la \emph{forma} delle due serie,
+deformando l'asse dei tempi alla ricerca dell'allineamento di costo minimo. È
+per questo lo strumento adatto a valutare se una grandezza abbia un andamento
+temporale coerente all'interno di una classe e diverso fra classi.
+
+\subsection{Le tre scelte metodologiche}
+
+\paragraph{Normalizzazione per curva.} Le grandezze hanno scale eterogenee —
+gradi, velocità, rapporti adimensionali — e sui valori grezzi la distanza
+sarebbe dominata da quelle di ampiezza maggiore. Ogni curva viene quindi
+riportata a media nulla e deviazione unitaria. Si perde l'informazione di
+ampiezza assoluta, il che è accettabile perché in questa fase interessa la
+forma.
+
+\paragraph{Vincolo sul cammino di allineamento.} Un DTW libero può deformare
+l'asse dei tempi al punto da far somigliare la curva di un'attività normale a
+quella di una caduta. Si impone quindi che l'allineamento fra due indici
+temporali resti vicino alla diagonale, $|i-j| \leq w$ con $w = 10$ fotogrammi:
+sono ammessi piccoli sfasamenti, non deformazioni prive di senso fisico.
+
+\paragraph{Ricampionamento a lunghezza comune.} È una scelta che deriva
+direttamente dalla precedente, e la sua necessità è stata individuata in fase di
+verifica. Il vincolo $|i-j| \leq w$ non è applicabile a due curve di lunghezza
+diversa senza allargarlo ad almeno la loro differenza, altrimenti nessun cammino
+di allineamento raggiunge il termine. Su questo dataset le riprese di caduta
+durano circa 180 fotogrammi e quelle di attività quotidiana circa 820: le coppie
+\emph{interne} a ciascuna classe hanno quindi lunghezze simili e mantengono la
+banda stretta, mentre le coppie \emph{incrociate} — proprio quelle che devono
+risultare distanti — se la vedono allargare a oltre seicento e si allineano
+quasi senza vincolo.
+
+L'effetto è sistematico e non uniforme: la distanza fra le classi risulta
+deflazionata, e la deflazione colpisce selettivamente le grandezze integrali,
+che sono curve regolari e sotto allineamento libero si deformano l'una
+nell'altra a costo quasi nullo. Prima della correzione, cinque delle nove
+grandezze integrali risultavano al di sotto della soglia di separazione e
+venivano scartate come rumore.
+
+Portando ogni curva a una lunghezza comune il problema si annulla, perché tutte
+le coppie hanno la stessa lunghezza e la banda vale identica per tutte. Si perde
+l'informazione di durata, ed è accettabile per una ragione precisa: la durata di
+una ripresa è identica per tutte e trentadue le grandezze, quindi non può
+contribuire a distinguerle fra loro, mentre il rumore che introduce sì.
+
+\subsection{Il punteggio di separabilità}
+
+Per ciascuna grandezza si calcolano tre popolazioni di distanze: fra curve di
+caduta ($D_{FF}$), fra curve di attività quotidiana ($D_{AA}$) e incrociate
+($D_{FA}$). Una grandezza discriminativa produce curve simili all'interno della
+stessa classe e diverse fra classi, quindi $D_{FF}$ e $D_{AA}$ bassi e $D_{FA}$
+alto. Il punteggio è
+
+\[
+S = \frac{\mu_{FA}}{\mu_{\text{intra}} + \varepsilon},
+\qquad
+\mu_{\text{intra}} = \frac{\mu_{FF} + \mu_{AA}}{2},
+\]
+
+affiancato da una versione che tiene conto anche della dispersione,
+
+\[
+S_{\text{rob}} = \frac{\mu_{FA} - \mu_{\text{intra}}}
+                      {\sigma_{FA} + \sigma_{\text{intra}} + \varepsilon},
+\]
+
+perché un punteggio alto può derivare da valori anomali o da forte variabilità
+invece che da una separazione reale. Un valore $S = 1$ indica assenza di
+separazione: le curve di classi diverse distano quanto quelle della stessa
+classe.
+
+\subsection{Il criterio del minimo fra le due viste}
+
+L'analisi iniziale calcolava un punteggio unico, mescolando le riprese delle due
+telecamere. Questa scelta nasconde però il divario più grande misurato in tutto
+il lavoro.
+
+UP-Fall riprende ogni evento con due telecamere simultanee: una laterale,
+all'altezza del busto, e una frontale rialzata. Una telecamera che guarda
+dall'alto comprime la rotazione del tronco lungo il proprio asse ottico: la
+stessa grandezza che di profilo mostra ottantaquattro gradi di escursione fra
+persona eretta e distesa ne mostra tre dall'alto. Una grandezza che separa
+benissimo da una vista può quindi non separare nulla dall'altra, e mescolando le
+due il crollo resta invisibile fino alla misura sul modello finito.
+
+Il punteggio viene perciò calcolato \emph{separatamente per telecamera}, e la
+selezione usa il \textbf{minimo} fra i due:
+
+\[
+S_{\text{robusto}} = \min\big(S_{\text{cam}_1},\ S_{\text{cam}_2}\big).
+\]
+
+Il minimo e non la media, perché una grandezza ottima da una vista e inutile
+dall'altra è esattamente quella da escludere, e la media la premierebbe. Il
+costo di questo criterio va dichiarato: scarta grandezze valide da una vista
+sola. L'asse maggiore dell'ellisse, per esempio, ottiene sulla vista dall'alto
+il secondo punteggio più alto dell'intera analisi ma un valore mediocre di
+profilo, e viene escluso. È il prezzo di un sistema che deve funzionare senza
+sapere come sia stata montata la telecamera.
+
+\subsection{Ridondanza fra le grandezze scelte}
+
+Il DTW valuta ogni grandezza \emph{isolatamente}: non sa nulla delle altre, e
+quindi se lo stesso fenomeno fisico è misurato in tre modi lo premia tre volte.
+
+Sui dati questa non è un'eventualità teorica. Le prime tre grandezze della
+classifica risultavano correlate fra loro al di sopra di $0{,}94$, ed erano
+tutte descrizioni di «quanto è verticale il tronco»: l'altezza della testa
+rispetto al bacino in due rappresentazioni diverse e l'angolo del tronco. Il
+legame è geometrico — il tronco è un segmento rigido, quindi l'altezza della
+testa vale approssimativamente $L\cos\theta$ — e prenderle tutte e tre
+significherebbe occupare tre posti con un segnale solo.
+
+La selezione è quindi resa consapevole della ridondanza: si scorre la classifica
+dall'alto e si aggiunge una grandezza soltanto se la sua correlazione assoluta
+con \emph{tutte} le già scelte resta al di sotto di una soglia, fissata a
+$0{,}85$. Le grandezze escluse vengono dichiarate insieme a quella che le
+blocca, così l'esclusione è documentata invece di essere semplicemente
+un'assenza dall'elenco.
+
+Un'ultima cautela riguarda i fotogrammi privi di posa: la correlazione si misura
+sui soli fotogrammi con posa valida, perché sugli altri tutte le grandezze
+valgono zero per costruzione e risulterebbero correlate fra loro per un motivo
+che non ha nulla a che vedere con la dinamica del corpo.
+
+\subsection{Un limite dichiarato}
+
+L'analisi qui descritta è una \textbf{preselezione euristica}, non una
+dimostrazione. Nessuna grandezza, presa singolarmente, raggiunge un punteggio
+tale da separare le classi da sola: i valori si collocano fra $1{,}05$ e
+$1{,}31$, mentre $1{,}0$ indica assenza di separazione. Il sottoinsieme va
+valutato \emph{insieme}, e l'arbitro è la validazione incrociata sul modello,
+riportata nel Capitolo~\ref{cap:sperimentale}.
+
+Va inoltre osservato che la selezione dipende dal campione: su un pilota a due
+soggetti la classifica risultava sensibilmente diversa da quella ottenuta su
+dieci, e due grandezze che apparivano fra le migliori si rivelavano al di sotto
+della soglia di separazione una volta esteso il campione.

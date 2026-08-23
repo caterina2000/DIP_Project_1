@@ -1,0 +1,153 @@
+% =====================================================================
+%  Sezione 2.5 — Le tre rappresentazioni geometriche
+%  Sostituisce le sottosezioni "Metodo A / A2 / A3" della versione
+%  precedente. Il Metodo B resta in una sezione separata.
+% =====================================================================
+
+\section{Tre rappresentazioni geometriche dello stesso movimento}
+\label{sec:rappresentazioni}
+
+Dai trentatré \emph{landmark} restituiti dallo stimatore di posa si possono
+costruire descrizioni molto diverse dello stesso movimento. In questo lavoro ne
+sono state considerate tre, che non sono tre modelli in competizione ma tre
+punti di vista sullo stesso dato: insieme formano il bacino di candidate da cui
+la selezione descritta nella Sezione~\ref{sec:dtw} estrae il sottoinsieme
+effettivamente utilizzato.
+
+\begin{itemize}
+    \item \textbf{A1}, la sagoma come ellisse: il corpo trattato come nuvola di
+          punti nel piano immagine, senza conoscenza dell'anatomia;
+    \item \textbf{A2}, la geometria in tre dimensioni: l'unica delle tre che non
+          sia una proiezione, costruita sui \emph{world landmark};
+    \item \textbf{A3}, la geometria riferita al corpo: tutto normalizzato
+          rispetto alla lunghezza del tronco, quindi adimensionale.
+\end{itemize}
+
+I nomi delle grandezze sono prefissati con quello della rappresentazione di
+appartenenza. Non è una precauzione formale: nella versione iniziale del lavoro
+la grandezza \texttt{d\_trunk\_angle} esisteva sia in A2 sia in A3 con unità di
+misura diverse — gradi per fotogramma contro gradi al secondo, con mediane
+$0{,}167$ e $1{,}700$ — ed era l'unica colonna in comune fra i due insiemi. Un
+accorpamento senza prefisso le avrebbe fuse silenziosamente.
+
+\subsection{A1 --- la sagoma come ellisse}
+
+Sette \emph{landmark} — naso, spalle, anche e caviglie — vengono trattati come
+una distribuzione di punti nel piano immagine. Dalla matrice di covarianza si
+ricavano autovalori e autovettori: gli autovettori danno le direzioni principali
+lungo cui il corpo si distribuisce, gli autovalori la dispersione lungo tali
+direzioni.
+
+Intuitivamente il corpo viene approssimato da un'ellisse: l'asse maggiore
+fornisce l'orientamento dominante, il rapporto fra gli assi descrive quanto la
+configurazione appaia allungata o compressa. Le grandezze estratte sono i due
+assi, il loro rapporto, l'inclinazione dell'asse maggiore, le rispettive
+derivate e le due componenti della velocità del baricentro della nuvola.
+
+Il punto di forza di questa rappresentazione è che \emph{non conosce
+l'anatomia}: non le serve identificare correttamente il tronco per accorgersi
+che la sagoma è passata da verticale e stretta a orizzontale e larga. Funziona
+quindi anche quando lo stimatore sbaglia l'attribuzione dei singoli giunti,
+purché la nuvola complessiva sia nella posizione giusta. Il limite è lo stesso:
+non distingue una persona distesa da una chinata in avanti, perché entrambe
+producono un'ellisse orizzontale.
+
+Una precisazione implementativa. L'inclinazione dell'asse di un'ellisse è una
+\emph{direzione}, non un verso: ha periodo $180^\circ$ e non $360^\circ$.
+Trattarla con il periodo sbagliato produce salti artificiali nella serie
+temporale — è stato misurato un passaggio da $201{,}9^\circ$ a $49{,}5^\circ$
+fra due fotogrammi consecutivi, cioè una rotazione fisicamente impossibile — che
+si propagano alla derivata e a ogni grandezza accumulata.
+
+\subsection{A2 --- la geometria in tre dimensioni}
+
+La seconda rappresentazione utilizza i \emph{world landmark}, cioè le coordinate
+metriche tridimensionali stimate dalla rete. È l'unica delle tre a non essere
+una proiezione, e questo la rende potenzialmente meno sensibile al punto di
+vista della telecamera.
+
+Dal punto medio delle spalle e da quello delle anche si ricava il vettore del
+tronco, dal quale si calcola l'angolo rispetto alla verticale del riferimento;
+il naso fornisce la posizione della testa. Le grandezze sono l'angolo del
+tronco, la sua derivata con segno e in modulo, la velocità della testa e
+l'altezza della testa sopra il bacino, normalizzata sulla lunghezza del tronco.
+
+Due precisazioni sono necessarie, e riguardano entrambe il sistema di
+riferimento.
+
+La prima è che il riferimento dei \emph{world landmark} è \emph{canonico e
+centrato sulle anche}, non allineato alla gravità reale. L'angolo così calcolato
+non è quindi un'inclinazione assoluta rispetto al pavimento: è una misura
+relativa al corpo. Resta informativa sui dati, ma chiamarla «inclinazione
+rispetto alla verticale» sarebbe impreciso.
+
+La seconda è più stringente. Poiché il riferimento è centrato sulle anche, il
+bacino \textbf{è l'origine e non si muove per costruzione}. La misura lo
+conferma: su quaranta fotogrammi consecutivi la deviazione standard della sua
+posizione è di $3\cdot10^{-5}$ metri, cioè tre centesimi di millimetro, contro i
+$1{,}75\cdot10^{-2}$ metri del naso — quattrocento volte tanto. Le grandezze
+relative alla traslazione del bacino, presenti nella formulazione iniziale,
+misuravano quindi rumore numerico e sono state rimosse. La traslazione assoluta
+del corpo con questa rappresentazione non è misurabile: la misurano A1 e A3, nel
+piano immagine.
+
+\subsection{A3 --- la geometria riferita al corpo}
+
+La terza rappresentazione utilizza i \emph{landmark} bidimensionali come A1, ma
+con una differenza decisiva: ogni grandezza viene divisa per la lunghezza del
+tronco. Il risultato è adimensionale, quindi indipendente dalla distanza della
+persona dalla telecamera e dalla sua corporatura: la stessa posa a due o a
+cinque metri, su una persona alta o bassa, produce gli stessi numeri.
+
+Il centro del bacino è l'origine del riferimento locale. Le grandezze sono la
+lunghezza del tronco, l'angolo del tronco nel piano immagine e la sua derivata,
+le altezze di testa, ginocchia e caviglie rispetto al bacino, la larghezza delle
+spalle, la velocità del bacino in lunghezze di torso al secondo e la velocità
+della testa relativa al bacino.
+
+È la rappresentazione anatomicamente più ricca — l'unica che osservi gli arti
+inferiori, e sapere che le caviglie sono salite all'altezza del bacino
+distingue una caduta all'indietro da un semplice piegarsi — ma vive nel piano
+immagine, e ne eredita quindi la dipendenza dal punto di vista.
+
+Va inoltre osservato che la normalizzazione rispetto al corpo, che è il pregio
+di questa rappresentazione, ne è anche il limite: normalizzando tutto rispetto
+al bacino, A3 \emph{cancella per costruzione} l'informazione su dove il corpo si
+trovi nella stanza. È il motivo per cui viene affiancata dalla grandezza
+descritta nella Sezione~\ref{sec:pavimento}.
+
+\subsection{Cosa è stato rimosso, e perché}
+
+Rispetto alla formulazione iniziale, che prevedeva dieci grandezze per ciascuna
+rappresentazione, alcune sono state rimosse. Le ragioni sono di tre tipi.
+
+\textbf{Grandezze degenerate per costruzione.} Le due relative alla traslazione
+del bacino in A2, per la ragione discussa sopra.
+
+\textbf{Grandezze dimensionalmente prive di senso.} Ciascuna rappresentazione
+conteneva una grandezza denominata \emph{energia}, calcolata come somma di
+quadrati dei contributi dinamici. Quelle somme sommavano quadrati di gradi, di
+rapporti adimensionali, di pixel e di frazioni di immagine: quantità non
+omogenee, il cui risultato non ha un'unità interpretabile. Sul dataset
+presentavano rapporti fra valore massimo e mediano dell'ordine di $7\cdot10^5$,
+ed erano all'origine della disparità di scala fra le colonne in ingresso — un
+fattore 646 fra la più grande e la più piccola — che senza normalizzazione
+rendeva alcune grandezze invisibili al modello.
+
+\textbf{Derivate seconde.} Le accelerazioni presenti in A2 sono state rimosse
+per la ragione descritta nella Sezione~\ref{sec:rumore}: se la derivata prima
+amplifica il rumore dello stimatore di posa, la derivata seconda lo amplifica
+due volte.
+
+Il bacino risultante conta trentadue grandezze: nove per A1, cinque per A2, nove
+per A3 e la terna integrale di ciascuna rappresentazione, descritta nella
+Sezione~\ref{sec:integrali}.
+
+\subsection{Una convenzione temporale unica}
+
+Un'ultima precisazione riguarda le derivate. Nella formulazione iniziale A1
+calcolava differenze \emph{per fotogramma} mentre A2 e A3 dividevano per
+$\Delta t$: confrontare A1 con A3 significava quindi confrontare anche due
+convenzioni temporali diverse, e cambiando frame rate una sola delle due
+cambiava scala. Nell'implementazione attuale tutte le derivate sono espresse per
+secondo.

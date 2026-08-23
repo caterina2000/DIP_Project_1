@@ -1,0 +1,201 @@
+% =====================================================================
+%  Sezione 2.11 — Definizione del compito ed etichettatura delle finestre
+%  Da inserire in Cap2.tex al posto della vecchia sezione
+%  "Finestre temporali e labeling" (parte relativa all'etichettatura).
+% =====================================================================
+
+\section{Definizione del compito ed etichettatura delle finestre}
+
+Fino a questo punto il problema è stato descritto come «distinguere una caduta
+da una normale attività quotidiana». È la formulazione corrente in letteratura,
+ma nasconde un'ambiguità che, come mostrerò nel capitolo sperimentale, produce
+l'effetto più grande misurato in tutto questo lavoro.
+
+\subsection{Una caduta è composta da tre fasi, non da una}
+
+Osservando le riprese di caduta del dataset si distinguono tre stati
+fisicamente diversi, che l'annotazione per fotogramma di UP-Fall separa
+esplicitamente:
+
+\begin{itemize}
+    \item \textbf{attività normale}: la persona è in piedi, cammina o si siede;
+    \item \textbf{transizione}: dalla perdita di equilibrio all'arrivo a terra;
+    \item \textbf{stato post-caduta}: la persona è a terra.
+\end{itemize}
+
+Le tre fasi hanno durate molto diverse. Misurando le cinquanta riprese di
+caduta della Camera~1 si ottengono i valori riportati in
+Tabella~\ref{tab:durate_fasi}: la transizione dura circa tre secondi, mentre lo
+stato successivo dura il doppio, e nel funzionamento reale può durare minuti od
+ore.
+
+\begin{table}[ht]
+\centering
+\caption{Durata delle tre fasi, misurata sulle riprese di caduta di UP-Fall
+(Camera~1, dieci soggetti).}
+\label{tab:durate_fasi}
+\begin{tabular}{lccc}
+\hline
+\textbf{Fase} & \textbf{Mediana} & \textbf{Decile 10\%} & \textbf{Decile 90\%} \\
+\hline
+In piedi, prima della caduta & 0,92 s & --- & --- \\
+Transizione (caduta in corso) & 3,11 s & 2,05 s & 3,94 s \\
+Stato post-caduta & 5,97 s & 4,82 s & 6,89 s \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Tre compiti diversi, non tre gradazioni dello stesso}
+
+Da questa scomposizione discende che «rilevare una caduta» non individua un
+compito solo. A seconda di quale fase si assume come positivo se ne definiscono
+tre, con prevalenze, difficoltà e negativi critici diversi:
+
+\begin{itemize}
+    \item \textbf{evento}: positivo se la finestra contiene la transizione.
+          Il sistema riconosce \emph{l'atto} del cadere;
+    \item \textbf{stato}: positivo se la finestra contiene la persona a terra.
+          Il sistema riconosce \emph{la condizione} di essere caduti;
+    \item \textbf{allarme}: positivo se la finestra contiene l'una o l'altra.
+\end{itemize}
+
+La scelta fra i tre non è un dettaglio di preprocessing. Il criterio clinico
+suggerirebbe il terzo, o addirittura il secondo: il danno della \emph{long-lie
+syndrome} dipende dal tempo trascorso a terra, non dall'impatto, e lo stato dura
+molto più a lungo della transizione, offrendo quindi più occasioni di
+rilevamento. Questa è la formulazione che il presente lavoro ha adottato
+inizialmente.
+
+\subsection{Il negativo che rende la scelta non ovvia}
+
+Esiste però una classe di negativi che rende i tre compiti profondamente
+diversi in difficoltà: le persone che si trovano in posizione orizzontale
+\emph{senza} essere cadute.
+
+In UP-Fall una delle attività registrate come normali è \emph{laying}, cioè
+sdraiarsi volontariamente: sono 20.980 fotogrammi, il 18\% dell'intero dataset,
+etichettati come attività quotidiana. Il dataset contiene quindi ventimila
+fotogrammi di persona distesa etichettati come normali e diecimila etichettati
+come post-caduta. \textbf{Nello stato finale i due casi sono quasi
+indistinguibili: la differenza sta unicamente nel modo in cui la persona ci è
+arrivata.}
+
+Questa osservazione è verificabile quantitativamente. Confrontando le mediane
+delle grandezze dinamiche fra le popolazioni di fotogrammi (Tabella
+\ref{tab:dinamica}), la transizione di caduta si separa dallo sdraiarsi
+volontario di uno o due ordini di grandezza, mentre lo stato post-caduta e lo
+stato disteso volontario sono praticamente sovrapposti.
+
+\begin{table}[ht]
+\centering
+\caption{Rapporto fra le mediane delle grandezze dinamiche. La transizione
+discrimina; la posa no.}
+\label{tab:dinamica}
+\begin{tabular}{lcc}
+\hline
+\textbf{Grandezza} & \textbf{Caduta / sdraiarsi} & \textbf{A terra / disteso} \\
+\hline
+Velocità del bacino & 30,1$\times$ & 1,3$\times$ \\
+Escursione del tronco & 42,5$\times$ & 2,8$\times$ \\
+Percorso del bacino & 33,0$\times$ & 1,3$\times$ \\
+Discesa del bacino & 139,4$\times$ & 2,1$\times$ \\
+\hline
+\end{tabular}
+\end{table}
+
+La ragione è fisica e intuitiva: nessuno si sdraia su un divano con
+un'escursione del tronco di trenta gradi in mezzo secondo. Lo stato finale è
+ambiguo per costruzione, la transizione no.
+
+\subsection{Dalle etichette per fotogramma a quella della finestra}
+
+Il classificatore non decide sul singolo fotogramma ma su una finestra di circa
+2,4 secondi, che quasi sempre contiene fotogrammi di fasi diverse. Serve quindi
+una regola di aggregazione.
+
+La regola adottata inizialmente contava i fotogrammi della classe ovunque
+essi fossero nella finestra: cinque fotogrammi di caduta sparsi valevano quanto
+cinque consecutivi. Per un evento che è per natura una dinamica continua il
+criterio è incoerente. È stato quindi sostituito da un criterio
+\textbf{$K$-su-$M$}: la finestra è positiva se esistono almeno $K$ fotogrammi
+della classe all'interno di un blocco locale di $M$ fotogrammi consecutivi.
+
+Formalmente, data la maschera binaria $m_t$ che vale 1 sui fotogrammi della
+classe cercata, la finestra è positiva se
+
+\[
+\max_{i}\ \sum_{t=i}^{i+M-1} m_t \ \geq\ K .
+\]
+
+Il criterio tollera un fotogramma annotato male senza spezzare l'evento, e ha
+due casi particolari utili: con $M = K$ degenera in «$K$ fotogrammi
+consecutivi», con $M$ molto grande nel conteggio totale sulla finestra. Il
+confronto fra criteri diventa quindi una variazione di parametro invece che di
+codice.
+
+I valori utilizzati sono $K = 5$ su $M = 8$ per la transizione e $K = 10$ su
+$M = 15$ per lo stato. Non sono valori ottimizzati: sono soglie di
+preprocessing scelte per imporre una presenza minima della fase nella finestra,
+ed è dichiarata nel Capitolo~\ref{cap:sperimentale} un'analisi di sensibilità.
+
+\subsection{Il metro di valutazione deve essere unico}
+
+Confrontare tre definizioni del compito richiede una cautela: se ciascun
+modello venisse misurato sulla propria definizione di positivo, il confronto non
+sarebbe interpretabile. Il compito \emph{evento} scarta le finestre di stato,
+che sono le più ambigue, e apparirebbe avvantaggiato per un motivo che non ha
+nulla a che vedere con la sua qualità.
+
+Ogni finestra porta quindi \textbf{due etichette}:
+
+\begin{itemize}
+    \item $y_{\text{train}}$, che dipende dalla definizione del compito ed è la
+          variabile dell'esperimento;
+    \item $y_{\text{allarme}}$, fissa per tutte le definizioni: vale 1 se la
+          finestra contiene la transizione \emph{oppure} lo stato. È il metro
+          con cui i tre modelli vengono confrontati.
+\end{itemize}
+
+Le finestre che il compito \emph{evento} esclude dall'addestramento restano
+quindi nell'insieme di verifica, marcate come non addestrabili: tutti i modelli
+sono misurati sullo stesso insieme.
+
+\subsection{Un vocabolario di riferimento}
+
+La tassonomia adottata coincide con quella di \emph{OmniFall}
+\cite{omnifall2025}, un benchmark del 2026 che unifica otto dataset di
+rilevamento cadute — UP-Fall compreso — per un totale di 101 soggetti e 29
+punti di vista, riannotandoli a mano con sedici classi. Quattro di queste sono
+esattamente le distinzioni discusse in questa sezione:
+
+\begin{itemize}
+    \item \texttt{fall} --- l'atto di cadere, da qualunque stato precedente;
+    \item \texttt{fallen} --- essere a terra dopo una caduta;
+    \item \texttt{lie\_down} --- sdraiarsi intenzionalmente;
+    \item \texttt{lying} --- essere disteso dopo esserci andato intenzionalmente.
+\end{itemize}
+
+Gli autori distribuiscono le sole annotazioni e non i video, il che ha permesso
+di applicarle ai dati già estratti senza modificare la pipeline: le etichette
+temporali sono state mappate sui fotogrammi di UP-Fall con una copertura del
+96,4\%, e l'allineamento è verificato dal fatto che le classi \texttt{fall} e
+\texttt{fallen} cadono dove cadono le annotazioni originali del dataset.
+
+L'adozione di questo vocabolario ha due conseguenze utili. La prima è che i
+negativi critici diventano misurabili \emph{dentro} il dataset di
+addestramento, e non soltanto sulle registrazioni domestiche o su un archivio
+esterno. La seconda è che i risultati diventano confrontabili con un benchmark
+pubblicato: OmniFall riporta, con un modello video da 87 milioni di parametri,
+F1 pari a 65,6\% sul riconoscimento dell'evento e \textbf{41,0\% sul
+riconoscimento dello stato}, e osserva che i modelli multimodali di grandi
+dimensioni confondono sistematicamente \texttt{fallen} con \texttt{lying}. Il
+divario fra i due compiti non è quindi un limite di questo lavoro: è un
+problema aperto del settore.
+
+\subsection{Cosa ne segue}
+
+La definizione del compito è stata trattata in questo capitolo come una scelta
+di rappresentazione del problema, alla pari della scelta delle feature, e non
+come un dettaglio di preprocessing. Il Capitolo~\ref{cap:sperimentale} ne misura
+le conseguenze, che risultano di gran lunga superiori a quelle della scelta
+dell'architettura di classificazione.

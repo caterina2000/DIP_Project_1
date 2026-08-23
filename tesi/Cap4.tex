@@ -1,0 +1,674 @@
+\chapter{Risultati sperimentali}
+\label{cap:risultati}
+%% alias: venti riferimenti nei capitoli precedenti usano questo nome
+\label{cap:sperimentale}
+
+% ---------------------------------------------------------------------
+% STRUTTURA — 7 sezioni. Rispetto alla bozza:
+%  - aggiunta 4.1 (la baseline), cerniera fra Cap. 3 e Cap. 4;
+%  - spostato qui dal Cap. 2 il confronto fra approcci supervisionati e
+%    non supervisionati, che e' un risultato e non un metodo;
+%  - aggiunta 4.7, il trasferimento a un dataset esterno (EXP-041), che
+%    l'impianto iniziale dava per non eseguibile.
+%
+% Tutti i risultati usano il protocollo del Cap. 3. Le metriche prodotte
+% PRIMA di quel protocollo compaiono solo in 4.1, come termine di
+% paragone.
+% ---------------------------------------------------------------------
+
+Questo capitolo riporta le misure ottenute applicando il protocollo del Capitolo~\ref{cap:protocollo}. L'ordine non è cronologico ma argomentativo: si parte dalla prima configurazione difendibile, si individua la variabile che domina tutte le altre, e si verifica in coda quanto di tutto ciò sopravviva fuori dal dataset di partenza.
+
+\section{La prima baseline difendibile}
+\label{sec:baseline}
+
+La configurazione iniziale del progetto produceva \textbf{F1 $= 0{,}0000$}: zero veri positivi su tutto l'insieme di verifica. Un risultato del genere non si spiega con un modello poco accurato — un classificatore che indovinasse a caso ne prenderebbe qualcuno — ma con un difetto sistematico.
+
+L'analisi ne ha individuati tre, tutti nel protocollo e nessuno nel modello:
+
+\begin{enumerate}
+\item \textbf{Nessuna normalizzazione.} Le scale delle dieci feature differivano di un fattore \textbf{646}: la grandezza di energia aveva media $11{,}58$ e massimo $15{,}499$, contro rapporti adimensionali vicini all'unità. Senza standardizzazione una sola colonna domina i gradienti e rende le altre nove invisibili.
+\item \textbf{Suddivisione per ripresa e non per soggetto.} Tutti e cinque i soggetti comparivano \emph{sia} in addestramento \emph{sia} in verifica.
+\item \textbf{Insieme di verifica usato come validation}, quindi selezione del modello sullo stesso insieme su cui si misura.
+\end{enumerate}
+
+Applicando il protocollo — standardizzazione stimata sul solo addestramento, suddivisione \emph{leave-one-subject-out}, validation separato — a parità di dati, feature e architettura:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & Prima & Dopo \\
+\midrule
+F1 & 0,0000 & \textbf{0,234} \\
+Veri positivi & 0 & \textbf{144} \\
+Rapporto fra le scale & 646$\times$ & 1,05--1,35$\times$ \\
+Soggetti condivisi fra i due insiemi & 5 su 5 & \textbf{zero} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Resta un risultato modesto}, e va detto: $0{,}234$ è lontano da qualunque soglia di utilizzabilità. Il capitolo spiega perché, e la risposta non è nel modello.
+
+\section{L'effetto del punto di vista}
+\label{sec:viewpoint}
+
+\paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
+sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
+ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
+sostengono è di un ordine di grandezza superiore alla dispersione fra
+soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
+vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
+sezioni misurate su dieci.
+
+
+È il risultato centrale del lavoro.
+
+Il dataset riprende ogni evento con \textbf{due telecamere simultanee}: una laterale (Camera1) e una frontale rialzata (Camera2). Stesso soggetto, stessa caduta, stesso istante — cambia solo da dove si guarda. È una condizione sperimentale rara, perché isola il punto di vista da ogni altra variabile.
+
+\subsection{Perché una vista rialzata perde l'informazione}
+
+L'indicatore geometrico più forte di una caduta è la variazione dell'inclinazione del tronco: dalla verticale all'orizzontale. Ma quella variazione è osservabile solo se il piano di proiezione la conserva. Una telecamera che guarda dall'alto vede una persona in piedi e una distesa proiettarsi in modo simile: l'escursione angolare si comprime.
+
+La misura, su 25 sequenze e tutti i soggetti:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & Camera1 (laterale) & Camera2 (frontale alta) \\
+\midrule
+Escursione media dell'angolo del tronco & 71,0° & 35,7° \\
+Sequenze con escursione sopra 60° & \textbf{18 su 25} & 6 su 25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Il rapporto fra le medie è $1{,}99\times$. Va però preferito il \textbf{conteggio} al rapporto, per una ragione che il dato stesso impone: le deviazioni standard ($25{,}3$ e $24{,}4$) valgono un terzo del valore medio, e il rapporto calcolato sequenza per sequenza spazia da $0{,}33\times$ a $13{,}22\times$. In \textbf{3 casi su 24} Camera2 osserva quanto o meglio di Camera1.
+
+Il fenomeno è reale e sistematico, ma molto variabile: una media da sola lo descrive male, e la Figura~\ref{fig:viewpoint_dist} ne mostra la distribuzione completa.
+
+\paragraph{Una correzione a un risultato precedente.} Una versione preliminare di questa misura riportava un fattore $4{,}32\times$ ($80{,}5°$ contro $18{,}6°$). Quel valore \textbf{non si riproduce}: proveniva da cinque sequenze di un solo soggetto, e rieseguendo la stessa procedura si ottiene $1{,}90\times$. Una misura indipendente, calcolata senza passare dai file di feature intermedi, conferma $1{,}90\times$. Il valore di riferimento è quello riportato sopra.
+
+\subsection{Quanto costa in accuratezza}
+
+Ripetendo l'esperimento della sezione~\ref{sec:baseline} sulla sola Camera1, a parità di tutto il resto, l'F2 passa da $0{,}29$ a \textbf{0,857}. Il difetto principale della baseline non era il modello: era che metà dei dati proveniva da un punto di vista che non contiene l'informazione cercata.
+
+\subsection{Il trasferimento fra viste, e la sua cura}
+
+Addestrare su una vista e verificare sull'altra misura la fragilità del sistema al cambio di inquadratura. Con la configurazione poi effettivamente installata sul dispositivo (foresta casuale a 50 alberi, finestra di 22 campioni, 9~fps):
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Addestrata su & Verificata su & F2 & Falsi positivi \\
+\midrule
+Camera1 & Camera1 & 0,872 $\pm$ 0,099 & --- \\
+Camera1 & Camera2 & 0,434 $\pm$ 0,182 & 1.113 \\
+\textbf{Camera1 + Camera2} & Camera2 & \textbf{0,678 $\pm$ 0,123} & \textbf{460} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Il cambio di inquadratura costa \textbf{metà dell'accuratezza}. Ma il dato che conta è la terza riga: \textbf{esporre il modello a due punti di vista in addestramento ne recupera il 56\%}, e lo fa migliorando \emph{insieme} recall (da $0{,}649$ a $0{,}814$) e precision (da $0{,}216$ a $0{,}543$).
+
+Il miglioramento simultaneo delle due grandezze è ciò che distingue un apprendimento più generale da uno spostamento di soglia: una soglia scambia recall e precision, non le alza entrambe. Anche la dispersione fra soggetti si stringe, da $\pm 0{,}182$ a $\pm 0{,}123$ — la fragilità non era solo media, era irregolare: su due soggetti su cinque la versione a vista singola scendeva a $0{,}28$.
+
+Restano $0{,}194$ di divario rispetto alla condizione a vista unica. Due punti di vista sono meglio di uno, e restano due.
+
+\paragraph{Un risultato controintuitivo.} Un modello addestrato su Camera1 e verificato su Camera2 batte di $2{,}5\times$ un modello addestrato \emph{direttamente} su Camera2, sullo stesso identico insieme di verifica. \textbf{La qualità del punto di vista in addestramento conta più della sua corrispondenza con quello di esercizio}: conviene imparare da riprese informative e trasferire, piuttosto che imparare da riprese povere nelle condizioni giuste.
+
+\begin{figure}[htbp]
+\centering
+% FIGURA 4.1 — la piu' importante della tesi. DA COMPORRE.
+% Due fotogrammi simultanei della stessa caduta, Camera1 e Camera2
+% affiancati. Sorgente:
+%   dataset/up_fall/raw/fall/Subject_01/sub01_act01_trial01_cam01
+%   dataset/up_fall/raw/fall/Subject_01/sub01_act01_trial01_cam02
+% stesso timestamp.
+\caption{La stessa caduta, nello stesso istante, dalle due telecamere. A sinistra la vista laterale, a destra quella frontale rialzata.}
+\label{fig:due_camere}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+% FIGURA 4.0 — fig_4_0_viewpoint_distribuzione.png. DA GENERARE.
+\caption{Distribuzione dell'escursione dell'angolo del tronco sulle 25 sequenze, per telecamera. È l'unica rappresentazione difendibile del fenomeno: le medie da sole nascondono che in tre sequenze la vista rialzata osserva quanto quella laterale.}
+\label{fig:viewpoint_dist}
+\end{figure}
+
+\section{Confronto fra rappresentazioni}
+\label{sec:featureset}
+
+Le tre rappresentazioni del Capitolo~\ref{cap:metodologia}, sulla stessa configurazione e sullo stesso protocollo:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Rappresentazione & F2 & Recall \\
+\midrule
+A2 (grandezze fisiche 3D) & 0,867 $\pm$ 0,099 & --- \\
+A3 (body-centric 2D) & 0,857 $\pm$ 0,088 & \textbf{0,929} \\
+A (PCA 2D) & 0,834 $\pm$ 0,121 & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Il risultato da riportare non è «A2 vince».} Lo scarto fra la
+migliore e la peggiore è $0{,}033$, dentro deviazioni comprese fra $0{,}088$ e
+$0{,}121$: le tre differenze \textbf{non sono distinguibili}, e dichiararlo è
+più corretto che proclamare un vincitore.
+
+\paragraph{Due precisazioni su questa tabella.} La prima è di provenienza: le
+tre esecuzioni risalgono all'impianto a cinque soggetti. La seconda è più
+seria, ed è emersa in seguito: \textbf{A2 conteneva due grandezze degeneri per
+costruzione}. I \emph{world landmark} di MediaPipe hanno il bacino come
+origine, e le due grandezze che ne descrivevano la traslazione erano quindi
+identicamente nulle --- deviazione standard $0{,}00003$~m contro $0{,}0175$~m
+del naso. Il punteggio di A2 in questa tabella è stato ottenuto con otto
+grandezze utili su dieci, e le due mancanti sono state successivamente rimosse
+e ridefinite. Il confronto va letto con questa riserva.
+
+Ripetuto su dieci soggetti dopo la correzione del motore geometrico, e con le
+rappresentazioni nella forma poi adottata, il confronto conferma il verdetto:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Rappresentazione & $F_2$ \\
+\midrule
+A3, senza grandezze integrali & 0,874 $\pm$ 0,080 \\
+A3, con grandezze integrali & 0,858 $\pm$ 0,075 \\
+sottoinsieme selezionato per allineamento & 0,857 $\pm$ 0,078 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Diciassette millesimi separano la prima dall'ultima, contro dispersioni di
+ottanta. \textbf{In laboratorio le tre restano indistinguibili anche con il
+doppio dei soggetti} --- ed è un risultato che il Capitolo~\ref{cap:campo}
+ribalta, perché in una casa la stessa scelta divide i falsi allarmi per
+quattordici.
+
+Ciò che invece esce dal rumore è che \textbf{tutte e tre migliorano di 2,5--3,4 volte} cambiando telecamera. Il punto di vista conta più della rappresentazione — e questo confronto, preso da solo, avrebbe suggerito di investire nella direzione sbagliata.
+
+Un criterio secondario ha comunque orientato la scelta finale: A3 ha il \textbf{recall più alto} ($0{,}929$) e il numero più basso di falsi negativi (17). In un sistema di sicurezza il falso negativo è l'errore che pesa, ed è la ragione per cui A3 è la rappresentazione installata sul dispositivo, malgrado un F2 medio leggermente inferiore ad A2.
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.86\textwidth]{figure/fig_configurazioni.png}
+\caption{Le configurazioni di grandezze a confronto, in laboratorio, su dieci soggetti con validazione \emph{leave-one-subject-out}. Le barre di errore sono la dispersione fra soggetti. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
+\label{fig:configurazioni}
+\end{figure}
+
+\section{Confronto fra architetture}
+\label{sec:architetture}
+
+Il progetto era stato impostato su una rete ricorrente GRU, con una motivazione
+esplicita: \emph{una rete ricorrente compatta svolge lo stesso lavoro
+consumando meno risorse}. È l'ipotesi che questa sezione verifica, ed è la
+domanda su cui il lavoro ha speso la maggior parte del proprio tempo.
+
+\subsection{Cinque architetture a parità di tutto il resto}
+
+Il confronto impiega la stessa rappresentazione, la stessa lunghezza di
+finestra, lo stesso protocollo di divisione, la stessa normalizzazione e la
+stessa soglia dichiarata a priori. Varia soltanto il modello. Le quattro reti
+sono addestrate con lo stesso criterio di arresto; il quinto termine di
+paragone è un classificatore \emph{non sequenziale} --- una foresta casuale su
+sei statistiche per grandezza --- che serve a stabilire quanto della
+prestazione dipenda dal trattare la finestra come una sequenza.
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Modello & $F_2$ & Recall & Falsi neg. & Parametri & Addestramento \\
+\midrule
+LSTM        & \textbf{0,858 $\pm$ 0,082} & 0,934 & 102 & 32.227 & 16,6 min \\
+GRU         & 0,847 $\pm$ 0,085 & 0,928 & 105 & 24.483 & 22,7 min \\
+Transformer & 0,846 $\pm$ 0,100 & \textbf{0,939} & \textbf{89} & 34.499 & 11,5 min \\
+CNN 1D      & 0,833 $\pm$ 0,118 & 0,937 & 95 & 46.147 & 11,1 min \\
+Foresta casuale & 0,792 $\pm$ 0,080 & 0,807 & 271 & --- & \textbf{0,2 min} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Fra la migliore e la peggiore corrono $0{,}066$; la dispersione fra
+soggetti della migliore è $0{,}082$.} La differenza fra due architetture è
+dunque più piccola della differenza fra due persone, e nessuna coppia risulta
+distinguibile.
+
+Il numero di parametri non ordina il risultato. Il modello più grande --- la
+CNN, con quasi il doppio dei parametri della GRU --- è penultimo, e ha la
+dispersione più alta; il transformer, che ha il maggior numero di parametri fra
+le reti, ottiene lo stesso $F_2$ della GRU con il minor numero di falsi
+negativi. \emph{Nessuna} delle due grandezze che si sarebbero volute mettere in
+relazione, capacità e prestazione, si comporta come atteso.
+
+L'unico termine che si stacca è la foresta casuale, e in una direzione
+istruttiva: perde $0{,}066$ di $F_2$ e più che raddoppia i falsi negativi,
+ma \textbf{dimezza i falsi allarmi} rispetto a ogni rete. Non è un modello
+peggiore, è un modello con un altro punto di funzionamento --- ed è il motivo
+per cui è quello installato sul dispositivo, dove il costo di un falso allarme
+non è una riga in una tabella ma un sistema che viene spento.
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.86\textwidth]{figure/fig_architetture.png}
+\caption{Cinque architetture a parità di protocollo, di grandezze e di dati. La banda grigia è la dispersione fra soggetti della configurazione migliore: tutte le architetture vi cadono dentro, e la colonna di destra mostra che il numero di parametri non ordina il risultato. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
+\label{fig:architetture}
+\end{figure}
+
+\subsection{Quanti soggetti servirebbero}
+
+Dichiarare due configurazioni indistinguibili è più utile se accompagnato dalla
+misura di \emph{quanto} sarebbero servite per distinguerle. Il confronto è
+appaiato --- ogni architettura viene valutata sugli stessi dieci soggetti --- e
+questo permette di calcolare, per ciascuna coppia, la numerosità necessaria a
+rilevare la differenza osservata con potenza dell'ottanta per cento.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Confronto & Differenza & $t$ ($n = 10$) & Soggetti necessari \\
+\midrule
+\textbf{modo di etichettatura} & $-0{,}309$ & $-6{,}85$ & \textbf{2} \\
+GRU contro foresta & $-0{,}055$ & $-1{,}74$ & 26 \\
+grandezze integrali & $-0{,}022$ & $-1{,}53$ & 34 \\
+finestra 22 contro 44 & $+0{,}033$ & $+1{,}23$ & 52 \\
+\textbf{GRU contro LSTM} & $+0{,}011$ & $+0{,}84$ & \textbf{113} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Distinguere una GRU da una LSTM richiederebbe 113 soggetti; distinguere
+due definizioni del compito ne richiede 2.} Un fattore cinquantasei fra le due
+domande. UP-Fall ne contiene diciassette in tutto, e nessun archivio pubblico
+di cadute si avvicina ai centotredici.
+
+Va aggiunto che aggiungere i sette soggetti mancanti non cambierebbe la
+situazione: porterebbe soltanto il confronto fra GRU e foresta in prossimità
+della soglia, senza raggiungerla, e l'errore standard della media passerebbe da
+$\pm 0{,}027$ a $\pm 0{,}021$. Il guadagno sarebbe cosmetico.
+
+\subsection{Due ablation precedenti, e perché la loro discordanza è il
+risultato}
+
+Prima che il protocollo fosse portato a dieci soggetti, lo stesso confronto era
+stato condotto due volte su cinque, con configurazioni leggermente diverse. La
+prima assegnava alla GRU $0{,}779$ e la collocava \emph{ultima}, dietro la
+foresta casuale di $0{,}108$; la seconda le assegnava $0{,}873$ e la collocava
+\emph{seconda}, a due centesimi dalla LSTM.
+
+La tentazione sarebbe di scartarle come misure superate. È invece opportuno
+riportarle, perché la loro discordanza dice qualcosa che nessuna delle due dice
+da sola: \textbf{con cinque soggetti, l'ordinamento fra architetture dipende da
+quale configurazione si scelga}. La conclusione della prima ablation --- «la
+GRU non fa lo stesso lavoro, ed è la più costosa» --- non è sopravvissuta al
+raddoppio dei soggetti.
+
+Quella conclusione era stata scritta, e sarebbe finita in questa tesi. Ciò che
+l'ha impedita non è stato un ripensamento, ma il fatto di avere misurato la
+dispersione accanto alla media, e di avere trovato che la seconda era più
+piccola della prima.
+
+\subsection{Che cosa se ne conclude}
+
+La conclusione che il lavoro può sostenere è diversa da quella cercata
+all'inizio, e più forte: \textbf{non è che una rete leggera regga il confronto
+con una pesante --- è che l'architettura non è la variabile che decide}.
+
+Fra la migliore e la peggiore architettura corrono $0{,}066$. Fra un punto di
+vista della telecamera e l'altro, sezione~\ref{sec:viewpoint}, ne corrono
+$0{,}438$; fra due definizioni del compito,
+sezione~\ref{sec:compito-risultati}, ne corrono $0{,}127$ con una differenza
+statisticamente netta. La domanda su cui il progetto era stato impostato non è
+quella che determina il comportamento del sistema.
+
+\paragraph{Limiti.} Non è stata condotta alcuna ricerca sistematica di
+iperparametri: le architetture sono confrontate nella configurazione in cui
+sono state definite, e un'ottimizzazione per ciascuna potrebbe spostare
+l'ordinamento. Data la dimensione degli scarti rispetto alla dispersione, però,
+è improbabile che possa renderli distinguibili. Sull'approccio non
+supervisionato --- autoencoder seguito da classificatore --- l'unico dato
+disponibile proviene da una esecuzione in cui i due metodi erano valutati su
+verità di riferimento diverse, e va citato come lavoro preliminare, non come
+confronto.
+
+\section{Dimensione del modello}
+\label{sec:dimensione}
+
+\paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
+sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
+ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
+sostengono è di un ordine di grandezza superiore alla dispersione fra
+soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
+vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
+sezioni misurate su dieci.
+
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Alberi & F2 & Falsi negativi & Latenza \\
+\midrule
+\textbf{50} & \textbf{0,906} & \textbf{15} & \textbf{4,47 ms} \\
+200 & 0,888 & 19 & 17,98 ms \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Il modello più piccolo è migliore \emph{e} quattro volte più veloce.} La spiegazione sta nella dimensione dei dati: con 4.990 finestre e 223 positivi, 200 alberi hanno capacità sufficiente per memorizzare la variabilità individuale dei soggetti disponibili invece della struttura comune dell'evento.
+
+Lo conferma l'andamento della dispersione fra fold, che \textbf{cresce in modo monotono} con la dimensione: $0{,}028$ a 25 alberi, $0{,}051$ a 400. I modelli grandi non sono solo meno accurati su questi dati — sono anche i \textbf{meno stabili fra soggetti}, che in un sistema destinato a persone diverse da quelle osservate è il difetto peggiore.
+
+È il miglior risultato del progetto, ed è il modello più semplice.
+
+\begin{figure}[htbp]
+\centering
+% FIGURA 4.4 — F2 e latenza al variare del numero di alberi, doppio asse.
+% Sorgente: scripts/out/exp017_rf_size.json. DA GENERARE.
+\caption{F2 e latenza al variare del numero di alberi. Le due curve hanno l'ottimo dalla stessa parte, il che è raro: di norma accuratezza e costo si scambiano.}
+\label{fig:dimensione}
+\end{figure}
+
+\section{Effetto del frame rate}
+
+\paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
+sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
+ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
+sostengono è di un ordine di grandezza superiore alla dispersione fra
+soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
+vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
+sezioni misurate su dieci.
+
+\label{sec:framerate}
+
+Il dispositivo di destinazione non regge i 18~fps del dataset. Dimezzarli ha un costo:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & 18 fps & 9 fps \\
+\midrule
+Cadute non rilevate & 6,8\% & \textbf{12,4\%} \\
+Scarto di F2 & --- & $-0{,}045$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Le cadute non rilevate raddoppiano}, mentre lo scarto di F2 resta formalmente dentro la dispersione fra fold. È il caso esemplare di perché una metrica aggregata non basti a decidere: la precision migliora al calare del frame rate e \textbf{compensa nel punteggio complessivo} il peggioramento della grandezza che in un sistema di sicurezza conta davvero.
+
+Un confronto incrociato mette la cosa in prospettiva: la foresta casuale a 9~fps ($0{,}861$) eguaglia la Bi-GRU a 18~fps ($0{,}862$). \textbf{Metà del frame rate si compra con un cambio di modello}, risultato utile per il Capitolo~\ref{cap:edge}, dove il vincolo di calcolo è stringente.
+
+\section{Robustezza all'occlusione}
+\label{sec:occlusioni}
+
+Il Capitolo~\ref{cap:contesto} ha indicato nelle occlusioni una delle due
+cause geometriche del degrado. Questa sezione le misura, e la misura non
+conferma il timore.
+
+La prova consiste nel congelare un gruppo di punti all'ultima posizione nota
+--- che è ciò che uno stimatore di posa fa quando perde un segmento --- e
+rimisurare la prestazione a parità di tutto il resto. Sono stati provati sia
+gruppi \textbf{anatomici}, scelti per il ruolo che hanno nella
+rappresentazione, sia gruppi \textbf{casuali} di dimensione crescente, che
+servono da termine di paragone: se un gruppo anatomico costasse più di un
+gruppo casuale della stessa dimensione, quel gruppo sarebbe critico.
+
+\begin{table}[ht]
+\centering
+\caption{Variazione di $F_2$ congelando un gruppo di punti. Base senza
+occlusione: $0{,}857 \pm 0{,}078$.}
+\label{tab:occlusioni}
+\begin{tabular}{lcr}
+\toprule
+\textbf{gruppo congelato} & \textbf{punti} & \textbf{variazione di $F_2$} \\
+\midrule
+spalle                     & 2 & $-0{,}020$ \\
+caviglie                   & 2 & $-0{,}015$ \\
+naso                       & 1 & $-0{,}008$ \\
+gambe (ginocchia+caviglie) & 4 & $-0{,}000$ \\
+metà sinistra              & 6 & $+0{,}008$ \\
+anche (riferimento di A3)  & 2 & $+0{,}012$ \\
+\midrule
+casuale, 11\% dei punti    & 1 & $-0{,}012$ \\
+casuale, 22\%              & 2 & $-0{,}006$ \\
+casuale, 33\%              & 3 & $-0{,}001$ \\
+casuale, 55\%              & 5 & $-0{,}008$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.86\textwidth]{figure/fig_occlusioni.png}
+\caption{Variazione di $F_2$ congelando un gruppo di punti all'ultima posizione nota. La banda grigia è la dispersione fra soggetti: nessuna barra la raggiunge. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
+\label{fig:occlusioni}
+\end{figure}
+
+\textbf{Il peggioramento più grande è $0{,}020$, contro una dispersione fra
+soggetti di $0{,}078$.} Nessun gruppo di punti è quindi critico: la variazione
+prodotta dall'occlusione è quattro volte più piccola della variazione prodotta
+dal cambio di persona, e resta dentro il rumore della misura.
+
+Due osservazioni completano il quadro, ed entrambe sono controintuitive.
+
+La prima è che congelare le \textbf{anche} --- il riferimento rispetto al
+quale A3 normalizza ogni grandezza --- non peggiora la prestazione, la
+migliora di $0{,}012$. La spiegazione plausibile è che un riferimento
+\emph{stabile} produca grandezze meno rumorose di un riferimento stimato a
+ogni fotogramma: congelarlo equivale a filtrarlo.
+
+La seconda è che i gruppi casuali non costano sistematicamente meno di quelli
+anatomici. Se esistesse un sottoinsieme di punti che porta l'informazione
+dell'evento, occludere proprio quello dovrebbe costare più di occludere un
+numero uguale di punti a caso. Non accade, e la conclusione è che
+\textbf{l'informazione è distribuita} sulla configurazione nel suo insieme e
+non concentrata in alcuni segmenti.
+
+\section{La definizione del compito}
+\label{sec:compito-risultati}
+
+Tutte le sezioni precedenti confrontano modi diversi di risolvere lo stesso
+problema. Questa confronta \emph{tre problemi diversi}, a parità di modello,
+di grandezze, di dati e di protocollo. È il confronto con l'effetto più grande
+misurato in questo lavoro.
+
+I tre compiti sono quelli definiti nella
+Sezione~\ref{sec:compito}: riconoscere l'\textbf{evento} --- la transizione
+dinamica --- riconoscere lo \textbf{stato} di persona a terra, oppure
+riconoscere \textbf{l'uno o l'altro}. Insieme a essi va dichiarato il negativo
+su cui il sistema viene giudicato: le finestre in cui una persona si sdraia
+volontariamente, che il vocabolario applicato a UP-Fall rende per la prima
+volta misurabili e che sono qui chiamate \emph{negativi difficili}.
+
+\begin{table}[ht]
+\centering
+\caption{I tre compiti a parità di tutto il resto. La colonna dei negativi
+difficili riporta la quota di finestre in allarme su una persona che si sdraia
+volontariamente.}
+\label{tab:compiti}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{compito} & \textbf{prevalenza} & \textbf{$F_2$} & \textbf{precisione}
+& \textbf{negativi difficili} \\
+\midrule
+\textbf{evento} & $0{,}047$ & $\mathbf{0{,}831 \pm 0{,}072}$ & $0{,}924$
+& $\mathbf{0{,}0\%}$ \\
+stato   & $0{,}089$ & $0{,}704 \pm 0{,}084$ & $0{,}755$ & $12{,}5\%$ \\
+allarme & $0{,}115$ & $0{,}810 \pm 0{,}068$ & $0{,}833$ & $13{,}1\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.92\textwidth]{figure/fig_compiti.png}
+\caption{I tre compiti a parità di modello, grandezze e protocollo. A sinistra la prestazione, a destra la quota di finestre in allarme su una persona che si sdraia volontariamente. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
+\label{fig:compiti}
+\end{figure}
+
+Il risultato è netto e va in una direzione sola. Il compito \textbf{evento} ha
+la prevalenza \emph{più bassa} --- meno di un quinto delle finestre positive
+del compito \emph{allarme} --- e nonostante questo ottiene l'$F_2$ più alto,
+la precisione più alta, e sbaglia sullo \textbf{zero per cento} delle 2.234
+finestre di persona distesa volontariamente.
+
+La ragione è che i tre compiti non sono tre gradazioni di difficoltà dello
+stesso problema, ma tre problemi con confini diversi. Una persona a terra e
+una persona sdraiata sul divano sono, come configurazione, la stessa cosa: chi
+riconosce lo \emph{stato} non ha modo di distinguerle, e infatti sbaglia su
+una su otto. Chi riconosce l'\emph{evento} cerca una transizione, e una
+persona che si corica lentamente non la produce.
+
+\paragraph{Perché questo risultato è il fulcro del capitolo.} Le sezioni
+precedenti hanno mostrato che l'architettura non è distinguibile: fra la GRU e
+la LSTM la differenza è $0{,}011$, e servirebbero \num{113} soggetti perché
+diventi significativa. Fra il compito \emph{stato} e il compito \emph{evento}
+la differenza è $0{,}127$, e ne servirebbero \textbf{due}. Le due domande non
+sono dello stesso ordine, e il lavoro ha speso la maggior parte del proprio
+tempo su quella meno importante.
+
+\section{Il trasferimento a un dataset esterno}
+\label{sec:domainshift}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.86\textwidth]{figure/fig_esterno.png}
+\caption{Trasferimento a UR-Fall, archivio registrato altrove e con altre persone. A sinistra il guadagno di PR-AUC rispetto al caso, che è la misura corretta quando la prevalenza cambia; a destra $F_2$ alla soglia dichiarata. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
+\label{fig:esterno}
+\end{figure}
+
+
+Tutte le misure precedenti provengono da un solo archivio, con validazione
+incrociata fra i suoi dieci soggetti: misurano la generalizzazione fra
+\textbf{persone}, mai quella fra \textbf{ambienti}. Questa sezione colma la
+differenza, ed è la verifica più severa del lavoro.
+
+\subsection{Che cosa è stato provato}
+
+Non un modello addestrato per l'occasione, ma \textbf{il sistema effettivamente
+installato}: gli stessi file di modello e di normalizzazione che girano sul
+dispositivo, applicati a un secondo archivio pubblico registrato in un altro
+laboratorio, con altre telecamere e altri soggetti. Nessuna di quelle riprese
+è mai entrata nell'addestramento.
+
+La distinzione non è formale. «Un modello addestrato su questi dati
+generalizzerebbe?» è una domanda accademica; «il sistema che sto consegnando
+generalizza?» è la domanda che decide se il lavoro serva a qualcosa.
+
+\paragraph{Una correzione preliminare, senza la quale la misura non
+significherebbe nulla.} Una prima versione di questa verifica riportava un
+crollo pressoché totale. Quel numero era misurato contro una verità di
+riferimento sbagliata. UR-Fall annota infatti la \textbf{postura} del soggetto
+e non l'evento: l'etichetta che segnala «persona a terra» era stata
+interpretata come «caduta in corso», cioè come il suo opposto temporale, e la
+conversione impiegata aveva inoltre collassato la classe di transizione, che è
+esattamente ciò che il sistema riconosce.
+
+L'archivio è stato quindi riestratto con lo stesso motore geometrico usato per
+i dati di addestramento e rietichettato secondo la semantica dichiarata dai suoi
+autori: \num{11400} fotogrammi su 67 riprese, con posa valida sull'
+\SI{81.0}{\percent} dei fotogrammi contro il \SI{95.8}{\percent} dell'archivio
+di addestramento. È di per sé un dato: le condizioni di ripresa sono
+sensibilmente peggiori.
+
+\subsection{Perché non si può confrontare $F_2$ con $F_2$}
+
+La prevalenza dell'evento nei due archivi è diversa, e questo rende il
+confronto diretto fra due valori di $F_2$ privo di significato: le metriche che
+dipendono dalla precisione si spostano al variare della quota di positivi anche
+a parità di capacità del modello.
+
+La grandezza che regge il confronto è l'\textbf{area sotto la curva
+precisione-richiamo rapportata alla prevalenza}, cioè quante volte il modello
+fa meglio di una decisione presa a caso su quello specifico archivio. È un
+numero adimensionale, confrontabile fra domini con basi diverse, e risponde
+alla domanda giusta: il modello \emph{ordina} ancora correttamente le finestre?
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Rappresentazione & PR-AUC & Guadagno sul caso & $F_2$ \\
+\midrule
+A3 senza grandezze integrali & 0,440 & 3,4$\times$ & 0,404 \\
+A3 con grandezze integrali   & 0,466 & 3,6$\times$ & 0,479 \\
+\textbf{sottoinsieme selezionato} & \textbf{0,660} & \textbf{5,1$\times$} & \textbf{0,630} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{La scomposizione, che è il risultato vero}
+
+\textbf{Il modello mantiene capacità discriminativa e perde calibrazione.}
+Cinque volte il caso, su un archivio mai visto, registrato altrove e con
+persone diverse, non è il comportamento di un modello che ha imparato
+l'ambiente di addestramento: è il comportamento di un modello che ha imparato
+qualcosa del fenomeno, ma che assegna alle cadute punteggi su una \emph{scala}
+diversa da quella su cui la soglia era stata fissata.
+
+La distinzione ha una conseguenza pratica precisa. Un difetto di ordinamento
+richiederebbe di riaddestrare; un difetto di scala richiede di ritarare, che
+costa incomparabilmente meno.
+
+Questo però \textbf{non è consolante}, ed è il punto che il lavoro deve
+dichiarare apertamente: per ritarare la soglia servono cadute etichettate
+dell'ambiente di destinazione, e chi installa un sistema in un'abitazione
+\textbf{non le possiede}. È una correzione disponibile soltanto a chi già
+dispone della risposta.
+
+\subsection{Due direzioni che si sommano}
+
+Il guadagno non è una proprietà fissa del problema: dipende da come il sistema
+è costruito, e le due scelte discusse nel Capitolo~\ref{cap:metodologia} lo
+migliorano in modo indipendente.
+
+La prima è la \textbf{rappresentazione temporale}. Passando dalle derivate
+istantanee alle grandezze accumulate, e poi al sottoinsieme selezionato per
+allineamento, il guadagno passa da $3{,}4$ a $5{,}1$ volte il caso. Il salto
+maggiore non viene dagli integrali in sé ma dal motore geometrico corretto
+--- angoli srotolati, derivate non esplosive --- che già sulla
+rappresentazione di base quasi raddoppia il guadagno rispetto alla versione
+precedente.
+
+La seconda è la \textbf{definizione del compito}. Restringendo il positivo alla
+sola transizione, il guadagno sale a $\mathbf{6{,}8\times}$ e i falsi allarmi
+sui negativi difficili --- persone che si distendono volontariamente --- scendono
+dal $50{,}5$ al $\mathbf{35{,}9}$ per cento.
+
+\textbf{Entrambe le direzioni aiutano, e si sommano.} È la stessa coppia di
+scelte che la sezione~\ref{sec:compito-risultati} e la
+sezione~\ref{sec:featureset} isolano in laboratorio, e ritrovarle qui, su dati
+di un altro laboratorio, è la corroborazione più forte che il lavoro possa
+offrire.
+
+\subsection{Che cosa resta, e non si trasferisce}
+
+Il guadagno di $5{,}1$ volte non va letto come un successo. Significa che il
+sistema, su un ambiente nuovo, distingue le cadute meglio del caso ma non
+abbastanza da essere impiegato senza taratura: alla soglia dichiarata i falsi
+allarmi sui negativi difficili restano fra un terzo e la metà.
+
+L'indizio su \emph{che cosa} non si trasferisca è però consistente. La
+sezione~\ref{sec:viewpoint} ha misurato che il solo cambio di inquadratura,
+\emph{dentro} l'archivio di addestramento e a parità di ogni altra condizione,
+costa più di qualunque altra variabile esaminata. I due archivi differiscono
+anche per etichettatura, soggetti e protocollo di ripresa, e il confronto è
+quindi suggestivo e non conclusivo --- ma indica dove intervenire, e in quella
+direzione la stessa sezione ha già misurato che si recupera oltre metà del
+divario.
+
+\subsection{Conseguenze}
+
+La distanza fra il comportamento in laboratorio e quello su un archivio registrato altrove è, misurata sullo stesso modello e con lo stesso codice, la distanza fra ciò che un sistema di rilevamento delle cadute dichiara e ciò che fa. È l'osservazione da cui questo lavoro è nato, qui quantificata --- e la forma che assume, capacità discriminativa conservata e calibrazione perduta, dice quale delle due si possa ragionevolmente correggere.
+
+Ne discendono due indicazioni operative, indipendenti fra loro e quindi sommabili:
+
+\begin{enumerate}
+\item \textbf{Sulla soglia:} serve una calibrazione che non richieda cadute etichettate — per esempio fissandola su un percentile delle probabilità osservate durante le prime ore di funzionamento ordinario. È l'unica via percorribile in assenza di verità di riferimento.
+\item \textbf{Sul punto di vista:} o si prescrive l'inquadratura come parte dell'installazione, oppure si addestra su una molteplicità di viste. La seconda è misurata come efficace, e la sintesi di viste per riproiezione dello scheletro ne è l'estensione naturale.
+\end{enumerate}
+
+\paragraph{Limiti.} Un solo dataset di destinazione: con due ambienti non si distingue ancora ciò che è specifico di quel dataset da ciò che varrebbe per qualunque ambiente nuovo. La soglia ottima è inoltre scelta sullo stesso insieme su cui è misurata, quindi $0{,}612$ è un limite superiore ottimistico — utile a separare le due componenti del divario, non una prestazione ottenibile.

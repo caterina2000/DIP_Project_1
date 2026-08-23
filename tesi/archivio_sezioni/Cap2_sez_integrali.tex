@@ -1,0 +1,301 @@
+% =====================================================================
+%  Sezione 2.6 — Grandezze integrali: accumulare invece di derivare
+%  Segue la sezione sulle tre rappresentazioni geometriche (A1, A2, A3)
+%  e precede quella sull'altezza dal pavimento.
+% =====================================================================
+
+\section{Grandezze integrali: accumulare invece di derivare}
+\label{sec:integrali}
+
+Le tre rappresentazioni descritte finora contengono, accanto alle grandezze
+statiche, alcune grandezze dinamiche: velocità del bacino, velocità della testa,
+variazione dell'angolo del tronco. Sono le grandezze che dovrebbero distinguere
+una caduta da un cambio di postura controllato, perché la differenza fra i due
+eventi è per sua natura dinamica.
+
+Questa sezione mostra che, calcolate come derivate istantanee, quelle grandezze
+non svolgono il ruolo che dovrebbero, e propone una formulazione alternativa.
+
+\subsection{Il modello non usava la dinamica}
+
+L'osservazione da cui parte l'analisi è sperimentale. Verificando il
+comportamento del classificatore sulle registrazioni domestiche, è emerso che
+esso assegnava punteggio elevato anche a corpi \emph{completamente immobili}, e
+che la correlazione fra il punteggio prodotto e il movimento effettivamente
+presente nella finestra era pari a $+0{,}139$, cioè praticamente nulla.
+
+Il modello, in altre parole, aveva imparato una scorciatoia posturale: un tronco
+orizzontale implicava una caduta, indipendentemente da come il corpo fosse
+arrivato in quella configurazione. È una regola perfetta su un dataset in cui
+nessuno si sdraia mai su un divano, e sbagliata in una casa vera.
+
+La prima ipotesi era che il difetto fosse del classificatore. La verifica ha
+mostrato che il difetto era \emph{a monte}, nelle grandezze che gli venivano
+fornite.
+
+\subsection{Perché derivare amplifica il rumore}
+
+I \emph{landmark} non sono misure dirette del corpo ma stime prodotte dal
+\emph{pose estimator}, e come tali sono affette da rumore. Una velocità
+calcolata come differenza fra fotogrammi consecutivi,
+
+\[
+v(t)=\frac{x(t)-x(t-1)}{\Delta t},
+\]
+
+divide la differenza fra \emph{due stime rumorose} per un intervallo di tempo
+piccolo. Se ciascuna stima ha un errore di deviazione standard $\sigma$, la
+differenza ne ha $\sigma\sqrt{2}$, e la divisione per $\Delta t = 1/\text{fps}$
+la moltiplica per il frame rate. A 18 fotogrammi al secondo, l'errore sulla
+velocità è quindi circa venticinque volte quello sulla posizione.
+
+La derivazione, in sostanza, è un'operazione che amplifica le alte frequenze —
+ed è esattamente lì che vive il rumore dello stimatore di posa.
+
+\subsection{Una misura del fenomeno: l'autocorrelazione a un passo}
+
+Per quantificare quanto di ciascuna grandezza sia segnale e quanto rumore è
+stata misurata l'\textbf{autocorrelazione a un passo}, cioè la correlazione fra
+il valore della grandezza al fotogramma $t$ e il suo valore al fotogramma
+$t-1$:
+
+\[
+\rho_1 = \frac{\operatorname{Cov}\big(x_t,\,x_{t-1}\big)}
+              {\sigma_{x_t}\,\sigma_{x_{t-1}}}.
+\]
+
+L'idea è che un segnale fisico vero cambia con continuità e quindi è molto
+correlato con sé stesso da un fotogramma al successivo; un rumore bianco non lo
+è affatto. I valori misurati sono riportati in
+Tabella~\ref{tab:autocorrelazione}.
+
+\begin{table}[ht]
+\centering
+\caption{Autocorrelazione a un passo delle grandezze dinamiche, misurata sui
+fotogrammi con posa valida di UP-Fall.}
+\label{tab:autocorrelazione}
+\begin{tabular}{lc}
+\hline
+\textbf{Grandezza} & $\boldsymbol{\rho_1}$ \\
+\hline
+\multicolumn{2}{l}{\emph{derivate istantanee}} \\
+\quad Variazione dell'angolo del tronco & 0,176 \\
+\quad Energia del corpo & 0,228 \\
+\quad Velocità del bacino & 0,322 \\
+\quad Velocità della testa & 0,438 \\
+\hline
+\multicolumn{2}{l}{\emph{grandezze integrali}} \\
+\quad Escursione del tronco & 0,916 \\
+\quad Percorso del bacino & 0,939 \\
+\quad Discesa del bacino & 0,911 \\
+\hline
+\end{tabular}
+\end{table}
+
+Il contrasto è netto: le derivate stanno fra $0{,}18$ e $0{,}44$, le grandezze
+integrate fra $0{,}91$ e $0{,}94$.
+
+È però necessaria una precisazione, perché l'autocorrelazione non è una prova
+sufficiente. Un valore basso non dimostra da solo che una grandezza sia rumore,
+così come un valore alto non dimostra che sia informativa per il
+riconoscimento; e una grandezza ottenuta integrando su un intervallo tende
+\emph{per costruzione} a essere più regolare nel tempo. L'autocorrelazione va
+quindi usata come \textbf{spiegazione del fenomeno}, non come sua
+dimostrazione. La dimostrazione è il comportamento discriminativo, riportato
+nel Capitolo~\ref{cap:sperimentale}.
+
+\subsection{La formulazione integrale}
+
+L'alternativa alla derivazione è l'\textbf{accumulazione}: invece di misurare
+quanto il tronco ruota \emph{adesso}, si misura di quanto ha ruotato \emph{in
+tutto} nell'ultimo mezzo secondo. È una descrizione più fedele al fenomeno,
+perché una caduta \emph{è} un'escursione, e produce grandezze che variano
+lentamente invece di oscillare a ogni fotogramma.
+
+È necessario però dichiarare subito che cosa questa formulazione \textbf{non}
+fa, perché l'intuizione naturale è sbagliata e conduce a una conclusione
+errata. Si sarebbe tentati di affermare che accumulando il rumore si cancella,
+poiché un errore a media nulla sommato su molti fotogrammi tende a zero.
+L'argomento vale per una somma di incrementi \emph{con segno}, ma le tre
+grandezze qui introdotte non lo sono:
+
+\begin{itemize}
+    \item il \emph{percorso} è una somma di valori assoluti, e i valori assoluti
+          non si cancellano mai;
+    \item l'\emph{escursione} è una differenza fra massimo e minimo, e il rumore
+          allarga l'intervallo;
+    \item la \emph{discesa} è uno scarto dal massimo recente, e il rumore
+          abbassa il minimo.
+\end{itemize}
+
+Tutte e tre sono quindi funzioni \textbf{monotone crescenti} del rumore. Ciò che
+le rende preferibili alle derivate non è la robustezza, ma la
+\textbf{regolarità}: variano lentamente per costruzione, e non presentano le
+discontinuità che rendono le derivate quasi indistinguibili dal rumore di
+fondo. La Sezione~\ref{sec:rumore-int} misura fin dove questa distinzione
+regge.
+
+Sono state quindi introdotte tre grandezze integrali, calcolate su una finestra
+mobile di $K$ fotogrammi e mai divise per $\Delta t$. Detta $\theta_t$ la
+sequenza dell'angolo del tronco e $(x_t, y_t)$ quella della posizione del punto
+seguito, normalizzata da una scala $s$ che rende le grandezze adimensionali:
+
+\begin{align}
+\text{escursione}_t &= \max_{\tau \in W} \theta_\tau
+                     - \min_{\tau \in W} \theta_\tau
+                     \label{eq:escursione}\\[4pt]
+\text{percorso}_t   &= \frac{1}{s}\sum_{\tau \in W}
+                       \sqrt{(x_\tau - x_{\tau-1})^2 + (y_\tau - y_{\tau-1})^2}
+                     \label{eq:percorso}\\[4pt]
+\text{discesa}_t    &= \frac{1}{s}\Big( y_t - \min_{\tau \in W} y_\tau \Big)
+                     \label{eq:discesa}
+\end{align}
+
+dove $W = \{t-K+1,\dots,t\}$ è la finestra di accumulazione. Le tre grandezze
+rispondono a tre domande diverse: di quanto il tronco ha ruotato in tutto,
+quanta strada ha percorso il corpo, e di quanto è sceso rispetto al punto più
+alto raggiunto di recente.
+
+La normalizzazione $s$ è la lunghezza del tronco per le rappresentazioni
+riferite al corpo e l'asse maggiore dell'ellisse per quella basata su PCA:
+senza di essa il percorso sarebbe espresso in pixel e dipenderebbe dalla
+distanza dalla telecamera.
+
+\subsection{Il vincolo di causalità}
+
+Una precisazione implementativa che ha conseguenze pratiche importanti.
+
+Le equazioni~\eqref{eq:escursione}--\eqref{eq:discesa} si possono calcolare in
+due modi. Il primo è applicare una funzione di finestra mobile a un file di
+feature già completo, quindi \emph{a registrazione conclusa}. È il modo più
+semplice, e produce esattamente gli stessi numeri per un'analisi fuori linea.
+
+Il secondo è mantenere un \textbf{buffer circolare} degli ultimi $K$
+fotogrammi e aggiornarlo a ogni nuovo campione. È il modo più laborioso, ed è
+l'unico compatibile con il funzionamento su dispositivo: la board riceve un
+fotogramma e deve decidere, il video intero non lo possiede.
+
+La distinzione non è formale. In una versione precedente di questo lavoro le
+grandezze integrali erano calcolate nel primo modo, ed è la ragione per cui non
+sono mai arrivate sul dispositivo: i risultati che le riguardavano erano tutti
+calcoli fuori linea, mentre il sistema installato utilizzava la sola
+rappresentazione senza integrali. Nell'implementazione attuale il motore
+geometrico mantiene il buffer, e le stesse grandezze si calcolano identiche
+fuori linea e in tempo reale.
+
+Il costo è un ritardo di riscaldamento: nei primi $K$ fotogrammi dopo l'avvio
+il buffer non è pieno e i valori non sono affidabili. Con $K = 31$ a 18
+fotogrammi al secondo, il periodo di riscaldamento è di circa 1,7 secondi, ed è
+dichiarato esplicitamente dal sistema.
+
+\subsection{La scelta di $K$}
+
+La lunghezza della finestra di accumulazione regola un compromesso: un valore
+piccolo mantiene la reattività ma cancella poco rumore, un valore grande
+stabilizza il segnale ma diluisce l'evento in fotogrammi normali.
+
+Il valore adottato è $K = 31$ fotogrammi, pari a circa 1,7 secondi a 18
+fotogrammi al secondo. La scelta non è arbitraria: nel
+Capitolo~\ref{cap:sperimentale} è riportata la scansione su cinque valori, dalla
+quale risulta che il parametro sposta il tasso di falsi allarmi in ambiente
+reale di un fattore undici. È il tipo di parametro che, non dichiarato, rende
+un risultato non riproducibile.
+
+\subsection{Fin dove regge: rumore indipendente e ambiguità di posa}
+\label{sec:rumore-int}
+
+Poiché le tre grandezze crescono con il rumore, è necessario misurare quanto
+questa proprietà le penalizzi in pratica. La verifica è stata condotta
+iniettando rumore gaussiano indipendente sulle coordinate dei \emph{landmark}
+di UP-Fall, con deviazione espressa in frazione della lunghezza del torso, e
+rimisurando la prestazione.
+
+\begin{table}[ht]
+\centering
+\caption{F2 al crescere del rumore iniettato sui \emph{landmark}. Fra parentesi
+la variazione rispetto all'assenza di rumore.}
+\label{tab:rumore}
+\begin{tabular}{lccc}
+\hline
+$\boldsymbol{\sigma}$ & \textbf{senza integrali} & \textbf{con integrali} & \textbf{sottoinsieme scelto} \\
+\hline
+0     & 0,874 & 0,858 & 0,857 \\
+0,005 & 0,863 \,(--0,011) & 0,864 \,(+0,006) & 0,844 \,(--0,012) \\
+0,010 & 0,855 \,(--0,018) & 0,866 \,(+0,008) & 0,863 \,(+0,007) \\
+0,020 & 0,864 \,(--0,010) & 0,846 \,(--0,012) & 0,836 \,(--0,021) \\
+0,040 & 0,863 \,(--0,011) & 0,856 \,(--0,002) & 0,825 \,(--0,031) \\
+\hline
+\end{tabular}
+\end{table}
+
+Il rumore indipendente \textbf{non degrada apprezzabilmente} nessuno dei tre
+insiemi: quadruplicando l'ampiezza rispetto a quella stimata sulle
+registrazioni domestiche, la perdita massima è $0{,}031$, inferiore alla
+dispersione fra soggetti ($\pm 0{,}08$). Le grandezze integrali, in
+particolare, non si degradano più delle derivate.
+
+La spiegazione è che un errore indipendente su ciascun punto e a ciascun
+fotogramma si media comunque, anche attraverso una funzione monotona, perché
+punti diversi sbagliano in direzioni diverse.
+
+\subsubsection*{L'ambiguità di posa}
+
+Il rumore indipendente non è però l'unica modalità di errore dello stimatore,
+e non è quella che si osserva sul campo. In una ripresa domestica in cui il
+soggetto è vicino alla telecamera e con gli arti scorciati verso l'obiettivo,
+lo stimatore non produce oscillazioni casuali: \textbf{alterna fra due
+interpretazioni plausibili della stessa configurazione} --- quale arto sia
+davanti, dove cada il bacino --- e ciascuna interpretazione resta stabile per
+diversi fotogrammi consecutivi.
+
+L'effetto sulle grandezze accumulate è qualitativamente diverso, ed è stato
+misurato:
+
+\begin{table}[ht]
+\centering
+\caption{Escursione del tronco su finestra mobile, in riprese domestiche.}
+\label{tab:ambiguita}
+\begin{tabular}{lcc}
+\hline
+ & \textbf{mediana} & \textbf{massimo} \\
+\hline
+Persona \textbf{ferma} su un divano & 9,0$^\circ$ & \textbf{93,5}$^\circ$ \\
+\textbf{Caduta} reale & 9,0$^\circ$ & 60,7$^\circ$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Una persona immobile produce un'escursione superiore a quella di una caduta.
+Non si tratta di movimento: è la stima che salta fra due configurazioni, e per
+un accumulatore un salto coerente ripetuto è indistinguibile da un movimento
+reale.
+
+Questa è dunque la vulnerabilità effettiva della formulazione integrale, ed è
+diversa da quella che si sarebbe supposta: non il rumore, ma l'ambiguità. La
+difesa non può essere un filtro, perché il segnale spurio è regolare quanto
+quello vero; deve essere un criterio di \textbf{affidabilità della stima}. Lo
+stimatore fornisce una confidenza per ciascun punto --- la stessa grandezza che
+ha rivelato l'occlusione del volto discussa nel
+Capitolo~\ref{cap:sperimentale} --- e quando la confidenza dei punti utilizzati
+cade durante la finestra di accumulazione l'accumulo non è affidabile: il
+sistema deve dichiararlo invece di decidere, come già fa durante il periodo di
+riscaldamento.
+
+\subsection{Cosa sostituiscono}
+
+L'introduzione delle grandezze integrali si accompagna alla rimozione di tre
+grandezze presenti nella formulazione iniziale, denominate \emph{energie} e
+calcolate come somme di quadrati dei contributi dinamici di ciascuna
+rappresentazione.
+
+Il motivo della rimozione è dimensionale: quelle somme sommavano quadrati di
+gradi, di rapporti adimensionali, di pixel e di frazioni di immagine, cioè
+quantità non omogenee. Il risultato non ha un'unità di misura interpretabile, e
+sul dataset presentava rapporti fra valore massimo e mediano dell'ordine di
+$7\cdot10^{5}$. Erano inoltre all'origine della disparità di scala fra le
+grandezze in ingresso, che senza normalizzazione rendeva alcune colonne
+invisibili al modello.
+
+Le grandezze integrali svolgono lo stesso ruolo — riassumere il contenuto
+dinamico di una finestra in un numero — ma sono dimensionalmente coerenti,
+normalizzate rispetto a una scala corporea e interpretabili singolarmente.

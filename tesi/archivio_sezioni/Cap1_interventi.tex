@@ -1,0 +1,121 @@
+% =====================================================================
+%  Capitolo 1 — blocchi da sostituire e da inserire
+%
+%  Non e' un capitolo nuovo: sono i quattro interventi puntuali sul
+%  Cap1.tex esistente. Ogni blocco riporta il testo attuale in commento
+%  e la versione proposta sotto.
+% =====================================================================
+
+
+% ---------------------------------------------------------------------
+% INTERVENTO 1 — nuova sottosezione, da inserire alla fine di
+% "Sfide in scenari reali", prima di "Obiettivi".
+%
+% Motivo: il capitolo elenca domain shift e occlusioni, ma non il
+% problema che in pratica fa fallire i sistemi installati e che il
+% capitolo sperimentale misura.
+% ---------------------------------------------------------------------
+
+\subsection{La prevalenza dell'evento e il costo dei falsi allarmi}
+
+Un terzo problema, meno discusso in letteratura ma decisivo nella pratica,
+riguarda la frequenza dell'evento da rilevare.
+
+Nei dataset di riferimento le cadute sono abbondanti per costruzione: in
+UP-Fall, che è l'archivio utilizzato in questo lavoro, le finestre temporali
+contenenti una caduta o una condizione post-caduta sono circa il 12\% del
+totale. È una proporzione necessaria per addestrare un classificatore, ma non ha
+alcun rapporto con la realtà di un'abitazione, dove una persona anziana cade
+mediamente una o due volte l'anno.
+
+Lo squilibrio si traduce in un vincolo progettuale stringente. Un sistema che
+produce una decisione ogni frazione di secondo compie, nell'arco di un anno,
+alcune decine di milioni di valutazioni, delle quali soltanto qualche decina
+corrisponde a un evento reale. A parità di specificità, lo stesso modello che
+sul dataset appare accurato può quindi produrre in ambiente domestico un numero
+di falsi allarmi di diversi ordini di grandezza superiore a quello tollerabile.
+
+Il riferimento pratico è severo. Gli studi longitudinali su installazioni
+funzionanti riportano tassi dell'ordine di $0{,}05$ eventi di falso allarme per
+ora di utilizzo \cite{bagala2012, palmerini2015}, e il criterio clinicamente
+accettabile è di uno o due episodi alla settimana. Un sistema che superi
+sistematicamente questa soglia viene disattivato dall'utente, e la sua
+sensibilità nominale diventa irrilevante.
+
+Ne segue che la valutazione di un sistema di rilevamento non può limitarsi alle
+metriche di classificazione calcolate sul dataset. Occorre distinguere fra le
+\emph{prestazioni del classificatore}, misurate per finestra temporale, e le
+\emph{prestazioni del sistema}, misurate in termini di eventi di allarme per
+unità di tempo — grandezze che, come mostrato nel
+Capitolo~\ref{cap:sperimentale}, differiscono fra loro di quasi due ordini di
+grandezza.
+
+
+% ---------------------------------------------------------------------
+% INTERVENTO 2 — sostituzione del secondo punto dell'elenco in
+% "Obiettivi".
+%
+% TESTO ATTUALE (da rimuovere):
+%   \item \textbf{Classificazione temporale tramite rete leggera}:
+%   analizzare le sequenze di feature tramite una rete ricorrente GRU,
+%   scelta come compromesso tra capacita di modellare dipendenze
+%   temporali e costo computazionale contenuto.
+%
+% Motivo: e' formulato come una scelta di progetto conclusa, mentre il
+% capitolo sperimentale mostra che l'architettura non e' distinguibile
+% da nessun'altra e che il sistema installato usa un classificatore
+% diverso. Il lettore troverebbe smentita una promessa del Capitolo 1.
+% ---------------------------------------------------------------------
+
+\item \textbf{Classificazione temporale tramite rete leggera}: analizzare le
+sequenze di grandezze tramite una rete ricorrente GRU, adottata come
+\emph{ipotesi di lavoro}. L'ipotesi è che una rete ricorrente compatta sia in
+grado di modellare le dipendenze temporali dell'evento a un costo compatibile
+con l'esecuzione su dispositivo. La verifica sperimentale di questa ipotesi, e
+il suo esito, sono oggetto del Capitolo~\ref{cap:sperimentale}.
+
+
+% ---------------------------------------------------------------------
+% INTERVENTO 3 — integrazione del primo punto dei requisiti in
+% "Requisiti di un sistema automatico di fall detection".
+%
+% TESTO ATTUALE (da sostituire):
+%   \item In primo luogo deve essere in grado di rilevare in maniera
+%   tempestiva gli eventi critici, generando alert quando viene
+%   individuata una caduta.
+%
+% Motivo: il requisito e' qualitativo e non fornisce un metro con cui
+% il capitolo sperimentale possa misurarsi.
+% ---------------------------------------------------------------------
+
+\item In primo luogo deve rilevare tempestivamente gli eventi critici,
+generando un allarme quando viene individuata una caduta, e deve farlo senza
+produrre un numero di segnalazioni improprie tale da comprometterne
+l'accettabilità. I due requisiti sono in tensione e vanno dichiarati insieme:
+in un contesto \emph{safety-critical} un mancato rilevamento è l'errore più
+grave, ma un sistema che segnali ripetutamente eventi inesistenti viene
+disattivato, e la sua sensibilità nominale perde ogni valore. Il riferimento
+adottato in questo lavoro è quello degli studi su installazioni reali
+funzionanti, dell'ordine di $0{,}05$ eventi di falso allarme per ora.
+
+
+% ---------------------------------------------------------------------
+% INTERVENTO 4 — aggiunta alla fine di "Conseguenze cliniche ed
+% esistenziali", dopo il paragrafo sulla long-lie syndrome.
+%
+% Motivo: la long-lie syndrome e' gia' citata, ma il capitolo non trae
+% la conseguenza progettuale che il capitolo sperimentale utilizza.
+% Piantare qui il seme rende leggibile la struttura a due vie descritta
+% nelle conclusioni.
+% ---------------------------------------------------------------------
+
+Questa osservazione ha una conseguenza progettuale che sarà ripresa nel seguito.
+L'evento da rilevare si compone infatti di due fasi distinte: la \emph{caduta}
+propriamente detta, che dura pochi secondi, e la \emph{permanenza a terra}, che
+può durare ore ed è la fase clinicamente determinante. Le due fasi hanno
+proprietà molto diverse dal punto di vista del riconoscimento automatico — la
+prima è una transizione dinamica, la seconda una condizione statica — e la
+scelta di quale delle due il sistema debba riconoscere non è neutra. Il
+Capitolo~\ref{cap:sperimentale} mostra che questa scelta produce sull'esito
+finale un effetto superiore a quello di qualunque altra variabile considerata in
+questo lavoro.

@@ -1,0 +1,164 @@
+\chapter{Il problema, e perché i numeri pubblicati non lo descrivono}
+\label{cap:contesto}
+
+% ---------------------------------------------------------------------
+% RISCRITTURA DEL 2026-08-18. Cosa cambia rispetto alla versione
+% precedente, e perche':
+%
+%  1. I dati ISTAT/PASSI sono stati INCORPORATI (stavano solo in
+%     Cap1_sez1_proposta.tex, mai unito). Il 60% delle cadute in casa e'
+%     il ponte logico verso il Cap. 6: senza, la scelta di validare in
+%     abitazioni private sembra dettata dalla comodita'.
+%
+%  2. TOLTA l'anticipazione dei risultati, spostata in Introduzione.tex.
+%     Stava qui, e ricompariva identica nel Cap. 6 e nel Cap. 7: il
+%     lettore arrivava al capitolo che fa il lavoro avendone gia' sentito
+%     due volte la conclusione. REGOLA: questo capitolo puo' dire "l'esito
+%     e' nel Capitolo X", non puo' dire il numero.
+%
+%  3. CORRETTO "cinque soggetti, nel caso di UP-Fall\cite{upfall}": il
+%     paper citato ne dichiara 17. Cinque sono quelli usati qui.
+%
+%  4. Il segnaposto {liu} e' sostituito da {omnifall}, che e' verificato
+%     e dice molto di piu'. Restano segnaposto {asif}, {zobi}, {gazem}:
+%     le frasi sono state riscritte in modo da reggere anche senza, ma
+%     vanno completate o tolte prima della consegna.
+%
+%  5. TOLTA la "catena di elaborazione" in quattro stadi: era metodo, e
+%     il Cap. 2 la rifa' per esteso. Restano due righe.
+%
+%  6. L'auto-occlusione non e' piu' presentata come proprieta' del
+%     problema: EXP-052 ha misurato che su MediaPipe non si verifica.
+% ---------------------------------------------------------------------
+
+\section{Il problema clinico}
+\label{sec:problema-clinico}
+
+Al 1\textsuperscript{o} gennaio 2026 le persone di età pari o superiore a 65 anni rappresentano il 25,1\% della popolazione italiana~\cite{istat2026}. Su questa fascia la sorveglianza \emph{PASSI d'Argento} dell'Istituto Superiore di Sanità rileva che il \textbf{20\% ha riferito almeno una caduta} nei dodici mesi precedenti l'intervista, e il 6\% nei soli trenta giorni precedenti~\cite{passi}.
+
+Il rischio non è distribuito in modo uniforme. Cresce marcatamente con l'età --- dal 16\% nella fascia 65--74 anni al \textbf{33\% oltre gli 85} --- ed è più alto fra le donne (25\% contro 16\%) e fra chi dichiara difficoltà economiche (30\% contro 19\%)~\cite{passi}. La popolazione più esposta è quindi anche quella con meno risorse per proteggersi, e il costo di un eventuale sistema di monitoraggio non è un dettaglio commerciale: è parte del problema clinico.
+
+\subsection{Dove si cade}
+
+Il dato che orienta la progettazione non è quanto spesso si cada, ma \emph{dove}. Le cadute degli anziani avvengono in larga maggioranza \textbf{nell'abitazione}: il 60\%, contro il 19\% in strada, l'11\% in giardino e il 10\% altrove~\cite{passi}.
+
+È una proporzione che sposta il problema. Un sistema pensato per il reparto ospedaliero copre una frazione minoritaria degli eventi, e lo fa nell'ambiente in cui il soccorso è comunque più rapido perché il personale è presente. \textbf{L'abitazione è insieme il luogo dove si cade di più e quello dove può non esserci nessuno ad accorgersene}, ed è la ragione per cui la validazione sperimentale di questo lavoro (Capitolo~\ref{cap:campo}) è stata condotta in case private e non in struttura.
+
+\subsection{Perché il tempo conta più dell'impatto}
+
+Il \textbf{14\% delle cadute richiede almeno un giorno di ricovero}~\cite{passi}, e fra i ricoveri per incidente domestico nella popolazione anziana la frattura di femore è la diagnosi più frequente: il 46,5\% nei maschi e il 55,3\% nelle femmine. Al costo sanitario diretto si somma quello, più difficile da quantificare, della perdita di autonomia: una frattura di femore in età avanzata comporta spesso una riduzione permanente della mobilità.
+
+Ma la grandezza su cui un sistema automatico può davvero incidere è un'altra. L'impossibilità di garantire un monitoraggio continuo produce il fenomeno delle cadute non assistite e della \emph{long-lie syndrome}, associata a complicanze sistemiche gravi quali ipotermia, disidratazione e danno muscolare. Il danno non dipende soltanto dalla caduta in sé ma dal \textbf{tempo} che la persona trascorre a terra prima del soccorso --- minuti in struttura, potenzialmente ore per chi vive solo.
+
+Questa osservazione ha una conseguenza progettuale che sarà ripresa nel seguito.
+L'evento da rilevare si compone infatti di due fasi distinte: la \emph{caduta}
+propriamente detta, che dura pochi secondi, e la \emph{permanenza a terra}, che
+può durare ore ed è la fase clinicamente determinante. Le due fasi hanno
+proprietà molto diverse dal punto di vista del riconoscimento automatico --- la
+prima è una transizione dinamica, la seconda una condizione statica --- e la
+scelta di quale delle due il sistema debba riconoscere non è neutra. Il
+Capitolo~\ref{cap:risultati} mostra che questa scelta produce sull'esito finale
+un effetto superiore a quello di qualunque altra variabile considerata in questo
+lavoro.
+
+Questa osservazione ha una conseguenza operativa che attraversa tutto l'elaborato: un sistema che rileva una caduta con novanta secondi di ritardo non risolve il problema per cui è stato costruito. Per questa ragione il Capitolo~\ref{cap:campo} misura esplicitamente il \emph{ritardo} di rilevamento, e non soltanto se l'allarme arrivi.
+
+\section{Le soluzioni esistenti e il loro limite}
+\label{sec:soluzioni}
+
+I sistemi di \emph{Ambient Assisted Living} (AAL) mirano a fornire un'infrastruttura di monitoraggio autonoma. Storicamente lo stato dell'arte si è basato su sensori indossabili quali accelerometri e giroscopi, che hanno il vantaggio di misurare direttamente l'accelerazione del corpo.
+
+Presentano però criticità difficilmente superabili nei contesti reali. Richiedono una ricarica costante e, soprattutto, dipendono dalla \emph{compliance} del paziente~\cite{gazem}: in soggetti affetti da deterioramento cognitivo il rifiuto o la dimenticanza nell'indossare il sensore vanifica l'intera architettura di sicurezza. È un limite che agisce in modo perverso, perché colpisce con maggiore probabilità proprio la popolazione più esposta al rischio.
+
+La ricerca si è quindi orientata verso soluzioni basate su visione artificiale con telecamere RGB. L'ottica ambientale risolve il problema dell'intrusività fisica --- nulla da indossare, nulla da ricaricare --- ma ne introduce uno normativo severo: la tutela della riservatezza secondo il GDPR, e l'inopportunità di trasmettere flussi video continui, contenenti dati biometrici, verso server centralizzati.
+
+\section{Posa come filtro di anonimizzazione}
+\label{sec:privacy}
+
+Questo lavoro affronta la tensione fra utilità e riservatezza adottando un approccio \emph{privacy-by-design} basato sulla \emph{pose estimation}. Invece di classificare i fotogrammi con una rete convoluzionale, il sistema interpone uno stimatore di posa che riduce ogni immagine a un insieme di coordinate di giunti: MediaPipe~\cite{mediapipe}, che restituisce 33 \emph{landmark} corporei.
+
+L'operazione agisce come un \textbf{filtro irreversibile}: texture, abbigliamento, volto e sfondo vengono scartati alla fonte, e ciò che raggiunge il classificatore non permette di risalire all'aspetto della persona. L'astrazione trasforma inoltre un problema di elaborazione di immagini in un problema di analisi cinematica di serie temporali, con due vantaggi collaterali --- la riduzione della dimensionalità e l'interpretabilità delle grandezze --- discussi nel Capitolo~\ref{cap:metodologia}.
+
+Alla proprietà di riservatezza se ne accompagna una statistica: le rappresentazioni basate sulla posa sono in larga misura invarianti alle caratteristiche estetiche del soggetto~\cite{asif}, il che riduce il rischio che il modello apprenda l'aspetto delle persone osservate invece del movimento.
+
+Va sottolineato che non si tratta di una dichiarazione di principio ma di una proprietà architetturale \textbf{verificabile}, e nel Capitolo~\ref{cap:campo} viene messa alla prova nel modo più diretto: durante le sessioni in abitazione il sistema registra in modo continuo soltanto posa e feature, mentre le immagini vengono conservate esclusivamente in una finestra di pochi secondi attorno agli allarmi. La scelta dello stimatore, peraltro, non è vincolata a questo argomento: il Capitolo~\ref{cap:edge} ne valuta un secondo, YOLOv8-pose~\cite{yolopose}, ed entrambi condividono la proprietà che qui interessa.
+
+\section{Perché i risultati pubblicati non descrivono il problema}
+\label{sec:divario}
+
+Sui dataset controllati la letteratura riporta accuratezze elevatissime: un'architettura che combina reti convoluzionali temporali e un \emph{encoder} basato su attenzione raggiunge il 99,58\% sulla vista frontale di UP-Fall e il 98,75\% su quella laterale~\cite{tcnte}, mentre un modello a grafo su tre flussi supera il 94\% medio su UR-Fall e UP-Fall~\cite{gcn3stream}.
+
+Il comportamento in ambiente reale è sensibilmente diverso. La discrepanza ha quattro origini distinte, che conviene tenere separate perché richiedono rimedi diversi.
+
+\subsection{Il protocollo di valutazione}
+
+Molti risultati pubblicati sono ottenuti partizionando i dati in modo casuale fra addestramento e verifica. Quando il dataset conta pochi soggetti, una partizione casuale colloca \emph{ogni} soggetto sia in addestramento sia in verifica, e il modello viene valutato su persone che ha già visto.
+
+Scheurer et al.~\cite{scheurer} mostrano che ottimizzare per utenti noti e per utenti sconosciuti sono problemi distinti, con divari che superano i venti punti di accuratezza sugli stessi dati. Un sistema destinato all'abitazione di una persona che non ha contribuito ai dati di addestramento deve essere valutato nel secondo modo, e il Capitolo~\ref{cap:protocollo} è dedicato interamente a costruire un protocollo che lo faccia.
+
+\subsection{Le cadute recitate}
+
+La seconda origine è più profonda e non si risolve con un protocollo migliore. Quasi tutti i dataset disponibili --- UP-Fall~\cite{upfall}, UR-Fall~\cite{urfall} --- contengono cadute \emph{recitate} da volontari sani su materassi.
+
+Bagalà et al.~\cite{bagala}, nel primo studio sistematico condotto su un archivio di ventinove cadute reali, hanno confrontato tredici algoritmi pubblicati e misurato una sensibilità media del $57{,}0\% \pm 27{,}3$, contro il 76--100\% che gli stessi algoritmi dichiaravano su cadute simulate. Nello stesso studio i falsi allarmi in ventiquattro ore di monitoraggio variavano da cinque a ottantacinque a seconda dell'algoritmo.
+
+Il fenomeno è stato riconfermato di recente e su scala molto maggiore. Il benchmark OmniFall~\cite{omnifall} unifica otto dataset pubblici --- fra cui UP-Fall --- per circa ottanta ore annotate a livello di fotogramma, e li confronta con un insieme di cadute vere riprese fuori dal laboratorio. Un modello addestrato su UP-Fall passa da un F1 del 72,9\% in dominio al \textbf{16,9\%} sulle cadute reali; su Le2i il crollo è dal 100\% al 58,8\%. Gli autori identificano inoltre il collo di bottiglia in una distinzione precisa: quella fra chi è \emph{caduto} e chi è semplicemente \emph{disteso}, che i modelli confondono sistematicamente. È un'osservazione che il Capitolo~\ref{cap:campo} ritroverà per via sperimentale e indipendente.
+
+È un limite che questo lavoro condivide e che va dichiarato: anche le cadute raccolte nelle sessioni del Capitolo~\ref{cap:campo} sono recitate. Nessuno studio della durata di pochi giorni può misurare cadute accidentali, dato che una persona anziana cade mediamente meno di una volta all'anno.
+
+\subsection{La frequenza di base in esercizio continuo}
+\label{sec:falsiallarmi}
+
+C'è una terza origine, meno discussa delle prime due e più decisiva di entrambe per la sorte pratica di un sistema installato.
+
+Le metriche di laboratorio sono calcolate su insiemi di verifica in cui le cadute costituiscono una frazione consistente dei campioni. In esercizio continuo la proporzione è di un altro ordine: una persona anziana cade mediamente meno di una volta all'anno, mentre il sistema valuta diverse finestre al secondo, ininterrottamente.
+
+La conseguenza è aritmetica prima che sperimentale. Una precision del 90\% misurata in laboratorio non si trasferisce, perché il denominatore cambia di ordini di grandezza: anche un tasso di falsi positivi apparentemente trascurabile produce decine di allarmi inutili al giorno in funzionamento continuo~\cite{gallery}.
+
+I valori riportati per installazioni reali danno la misura della soglia di accettabilità. Uno studio su una galleria espositiva riporta circa \textbf{0,4 allarmi all'ora} nelle ore di maggiore affluenza, causati in prevalenza da visitatori accovacciati o inginocchiati per fotografare~\cite{gallery}; in una raccolta di ventisette giorni in due strutture per anziani il tasso risulta dello 0,00126\%. Sono numeri che nessuna metrica calcolata su un insieme di verifica bilanciato può predire, e che decidono se un sistema resti acceso oppure venga spento dopo pochi giorni.
+
+Ne segue una distinzione che questo lavoro adotta per tutto il seguito. Le
+\emph{prestazioni del classificatore} si misurano per finestra temporale e
+rispondono alla domanda se il modello sappia riconoscere una caduta; le
+\emph{prestazioni del sistema} si misurano in eventi di allarme per unità di
+tempo e rispondono alla domanda se un'installazione resti accesa. Non sono la
+stessa grandezza espressa in due modi: il Capitolo~\ref{cap:campo} mostra che
+sulle stesse registrazioni differiscono di quasi due ordini di grandezza, e che
+la seconda non è ricavabile dalla prima.
+
+\subsection{Le due cause geometriche}
+
+Alle tre origini precedenti se ne aggiungono due di natura \textbf{geometrica}, che costituiscono il perimetro di indagine sperimentale della tesi.
+
+\paragraph{Il punto di vista.} Il posizionamento della telecamera altera la proiezione dei \emph{landmark} sul piano immagine, e con essa il calcolo delle derivate cinematiche. Una telecamera zenitale o fortemente inclinata comprime la rotazione del tronco lungo l'asse ottico: una persona eretta e una distesa si proiettano in modo simile, e l'informazione che distingue una caduta viene cancellata dall'ottica prima ancora che un modello possa elaborarla.
+
+L'entità del fenomeno è documentata e severa. Alanazi et al.~\cite{vira} riportano un modello a grafo che raggiunge il 99,81\% di accuratezza sul proprio dominio di addestramento e scende a circa il 50\%, con un F1 dell'1,38\%, su un archivio diverso. Non è un degrado: è il collasso della capacità di rilevare l'evento. Gli stessi autori mostrano che il divario si recupera quasi interamente sintetizzando punti di vista artificiali --- ventisette per sequenza, ottenuti ruotando lo scheletro --- riportando l'accuratezza fuori dominio al 99,2--99,4\%.
+
+Su quest'ultimo risultato va però registrata una riserva, perché condiziona l'uso che se ne può fare: ruotare uno scheletro produce le \emph{coordinate} di un punto di vista nuovo, non la degradazione di confidenza che quel punto di vista causerebbe realmente, e in presenza di auto-occlusioni in direzioni diverse lo scheletro trasformato non ne riproduce fedelmente le condizioni di osservazione.
+
+\paragraph{Le occlusioni.} Negli ambienti domestici e clinici i pazienti raramente cadono in campo aperto: la presenza di mobilio genera occlusioni parziali, e gli stimatori di posa tendono a produrre coordinate instabili quando non rilevano un segmento corporeo, inquinando il vettore delle feature~\cite{zobi}.
+
+A questa si affianca un'occlusione meno ovvia, che il corpo produce su sé stesso: quando il soggetto è a terra il volto è girato di lato, rivolto verso il basso o coperto dal braccio. Il Capitolo~\ref{cap:risultati} misura entrambe, e mostra che la seconda dipende in modo determinante da \emph{quale} stimatore di posa si adotti --- il che la rende una proprietà dello strumento e non del problema.
+
+\section{Ipotesi e obiettivi}
+\label{sec:obiettivi}
+
+Il lavoro parte da un prototipo sviluppato in una fase precedente, costruito attorno a un'architettura ibrida: una rete ricorrente GRU alimentata da feature geometriche e cinematiche ispirate a grandezze fisiche. L'obiettivo dell'elaborato è portare quel prototipo a un sistema \emph{valutabile} --- non tanto più accurato, quanto misurato in condizioni che permettano di dire qualcosa sul suo comportamento reale.
+
+L'ipotesi che orienta il lavoro è economica prima che tecnica. Un sistema di rilevamento cadute utile è un sistema che si può installare in molte stanze, e il costo per stanza ne determina la diffusione più della sua accuratezza --- tanto più data la correlazione fra rischio di caduta e difficoltà economiche osservata nella sezione~\ref{sec:problema-clinico}. L'ipotesi da verificare è che un dispositivo \emph{edge} da poche decine di euro, affiancato a una telecamera USB, basti a eseguire l'intera catena in tempo reale, rendendo superflui sia un server con GPU sia la trasmissione dei dati fuori dall'abitazione. Se regge, il costo dell'infrastruttura crolla e con esso la barriera all'adozione; se non regge, è utile sapere \emph{dove} si rompe.
+
+Da qui i tre obiettivi specifici.
+
+\begin{enumerate}
+
+\item \textbf{Costruire un protocollo di valutazione difendibile} per un dataset con pochi soggetti, e misurare quanto i risultati cambino applicandolo. Comprende validazione \emph{leave-one-subject-out}, normalizzazione stimata sui soli dati di addestramento, insieme di validazione separato da quello di verifica, e soglia decisionale scelta sul validation massimizzando una metrica dichiarata a priori.
+
+\item \textbf{Quantificare il degrado di generalizzazione} con due verifiche complementari, che rispondono a domande diverse e vanno lette insieme. La prima è \emph{cross-view}: addestramento su una telecamera, verifica su una seconda che riprende le stesse azioni negli stessi istanti. Varia una sola grandezza, quindi il degrado è attribuibile con certezza. La seconda è \emph{cross-dataset}: il sistema installato sul dispositivo, applicato a un secondo archivio pubblico registrato altrove. Qui cambia tutto insieme e nessuna causa è isolabile, ma è la condizione che un sistema incontra davvero. La prima dice \emph{perché} il sistema si degrada, la seconda \emph{quanto}.
+
+\item \textbf{Portare l'intera catena su un nodo edge}, caratterizzarne il costo computazionale fase per fase, e verificare a parità di protocollo le scelte architetturali del prototipo --- la rete ricorrente, la rappresentazione delle feature, la dimensione del modello, il \emph{frame rate} --- invece di assumerle.
+
+\end{enumerate}
+
+A questi se ne è aggiunto un quarto, non previsto in partenza e imposto dai dati: \textbf{misurare il tasso di falsi allarmi in funzionamento continuo} in un'abitazione reale. È la grandezza che decide se un sistema di questo tipo resti acceso oppure venga spento dopo pochi giorni, e nessuna delle metriche calcolate su un insieme di verifica bilanciato la predice. La sua indagine ha prodotto il risultato che l'Introduzione anticipa e che il Capitolo~\ref{cap:campo} stabilisce.
+
+\paragraph{Una scelta sui dati, e il suo limite.} Il dataset di riferimento è UP-Fall, che raccoglie 17 soggetti in undici attività~\cite{upfall}. Il lavoro ne impiega \textbf{dieci}. È una limitazione della raccolta condotta qui e non del dataset, e va dichiarata perché condiziona ogni confronto: anche con dieci soggetti la dispersione fra ripetizioni resta dello stesso ordine di molte delle differenze che si vorrebbero misurare, come il Capitolo~\ref{cap:protocollo} argomenta in dettaglio. Il Capitolo~\ref{cap:risultati} ne trae la conseguenza quantitativa: per alcune delle domande poste all\'inizio, il numero di persone necessario a rispondere è di un ordine di grandezza superiore a quello disponibile, e la risposta corretta è dichiararlo invece di produrre un vincitore.

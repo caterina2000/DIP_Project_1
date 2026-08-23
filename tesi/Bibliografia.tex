@@ -1,0 +1,207 @@
+\markboth{Bibliografia}{Bibliografia}
+
+% ---------------------------------------------------------------------
+% NOTA
+% La versione precedente di questo file conteneva 21 riferimenti su
+% geometria tropicale, zonotopi e politopi (Maclagan & Sturmfels,
+% McMullen, Butkovic): la bibliografia di un altro lavoro.
+%
+% Qui restano solo i riferimenti pertinenti. Quelli marcati [DA CERCARE]
+% sono segnaposto: servono a sostenere affermazioni che al momento
+% poggiano solo sui dati sperimentali di questa tesi, e vanno completati
+% con riferimenti reali prima della consegna.
+% ---------------------------------------------------------------------
+
+\begin{thebibliography}{99}
+
+% --- Pose estimation ---
+
+\bibitem{mediapipe} C. Lugaresi, J. Tang, H. Nash, C. McClanahan, E. Uboweja,
+M. Hays, F. Zhang, C.-L. Chang, M. Yong, J. Lee, W.-T. Chang, W. Hua,
+M. Georg, M. Grundmann, {\it MediaPipe: A Framework for Building Perception
+Pipelines}, arXiv:1906.08172, 2019.
+
+\bibitem{yolopose} D. Maji, S. Nagori, M. Mathew, D. Poddar, {\it YOLO-Pose:
+Enhancing YOLO for Multi Person Pose Estimation Using Object Keypoint
+Similarity Loss}, in Proceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition Workshops (CVPRW), 2022, 2637--2646.
+
+% --- Architetture per sequenze temporali ---
+
+\bibitem{gru} K. Cho, B. van Merri\"enboer, C. Gulcehre, D. Bahdanau,
+F. Bougares, H. Schwenk, Y. Bengio, {\it Learning Phrase Representations
+using RNN Encoder-Decoder for Statistical Machine Translation}, in
+Proceedings of EMNLP, 2014, 1724--1734.
+
+\bibitem{lstm} S. Hochreiter, J. Schmidhuber, {\it Long Short-Term Memory},
+Neural Computation, {\bf 9}(8) (1997), 1735--1780.
+
+\bibitem{randomforest} T.-K. Ho, {\it Random Decision Forests}, in
+Proceedings of the 3rd International Conference on Document Analysis and
+Recognition (ICDAR), IEEE, vol. 1, 1995, 278--282.
+
+% --- Dataset ---
+
+\bibitem{urfall} B. Kwolek, M. Kepski, {\it Human fall detection on embedded
+platform using depth maps and wireless accelerometer}, Computer Methods and
+Programs in Biomedicine, {\bf 117}(3) (2014), 489--501.
+
+\bibitem{upfall} L. Mart\'inez-Villase\~nor, H. Ponce, J. Brieva,
+E. Moya-Albor, J. N\'u\~nez-Mart\'inez, C. Pe\~nafort-Asturiano, {\it UP-Fall
+Detection Dataset: A Multimodal Approach}, Sensors, {\bf 19}(9) (2019), 1988.
+
+% --- Validazione: i due riferimenti portanti ---
+% Aggiunti il 2026-08-07, citazioni verificate sulla fonte.
+% Mappa completa in docs/LETTERATURA.md.
+
+\bibitem{bagala} F. Bagal\`a, C. Becker, A. Cappello, L. Chiari, K. Aminian,
+J. M. Hausdorff, W. Zijlstra, J. Klenk, {\it Evaluation of Accelerometer-Based
+Fall Detection Algorithms on Real-World Falls}, PLOS ONE, {\bf 7}(5) (2012),
+e37062.
+% Cap. 6.1-6.2 e Cap. 7.2. Su 29 cadute reali e 13 algoritmi pubblicati, la
+% sensibilita' media crolla a 57,0% +/- 27,3 contro il 76-100% dichiarato su
+% cadute simulate; i falsi allarmi vanno da 5 a 85 al giorno. E' il
+% riferimento che sostiene l'intero Cap. 6 e la dichiarazione, nel Cap. 7,
+% che le nostre cadute sono recitate.
+
+\bibitem{scheurer} S. Scheurer, S. Tedesco, B. O'Flynn, K. N. Brown,
+{\it Comparing Person-Specific and Independent Models on Subject-Dependent and
+Independent Human Activity Recognition Performance}, Sensors, {\bf 20}(13)
+(2020), 3647.
+% Cap. 3.2. Valutare su soggetti noti e su soggetti nuovi sono problemi
+% diversi: 84,0% contro 63,2% su MHEALTH, 79,6% contro 59,2% su PAMAP2,
+% 76,4% contro 47,1% su REALWORLD. Sostiene che il subject leakage e' un
+% problema noto, non una scoperta di questa tesi.
+
+% --- Fall detection basata sulla forma e sulla posa ---
+
+\bibitem{rougier} C. Rougier, J. Meunier, A. St-Arnaud, J. Rousseau,
+{\it Robust Video Surveillance for Fall Detection Based on Human Shape
+Deformation}, IEEE Transactions on Circuits and Systems for Video
+Technology, {\bf 21}(5) (2011), 611--622.
+
+\bibitem{noury} N. Noury, A. Fleury, P. Rumeau, A.-K. Bourke, G. \'OLaighin,
+V. Rialle, J.-E. Lundy, {\it Fall detection -- Principles and Methods}, in
+Proceedings of the 29th Annual International Conference of the IEEE
+Engineering in Medicine and Biology Society (EMBC), 2007, 1663--1666.
+
+% --- Fonti epidemiologiche italiane, aggiunte il 2026-08-14 -------------
+% Sostengono i numeri della sezione 1.1. Reperite su Epicentro/ISS.
+% ATTENZIONE: i dettagli di edizione vanno confermati sulla fonte prima
+% della consegna — in particolare l'anno esatto del comunicato ISTAT e la
+% denominazione del rapporto PASSI d'Argento da cui vengono le percentuali.
+
+\bibitem{istat2026} Istituto Nazionale di Statistica (ISTAT), {\it
+Indicatori demografici}, Roma, 2026.
+% DA CONFERMARE: titolo esatto del comunicato e data di pubblicazione da
+% cui viene il 25,1% di over 65 al 1 gennaio 2026.
+
+\bibitem{passi} Istituto Superiore di Sanit\`a, {\it Sorveglianza PASSI
+d'Argento — Le cadute negli ultra 64enni}, Epicentro, biennio 2023--2024.
+% Da qui: 20% caduto nei 12 mesi, 6% nei 30 giorni, 16% fra 65-74 anni e
+% 33% oltre gli 85, 25% donne contro 16% uomini, 30% con difficolta'
+% economiche contro 19%, 60% delle cadute in casa contro 19% in strada,
+% 14% con almeno un giorno di ricovero.
+
+% --- Riferimenti verificati, aggiunti il 2026-08-11 ---------------------
+% Reperiti e controllati uno per uno. Sostengono le affermazioni
+% quantitative del Cap. 1 su domain shift e falsi allarmi, che finora si
+% appoggiavano ai segnaposto qui sotto.
+
+\bibitem{vira} A. Alanazi et al., {\it Robust 3D Skeletal Joint Fall
+Detection in Occluded and Rotated Views Using Data Augmentation and
+Inference-Time Aggregation}, Sensors, 2025.
+% Il riferimento chiave sul viewpoint: 99,81% nel dominio di
+% addestramento contro ~50% (F1 1,38%) su dominio diverso, e il recupero
+% a 99,2-99,4% ruotando lo scheletro per sintetizzare 27 punti di vista.
+
+\bibitem{tcnte} X. Wang et al., {\it A Real-time skeleton-based fall
+detection algorithm based on temporal convolutional networks and
+transformer encoder}, Pervasive and Mobile Computing, 2025.
+% 99,58% sulla vista frontale di UP-Fall e 98,75% su quella laterale:
+% serve come termine di paragone per i numeri di laboratorio.
+
+\bibitem{gcn3stream} A. S. M. Miah et al., {\it Fall recognition using a
+three-stream spatio-temporal GCN model with adaptive feature
+aggregation}, Scientific Reports, 2025.
+% Oltre il 94% medio su URFD e UPFD.
+
+\bibitem{gallery} {\it Interpretable and lightweight fall detection in a
+heritage gallery using YOLOv11-SEFA for edge deployment}, Scientific
+Reports, 2026.
+% Il riferimento sui falsi allarmi in esercizio continuo: circa 0,4
+% allarmi all'ora nelle ore di punta, causati da visitatori accovacciati
+% o inginocchiati per fotografare.
+
+% --- Riferimenti citati nel Cap. 1, da completare ---
+%
+% ATTENZIONE: le quattro voci qui sotto sono SEGNAPOSTO. Sono citate nel
+% Cap. 1 ma non corrispondono a lavori verificati: autori, titoli e anni
+% sono ricostruiti a memoria e vanno considerati NON attendibili finche'
+% non sono stati recuperati.
+%
+% Consegnare la tesi con queste voci cosi' come sono significa citare
+% lavori che potrebbero non esistere. Vanno recuperate oppure le
+% affermazioni che sostengono vanno riscritte appoggiandole ai
+% riferimenti verificati qui sopra.
+
+\bibitem{asif} % [DA CERCARE] citato nel Cap. 1 per le rappresentazioni
+% pose-based e l'invarianza alle caratteristiche estetiche del soggetto
+Asif et al., {\it Pose-based fall representations}, 2020.
+% TODO: recuperare titolo completo, autori e sede di pubblicazione
+
+% --- Il divario laboratorio/realta': i riferimenti che lo misurano ---
+
+\bibitem{omnifall} D. Schneider, M. Sarfraz, C. Uhlemann, Z. Cao, Y. Wang,
+A. Roitberg, R. Stiefelhagen, {\it OmniFall: From Staged Through Synthetic to
+Wild --- A Unified Multi-Domain Dataset for Robust Fall Detection},
+arXiv:2505.19889, 2025.
+% VERIFICATO 2026-08-17. Unifica otto dataset pubblici (CMDFall, UP-Fall,
+% Le2i, GMDCSA24, CAUCA Fall, EDF, OCCU, MCFD) per ~80 h annotate a livello
+% di fotogramma, piu' un insieme di cadute reali "in the wild" e uno
+% sintetico da 12k video. Numeri usati nel Cap. 1 e nel Cap. 6: modello
+% addestrato su UP-Fall da F1 72,9% in dominio a 16,9% su cadute vere;
+% Le2i da 100% a 58,8%; fallen-state da 97,7% a 33,1%.
+% Sostituisce il segnaposto {liu}, che era inventato.
+
+\bibitem{zobi} % [DA CERCARE] citato nel Cap. 1 per la vulnerabilita'
+% alle occlusioni
+Zobi et al., {\it Occlusion handling in pose-based fall detection}, 2025.
+% TODO: recuperare riferimento completo
+
+\bibitem{gazem} % [DA CERCARE] citato nel Cap. 1 per i limiti dei
+% sensori indossabili e la compliance del paziente
+Gazem et al., {\it Wearable sensors compliance in elderly monitoring}, 2025.
+% TODO: recuperare riferimento completo
+
+% ---------------------------------------------------------------------
+% DA AGGIUNGERE per sostenere affermazioni sperimentali della tesi.
+% Per ciascun tema bastano uno o due riferimenti.
+%
+%  - cross-subject validation in Human Activity Recognition
+%      serve al Cap. sul protocollo: il subject leakage e' un problema
+%      noto, non una scoperta di questa tesi
+%
+%  - effetto del viewpoint sul riconoscimento di azioni
+%      serve a contestualizzare il fattore 1,99x misurato sull'escursione
+%      del tronco e il 2,5-3,4x sull'accuratezza finale
+%
+%  - quantizzazione INT8 e perdita di accuratezza su NPU
+%      serve a dichiarare che in questa tesi non e' stata misurata
+%
+%  - metriche per applicazioni safety-critical (F-beta, costo asimmetrico
+%    di falsi positivi e negativi)
+%      serve a giustificare la scelta di beta = 2
+%
+%  - metodi su feature aggregate per la classificazione di serie temporali
+%      serve a mostrare che il risultato del Random Forest non e' isolato
+% ---------------------------------------------------------------------
+
+
+\bibitem{omnifall2025} % [DA VERIFICARE] la tassonomia a sedici classi e'
+% quella usata nel Capitolo 2 per distinguere fall / fallen / lie down /
+% lying. Controllare autori, sede e anno esatti prima della consegna.
+OmniFall: a unified taxonomy and benchmark for staged and in-the-wild
+fall detection. 2025.
+
+\end{thebibliography}

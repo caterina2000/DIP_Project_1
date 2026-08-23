@@ -1,0 +1,50 @@
+# ---------------------------------------------------------------------
+# Immagini di persone identificabili.
+#
+# Questo progetto non e' ancora un repository git. Questo file esiste
+# PRIMA che lo diventi, perche' la cartella delle clip contiene fotogrammi
+# di familiari, e il momento in cui ci si accorge di averli pubblicati e'
+# sempre quello dopo.
+#
+# Le clip non servono a riprodurre alcun numero: la regola di decisione si
+# applica ai punteggi in risultati/sessioni/, che sono testo e restano
+# tracciati.
+# ---------------------------------------------------------------------
+deploy_board/clip_demo/
+risultati/sessioni/**/clip/
+**/clip/
+*.mp4
+*.avi
+
+# ---------------------------------------------------------------------
+# Modelli e dati pesanti
+# ---------------------------------------------------------------------
+*.keras
+*.pkl
+*.task
+*.npz
+dataset/up_fall/raw/
+# feature_v2.csv da solo pesa 71 MB
+dataset/processed/features/*.csv
+
+# Eccezione: i punteggi per fold sono 1,5 MB in tutto, e sono il motivo per
+# cui EXP-010 costa secondi invece di dieci addestramenti. Vanno tracciati.
+!risultati/addestramento/*.npz
+
+# ---------------------------------------------------------------------
+# Ambiente
+# ---------------------------------------------------------------------
+__pycache__/
+*.pyc
+.idea/
+.venv/
+
+# ---------------------------------------------------------------------
+# Bozze superate
+#
+# 'tesi aggiornata ad oggi/' contiene le stesure in .txt da cui i capitoli
+# sono nati. Restano sul disco perche' sono la storia del testo, ma NON
+# vanno tracciate: avere due file che si chiamano cap2 e dicono cose
+# diverse e' il modo piu' rapido per lavorare su quello sbagliato.
+# ---------------------------------------------------------------------
+tesi/tesi aggiornata ad oggi/
