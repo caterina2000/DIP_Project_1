@@ -83,6 +83,70 @@ Alla proprietà di riservatezza se ne accompagna una statistica: le rappresentaz
 
 Va sottolineato che non si tratta di una dichiarazione di principio ma di una proprietà architetturale \textbf{verificabile}, e nel Capitolo~\ref{cap:campo} viene messa alla prova nel modo più diretto: durante le sessioni in abitazione il sistema registra in modo continuo soltanto posa e feature, mentre le immagini vengono conservate esclusivamente in una finestra di pochi secondi attorno agli allarmi. La scelta dello stimatore, peraltro, non è vincolata a questo argomento: il Capitolo~\ref{cap:edge} ne valuta un secondo, YOLOv8-pose~\cite{yolopose}, ed entrambi condividono la proprietà che qui interessa.
 
+\section{Che cosa deve fare il sistema}
+\label{sec:requisiti}
+
+Prima di descrivere come il problema viene affrontato conviene dichiarare
+rispetto a quali criteri la soluzione andrà giudicata. Un sistema destinato a
+un'abitazione deve soddisfare quattro requisiti, e la loro caratteristica
+saliente è di essere in \textbf{tensione} fra loro: nessuno può essere
+massimizzato senza cedere sugli altri.
+
+\subsection{Tempestività}
+
+Il sistema deve emettere l'allarme in un tempo sufficientemente breve da
+ridurre la permanenza a terra. È il requisito che discende direttamente dalla
+sezione precedente, ed è il più stringente proprio nell'ambiente in cui le
+cadute avvengono di più, perché in casa non è garantita la presenza di nessuno.
+
+La tempestività non si misura però come latenza del modello. Un sistema veloce
+e soggetto a segnalazioni improprie viene disattivato, e la sua latenza diventa
+irrilevante: va valutata insieme al requisito che segue.
+
+\subsection{Sostenibilità del carico di allarmi}
+
+È il requisito che la letteratura di laboratorio trascura e che decide se
+un'installazione resti accesa. Gli studi condotti su impianti realmente in
+esercizio forniscono i termini di paragone.
+
+Kangas et al., in uno studio longitudinale su \textbf{15.500 ore} di utilizzo
+reale, riportano un tasso di \textbf{0,049 allarmi impropri per ora}, ridotto a
+$0{,}025$ dopo una modifica dell'algoritmo~\cite{kangas}. In una seconda
+installazione domestica, il sistema AIDE-MOI riduce le segnalazioni improprie
+da $0{,}43$ a \textbf{0,17 per settimana e per soggetto}~\cite{aidemoi}.
+
+Il secondo dato dice più del primo. In un'abitazione privata ogni allarme
+richiede una verifica da parte di una persona, e la soglia di tolleranza si
+misura in \emph{episodi alla settimana}, non per ora. Un sistema che superi
+sistematicamente quell'ordine di grandezza non viene corretto: viene spento.
+
+\subsection{Riservatezza}
+
+Un impianto installato in un'abitazione, in una residenza assistenziale o in
+un reparto non dovrebbe trasmettere flussi video verso l'esterno. Le immagini
+costituiscono dati personali potenzialmente identificativi, e la loro
+trasmissione continua richiede garanzie che un dispositivo domestico
+difficilmente offre.
+
+Il requisito non si soddisfa cifrando il canale: si soddisfa \textbf{non
+producendo il dato}. La sezione~\ref{sec:privacy} descrive la scelta
+architetturale che lo rende possibile.
+
+\subsection{Costo e risorse}
+
+L'ultimo requisito è economico, ed è quello che condiziona tutti gli altri. Un
+sistema di rilevamento utile è un sistema che si può installare in molte
+stanze, e il costo per stanza ne determina la diffusione più della sua
+accuratezza --- tanto più data la correlazione fra rischio di caduta e
+difficoltà economiche osservata nella sezione~\ref{sec:problema-clinico}.
+
+Ne discende la scelta di un'architettura \emph{edge}: l'elaborazione avviene
+su un dispositivo locale a basso consumo invece che su un server remoto. La
+scelta riduce la latenza, elimina la dipendenza da una connessione stabile e
+soddisfa il requisito di riservatezza per costruzione. Ma vincola la capacità
+di calcolo disponibile, ed è il vincolo entro cui ogni scelta successiva di
+questo lavoro è stata compiuta.
+
 \section{Perché i risultati pubblicati non descrivono il problema}
 \label{sec:divario}
 
@@ -113,9 +177,30 @@ C'è una terza origine, meno discussa delle prime due e più decisiva di entramb
 
 Le metriche di laboratorio sono calcolate su insiemi di verifica in cui le cadute costituiscono una frazione consistente dei campioni. In esercizio continuo la proporzione è di un altro ordine: una persona anziana cade mediamente meno di una volta all'anno, mentre il sistema valuta diverse finestre al secondo, ininterrottamente.
 
-La conseguenza è aritmetica prima che sperimentale. Una precision del 90\% misurata in laboratorio non si trasferisce, perché il denominatore cambia di ordini di grandezza: anche un tasso di falsi positivi apparentemente trascurabile produce decine di allarmi inutili al giorno in funzionamento continuo~\cite{gallery}.
+La conseguenza è aritmetica prima che sperimentale, e conviene svolgerla.
 
-I valori riportati per installazioni reali danno la misura della soglia di accettabilità. Uno studio su una galleria espositiva riporta circa \textbf{0,4 allarmi all'ora} nelle ore di maggiore affluenza, causati in prevalenza da visitatori accovacciati o inginocchiati per fotografare~\cite{gallery}; in una raccolta di ventisette giorni in due strutture per anziani il tasso risulta dello 0,00126\%. Sono numeri che nessuna metrica calcolata su un insieme di verifica bilanciato può predire, e che decidono se un sistema resti acceso oppure venga spento dopo pochi giorni.
+Un sistema che produce una decisione ogni finestra, a una frequenza
+decisionale di $4{,}5$~Hz, compie nell'arco di un anno
+\[
+4{,}5 \cdot 60 \cdot 60 \cdot 24 \cdot 365 \simeq 1{,}42 \cdot 10^{8}
+\]
+valutazioni. Se nello stesso periodo si verificano una o due cadute, le
+finestre realmente positive sono una frazione dell'ordine di $10^{-8}$ del
+totale.
+
+Su questo denominatore anche un tasso di falsi positivi che in laboratorio
+apparirebbe trascurabile diventa insostenibile. Uno $0{,}01$ per cento ---
+una decisione errata su diecimila --- produce
+\[
+1{,}42 \cdot 10^{8} \cdot 10^{-4} \simeq 1{,}42 \cdot 10^{4}
+\]
+finestre positive errate all'anno. Non corrispondono ad altrettanti allarmi,
+perché finestre consecutive vengono aggregate, ma l'ordine di grandezza
+rimane: \textbf{una precision del 90\% misurata su un insieme quasi bilanciato
+non dice nulla su quanti allarmi il sistema produrrà in un anno di
+esercizio}.
+
+I termini di paragone sono quelli riportati nella sezione~\ref{sec:requisiti}: \textbf{0,049 allarmi impropri per ora}~\cite{kangas} e \textbf{0,17 per settimana e per soggetto}~\cite{aidemoi}, misurati su installazioni realmente in esercizio. Sono numeri che nessuna metrica calcolata su un insieme di verifica bilanciato può predire, e che decidono se un sistema resti acceso oppure venga spento dopo pochi giorni.
 
 Ne segue una distinzione che questo lavoro adotta per tutto il seguito. Le
 \emph{prestazioni del classificatore} si misurano per finestra temporale e
@@ -140,6 +225,39 @@ Su quest'ultimo risultato va però registrata una riserva, perché condiziona l'
 
 A questa si affianca un'occlusione meno ovvia, che il corpo produce su sé stesso: quando il soggetto è a terra il volto è girato di lato, rivolto verso il basso o coperto dal braccio. Il Capitolo~\ref{cap:risultati} misura entrambe, e mostra che la seconda dipende in modo determinante da \emph{quale} stimatore di posa si adotti --- il che la rende una proprietà dello strumento e non del problema.
 
+\subsection{Che cosa, esattamente, va riconosciuto}
+\label{sec:cosa-riconoscere}
+
+Alle cause precedenti se ne aggiunge una che non riguarda i dati né l'ottica,
+ma la formulazione del problema, e che il seguito di questo lavoro mostrerà
+essere la più influente di tutte.
+
+Una caduta non corrisponde a una configurazione del corpo: è un fenomeno
+temporale, composto da una condizione precedente, da una transizione, e da uno
+stato successivo in cui il soggetto resta a terra. Il problema di
+classificazione può quindi essere posto in tre modi diversi, e la scelta non è
+una convenzione di comodo:
+
+\begin{itemize}
+    \item riconoscere \textbf{l'atto del cadere}, cioè la transizione dinamica;
+    \item riconoscere lo \textbf{stato successivo}, cioè la persona a terra;
+    \item considerare \textbf{entrambe} le condizioni sufficienti a generare
+          l'allarme.
+\end{itemize}
+
+Le tre formulazioni non sono equivalenti, e la ragione è la stessa che rende
+difficile l'intero problema. Attività ordinarie come sdraiarsi su un divano o
+coricarsi producono una configurazione corporea \emph{indistinguibile} da
+quella successiva a una caduta, raggiunta però attraverso una dinamica
+completamente diversa. Chi riconosce lo stato non ha modo di separarle; chi
+riconosce la transizione sì.
+
+La letteratura adotta prevalentemente la seconda formulazione o la terza, e
+raramente dichiara la scelta come tale. Questo lavoro le confronta a parità di
+tutto il resto, e il Capitolo~\ref{cap:risultati} misura che la differenza fra
+di esse è più grande di quella prodotta da qualunque altra variabile qui
+considerata, architettura del classificatore compresa.
+
 \section{Ipotesi e obiettivi}
 \label{sec:obiettivi}
 
@@ -161,4 +279,4 @@ Da qui i tre obiettivi specifici.
 
 A questi se ne è aggiunto un quarto, non previsto in partenza e imposto dai dati: \textbf{misurare il tasso di falsi allarmi in funzionamento continuo} in un'abitazione reale. È la grandezza che decide se un sistema di questo tipo resti acceso oppure venga spento dopo pochi giorni, e nessuna delle metriche calcolate su un insieme di verifica bilanciato la predice. La sua indagine ha prodotto il risultato che l'Introduzione anticipa e che il Capitolo~\ref{cap:campo} stabilisce.
 
-\paragraph{Una scelta sui dati, e il suo limite.} Il dataset di riferimento è UP-Fall, che raccoglie 17 soggetti in undici attività~\cite{upfall}. Il lavoro ne impiega \textbf{dieci}. È una limitazione della raccolta condotta qui e non del dataset, e va dichiarata perché condiziona ogni confronto: anche con dieci soggetti la dispersione fra ripetizioni resta dello stesso ordine di molte delle differenze che si vorrebbero misurare, come il Capitolo~\ref{cap:protocollo} argomenta in dettaglio. Il Capitolo~\ref{cap:risultati} ne trae la conseguenza quantitativa: per alcune delle domande poste all\'inizio, il numero di persone necessario a rispondere è di un ordine di grandezza superiore a quello disponibile, e la risposta corretta è dichiararlo invece di produrre un vincitore.
+\paragraph{Una scelta sui dati, e il suo limite.} Il dataset di riferimento è UP-Fall, che raccoglie 17 soggetti in undici attività~\cite{upfall}. Il lavoro ne impiega \textbf{dieci}. È una limitazione della raccolta condotta qui e non del dataset, e va dichiarata perché condiziona ogni confronto: anche con dieci soggetti la dispersione fra ripetizioni resta dello stesso ordine di molte delle differenze che si vorrebbero misurare, come il Capitolo~\ref{cap:protocollo} argomenta in dettaglio. Il Capitolo~\ref{cap:risultati} ne trae la conseguenza quantitativa: per alcune delle domande poste all'inizio, il numero di persone necessario a rispondere è di un ordine di grandezza superiore a quello disponibile, e la risposta corretta è dichiararlo invece di produrre un vincitore.

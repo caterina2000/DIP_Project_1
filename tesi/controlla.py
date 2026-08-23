@@ -100,7 +100,11 @@ for f in CAPITOLI:
 
 # --------------------------------------------------------------- citazioni
 if os.path.exists('Bibliografia.tex'):
-    bib = leggi('Bibliografia.tex')
+    # una riga commentata non produce una voce: una \bibitem preceduta
+    # da % e' una voce RITIRATA, e contarla farebbe segnalare come «mai
+    # citata» qualcosa che non viene nemmeno stampato
+    bib = '\n'.join(r for r in leggi('Bibliografia.tex').split('\n')
+                    if not r.lstrip().startswith('%'))
     chiavi = set(re.findall(r'\\bibitem\{([^}]+)\}', bib))
     usate = collections.defaultdict(set)
     for f in FILE:
