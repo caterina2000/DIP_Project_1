@@ -75,7 +75,7 @@ La ricerca si è quindi orientata verso soluzioni basate su visione artificiale 
 \section{Posa come filtro di anonimizzazione}
 \label{sec:privacy}
 
-Questo lavoro affronta la tensione fra utilità e riservatezza adottando un approccio \emph{privacy-by-design} basato sulla \emph{pose estimation}. Invece di classificare i fotogrammi con una rete convoluzionale, il sistema interpone uno stimatore di posa che riduce ogni immagine a un insieme di coordinate di giunti: MediaPipe~\cite{mediapipe}, che restituisce 33 \emph{landmark} corporei.
+Questo lavoro affronta la tensione fra utilità e riservatezza adottando un approccio \emph{privacy-by-design} basato sulla \emph{pose estimation}. Invece di classificare i fotogrammi con una rete convoluzionale, il sistema interpone uno stimatore di posa che riduce ogni immagine a un insieme di coordinate di giunti: MediaPipe~\cite{mediapipe}, costruito sul modello BlazePose~\cite{blazepose}, che restituisce 33 \emph{landmark} corporei.
 
 L'operazione agisce come un \textbf{filtro irreversibile}: texture, abbigliamento, volto e sfondo vengono scartati alla fonte, e ciò che raggiunge il classificatore non permette di risalire all'aspetto della persona. L'astrazione trasforma inoltre un problema di elaborazione di immagini in un problema di analisi cinematica di serie temporali, con due vantaggi collaterali --- la riduzione della dimensionalità e l'interpretabilità delle grandezze --- discussi nel Capitolo~\ref{cap:metodologia}.
 

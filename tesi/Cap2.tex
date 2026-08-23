@@ -342,6 +342,72 @@ Il bacino risultante conta trentadue grandezze: nove per A1, cinque per A2, nove
 per A3 e la terna integrale di ciascuna rappresentazione, descritta nella
 Sezione~\ref{sec:integrali}.
 
+\subsection{Le trentadue grandezze, per esteso}
+\label{sec:elenco-grandezze}
+
+Le sezioni precedenti hanno descritto il criterio con cui ciascuna
+rappresentazione è costruita. Conviene raccoglierle qui in un solo prospetto,
+perché il resto della tesi vi si riferisce per nome.
+
+\begin{table}[ht]
+\centering
+\caption{Le grandezze calcolate a ogni fotogramma. Le derivate sono tutte
+espresse per secondo; le lunghezze di A3 sono divise per la lunghezza del
+torso e sono quindi adimensionali.}
+\label{tab:grandezze}
+\small
+\begin{tabular}{llp{6.6cm}}
+\toprule
+\textbf{Insieme} & \textbf{Nome} & \textbf{Che cosa misura} \\
+\midrule
+\multirow{8}{*}{\textbf{A1} (9)}
+ & \texttt{asse\_mag}        & semiasse maggiore dell'ellisse adattata alla sagoma \\
+ & \texttt{asse\_min}        & semiasse minore \\
+ & \texttt{allungamento}     & rapporto fra i due assi: alto se il corpo appare allungato \\
+ & \texttt{inclinazione}     & orientamento dell'asse maggiore nel piano immagine \\
+ & \texttt{d\_inclinazione}  & sua derivata \\
+ & \texttt{d\_allungamento}  & derivata del rapporto fra gli assi \\
+ & \texttt{d\_asse\_mag}     & derivata del semiasse maggiore \\
+ & \texttt{vx}, \texttt{vy}  & velocità del baricentro dei punti, per componente \\
+\midrule
+\multirow{5}{*}{\textbf{A2} (5)}
+ & \texttt{angolo\_tronco}   & inclinazione del tronco nello spazio tridimensionale \\
+ & \texttt{d\_angolo\_tronco}& sua derivata, con segno \\
+ & \texttt{vel\_ang\_tronco} & modulo della stessa derivata \\
+ & \texttt{testa\_vel}       & modulo della velocità del naso \\
+ & \texttt{testa\_rel\_y}    & altezza del naso rispetto al bacino \\
+\midrule
+\multirow{9}{*}{\textbf{A3} (9)}
+ & \texttt{torso\_len}       & lunghezza del torso: è il fattore di normalizzazione \\
+ & \texttt{angolo\_tronco}   & inclinazione del tronco nel piano immagine \\
+ & \texttt{d\_angolo\_tronco}& sua derivata \\
+ & \texttt{testa\_rel\_y}    & altezza della testa rispetto al bacino \\
+ & \texttt{ginocchia\_rel\_y}& altezza delle ginocchia rispetto al bacino \\
+ & \texttt{caviglie\_rel\_y} & altezza delle caviglie rispetto al bacino \\
+ & \texttt{larghezza}        & distanza fra le spalle \\
+ & \texttt{hip\_vel}         & velocità del bacino \\
+ & \texttt{testa\_vel\_rel}  & velocità della testa rispetto al bacino \\
+\midrule
+\multirow{3}{*}{\textbf{integrali} (3$\times$3)}
+ & \texttt{escursione}       & massimo meno minimo sull'ultima finestra di $K$ fotogrammi \\
+ & \texttt{percorso}         & somma degli spostamenti in valore assoluto \\
+ & \texttt{discesa}          & scarto rispetto al valore più alto della finestra \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La terna integrale viene calcolata per ciascuna delle tre rappresentazioni ---
+sul centroide per A1, sul naso per A2, sul bacino per A3 --- il che porta il
+totale a $9 + 5 + 9 + 9 = 32$.
+
+Due assenze vanno notate, perché segnalano scelte discusse altrove. Non
+compare alcuna grandezza denominata \emph{energia}: erano tre, una per
+rappresentazione, e sono state rimosse per le ragioni della
+sezione~\ref{sec:integrali}. Non compaiono derivate seconde: le accelerazioni
+presenti nella formulazione iniziale di A2 sono state tolte perché se la
+derivata prima amplifica il rumore dello stimatore, la seconda lo amplifica
+due volte.
+
 \subsection{Una convenzione temporale unica}
 
 Un'ultima precisazione riguarda le derivate. Nella formulazione iniziale A1
