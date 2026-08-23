@@ -1,1259 +1,476 @@
-\chapter{Metodologia: dal video alle feature}
-\label{cap:metodologia}
-
-%% ---------------------------------------------------------------------
-%% FUSIONE DEL 2026-08-22. Le sei sezioni che stavano nei file
-%% Cap2_sez_*.tex sono state incorporate qui: non erano incluse da
-%% tesi.tex e quindi non comparivano nel PDF.
-%% Tolte perche' sostituite: "Feature engineering: quattro
-%% rappresentazioni", "Le due estensioni di A3", "Rumore dei landmark",
-%% "Analisi di separabilita' con DTW", "Finestre temporali ed
-%% etichettatura". Di Cap2_sez_finestre sono state scartate le
-%% sottosezioni su divisione dei dati e soglia: duplicavano Cap3.tex.
-%% ---------------------------------------------------------------------
+\chapter{Stato dell'arte nel rilevamento automatico delle cadute}
+\label{cap:stato_arte}
 
 % ---------------------------------------------------------------------
-% FUSIONE DEL 2026-08-19 fra due stesure: cap2.txt (prima persona, piu'
-% dettagliata su DTW e sulle quattro rappresentazioni) e la versione
-% precedente di questo file (piu' compatta, con le correzioni derivate
-% dalle verifiche sul codice).
+% NUOVO, 2026-08-23. Era il capitolo mancante: il Capitolo 1 poneva le
+% domande e il Capitolo 3 costruiva il metodo, senza che nulla collocasse
+% il lavoro rispetto alla letteratura.
 %
-% Criterio adottato sezione per sezione:
-%
-%  2.1  impianto della versione compatta (il formalismo I(x,y,t) e le tre
-%       fasi con la durata misurata). TOLTA la parte clinica che c'era
-%       nella stesura lunga: e' Cap. 1, e ripeterla qui indebolisce
-%       entrambi i capitoli.
-%  2.2  PRESO dalla stesura lunga l'inquadramento denso/sparso, che
-%       mancava e che colloca la scelta nei termini della computer
-%       vision; aggiunte le due tabelle degli stimatori.
-%  2.3  base la stesura lunga, che descrive meglio le quattro
-%       rappresentazioni; aggiunti i due risultati di verifica del codice
-%       (energy_body mal chiamata, la normalizzazione che cancella la
-%       posizione) e le due estensioni A3h/A3i, che NESSUNA delle due
-%       stesure conteneva ed e' l'insieme su cui poggia il risultato
-%       migliore.
-%  2.4  la stesura lunga spiega bene PERCHE' serve un filtro: conservata.
-%       Ma descriveva l'EMA come applicato, e non lo e': la correzione
-%       resta. La tabella delle confidenze e' di YOLOv8 e ora lo dichiara
-%       (EXP-052 ha misurato che su MediaPipe il fenomeno non si verifica).
-%  2.5  PRESA quasi per intero dalla stesura lunga, che ha le formule
-%       dello score e la lista dei grafici; aggiunta la riserva finale.
-%  2.6  fusa: esposizione della stesura lunga, numeri misurati dalla
-%       versione compatta. Risolte le due note \hl (split per video ->
-%       LOSO; regola di labeling non consecutiva).
-%
-% Le formule sono trascritte da src/geometry.py, riverificate il 2026-08-19.
+% Criterio di scrittura: ogni sezione chiude su cio' che la letteratura
+% NON risolve, e quel residuo e' esattamente cio' che i capitoli
+% sperimentali misurano. Le chiavi di citazione sono verificate contro
+% Bibliografia.tex.
 % ---------------------------------------------------------------------
 
-Il Capitolo~\ref{cap:contesto} ha stabilito \emph{perché} un sistema di questo tipo debba lavorare sulla posa e non sui fotogrammi. Questo capitolo descrive \emph{come}: la catena che porta da un video RGB al vettore di grandezze che il classificatore riceve in ingresso, e le scelte che quella catena comporta.
-
-Il sistema è organizzato in tre fasi sequenziali: acquisizione dei dati scheletrici e normalizzazione, costruzione delle feature, e aggregazione temporale in finestre. La classificazione vera e propria è oggetto del Capitolo~\ref{cap:risultati}; il protocollo con cui la si misura, del Capitolo~\ref{cap:protocollo}.
-
-\section{La caduta come problema di analisi del movimento}
-\label{sec:motion}
-
-Il rilevamento di una caduta è un caso particolare di \emph{motion analysis}: il processo con cui un sistema visivo osserva e interpreta il movimento nel tempo. Il movimento non è deducibile da una singola immagine ma emerge dall'evoluzione di una sequenza, e un video si rappresenta come una funzione spazio-temporale $I(x,y,t)$, dove $x$ e $y$ sono le coordinate nel piano immagine e $t$ l'indice del fotogramma.
-
-Una caduta non è un evento istantaneo: è una dinamica in cui il corpo passa da una posizione eretta a una perdita di equilibrio, poi a una discesa rapida, e infine a una configurazione a terra. La distinzione che interessa --- caduta contro attività quotidiana --- non risiede quindi in una posa. Una persona che si china per raccogliere un oggetto, che si siede rapidamente o che si inginocchia assume, in un singolo fotogramma, configurazioni visivamente simili a quelle di chi sta cadendo. Ciò che le separa è la \textbf{traiettoria}: la sequenza di configurazioni assunte nei fotogrammi successivi.
-
-Da qui discende la prima scelta strutturale del lavoro: \textbf{non si classifica il singolo fotogramma, ma una finestra temporale}. Le conseguenze e i parametri di questa scelta sono nella sezione~\ref{sec:finestre}.
-
-Le tre fasi della caduta corrispondono alle tre etichette usate nell'annotazione:
-
-\begin{enumerate}
-\item \textbf{pre-caduta} --- postura eretta, movimento controllato;
-\item \textbf{caduta} --- perdita di equilibrio e discesa;
-\item \textbf{post-caduta} --- soggetto a terra, tipicamente immobile, ed è la fase che dura di più.
-\end{enumerate}
-
-Sulle sequenze annotate del dataset la fase centrale occupa fra i 41 e i 68 fotogrammi, cioè fra 2,3 e 3,8 secondi a 18~fps. È un intervallo più lungo di quanto la parola «caduta» suggerisca, perché l'annotazione fa cominciare la fase alla perdita di equilibrio e non all'impatto.
-
-\section{Rappresentazione pose-based e stima della posa}
-\label{sec:pose}
-
-Nel contesto della \emph{motion analysis} esistono rappresentazioni diverse. Si possono impiegare rappresentazioni \textbf{dense}, basate sui pixel o su regioni e blocchi, oppure rappresentazioni \textbf{sparse}, basate su un insieme limitato di punti significativi.
-
-Il dato di partenza è denso: il dataset è composto da immagini RGB. Il classificatore però non le riceve. Fra immagine e modello si interpone uno \emph{stimatore di posa}, che estrae una rappresentazione sparsa: un insieme di punti anatomici.
-
-La scelta porta due vantaggi, oltre a quello di riservatezza discusso nel Capitolo~\ref{cap:contesto}. Il primo è la \textbf{riduzione della dimensionalità}: invece di elaborare centinaia di migliaia di pixel, o di associare a ciascuno un vettore di movimento, il sistema tratta poche decine di coordinate. Il secondo è l'\textbf{interpretabilità}: dai punti si costruiscono grandezze geometriche e cinematiche con un significato fisico esplicito, invece di attivazioni astratte.
-
-\subsection{Due famiglie di stimatori, e cosa cambia}
-
-Il lavoro ne impiega due, con caratteristiche che ritornano nei capitoli successivi:
-
-\begin{center}
-\begin{tabular}{lccc}
-\toprule
- & Punti & Coordinate & Persone \\
-\midrule
-MediaPipe \texttt{solutions} & 33 & 2D + world 3D & 1 \\
-MediaPipe \texttt{tasks} & 33 & 2D + world 3D & $\geq 1$ \\
-YOLOv8-pose & 17 (COCO) & 2D & tutte \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-La differenza sulle coordinate ha una conseguenza che ritorna nel Capitolo~\ref{cap:edge}: \textbf{YOLOv8 non fornisce i \emph{world landmark} 3D}, quindi la rappresentazione che li usa non è calcolabile su quella pipeline.
-
-La differenza sul numero di persone ne ha una ancora più netta, discussa nel Capitolo~\ref{cap:campo}: uno stimatore a persona singola sceglie la più prominente, e una persona distesa occupa molta meno area di una in piedi.
-
-\subsection{Non tutti i landmark sono usati allo stesso modo}
-
-Lo stimatore restituisce una posa completa, ma le rappresentazioni ne selezionano sottoinsiemi diversi, scelti per significato cinematico:
-
-\begin{center}
-\begin{tabular}{lll}
-\toprule
-Rappresentazione & Indici & Landmark impiegati \\
-\midrule
-A (PCA 2D) & 0, 11, 12, 23, 24, 27, 28 & naso, spalle, anche, caviglie \\
-A2 (physics 3D) & 0, 11, 12, 23, 24 & naso, spalle, anche \\
-A3 (body-centric 2D) & 0, 11, 12, 23--28 & naso, spalle, anche, ginocchia, caviglie \\
-B (scheletro grezzo) & 12 punti & spalle, gomiti, polsi, anche, ginocchia, caviglie \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-La distinzione fra le famiglie non è «pochi punti contro molti», ma \textbf{grandezze progettate a mano contro coordinate grezze}.
-
-
-\section{Il rumore dei \emph{landmark} e i suoi effetti}
-\label{sec:rumore}
-
-L'uso di una rappresentazione basata sulla posa introduce una criticità che
-attraversa tutto il resto del lavoro: i \emph{landmark} non sono misure dirette
-del corpo, ma stime prodotte automaticamente dal \emph{pose estimator}. Come
-tali sono soggetti a rumore, a instabilità e a perdita temporanea del
-tracciamento, soprattutto in presenza di occlusioni, di variazioni di
-illuminazione, di movimenti rapidi o di punti di vista sfavorevoli.
-
-\subsection{Due manifestazioni diverse}
-
-Il rumore si manifesta in due forme che richiedono trattamenti diversi.
-
-La prima è l'\textbf{assenza della posa}: in una frazione dei fotogrammi lo
-stimatore non produce alcuna stima. Sul dataset utilizzato riguarda il 4,5\%
-dei fotogrammi, e su un archivio esterno registrato in condizioni diverse
-arriva al 19\%. Il trattamento è dichiarativo: il fotogramma viene marcato come
-privo di posa e le grandezze valgono zero, ma la marcatura è essenziale perché
-uno zero non è un valore neutro. Un angolo del tronco pari a zero descrive un
-tronco \emph{orizzontale}, e una sequenza di zeri seguita da un valore reale
-produce una derivata di ampiezza arbitraria. Per la stessa ragione, lo stato
-temporale dell'estrattore viene azzerato a ogni interruzione, in modo che
-nessuna grandezza dinamica attraversi il buco.
-
-La seconda forma è il \textbf{rumore sulla posizione stimata}: il
-\emph{landmark} c'è, ma la sua coordinata oscilla anche quando il corpo è
-fermo. È la forma più insidiosa, perché non è rilevabile da un controllo di
-validità e si propaga silenziosamente a tutte le grandezze derivate.
-
-\subsection{Il filtraggio come prima risposta}
-
-La risposta immediata al secondo problema è il filtraggio temporale. Una media
-mobile esponenziale è la scelta naturale in un contesto \emph{edge}, perché è
-ricorsiva, non richiede di conservare la storia del segnale e si aggiorna a
-ogni fotogramma con una sola operazione:
-
-\[
-\tilde{x}_t = \alpha\,x_t + (1-\alpha)\,\tilde{x}_{t-1},
-\]
-
-dove $x_t$ è il valore stimato corrente e $\alpha$ regola il compromesso fra
-reattività e stabilità. Un valore elevato di $\alpha$ segue rapidamente i
-cambiamenti ma lascia passare il rumore; un valore basso stabilizza il segnale
-ma attenua proprio le variazioni rapide che caratterizzano una caduta.
-
-Va però dichiarato un fatto sull'implementazione. Nella versione iniziale di
-questo lavoro il filtro era \textbf{previsto ma non applicato}: il motore
-geometrico accettava i parametri $\alpha$ per posizione e velocità e non li
-utilizzava, mentre una diversa componente del sistema ne applicava uno proprio.
-Le grandezze utilizzate per l'addestramento e quelle prodotte in esercizio
-avevano quindi caratteristiche di segnale differenti. Il difetto è stato
-individuato in fase di revisione ed è documentato fra i difetti noti.
-
-\subsection{Perché il filtraggio non è la risposta}
-
-La correzione di quel difetto avrebbe reso coerente il sistema, ma non avrebbe
-risolto il problema di fondo, per una ragione che riguarda l'ordine delle
-operazioni.
-
-Il filtraggio agisce sulla \emph{posizione}; le grandezze che interessano sono
-\emph{derivate} della posizione. Filtrare prima di derivare riduce il rumore ma
-riduce anche l'ampiezza del segnale, perché la derivazione amplifica
-selettivamente le alte frequenze e il filtro le attenua entrambe senza
-distinguerle. Il compromesso fra reattività e stabilità non si risolve: si
-sposta.
-
-La misura riportata nella Sezione~\ref{sec:integrali} rende il problema
-quantitativo. L'autocorrelazione a un passo delle grandezze derivate si colloca
-fra $0{,}18$ e $0{,}44$, cioè in un intervallo in cui la componente incorrelata
-è dominante. Nessuna scelta di $\alpha$ porta quei valori nell'intervallo delle
-grandezze statiche, che si trovano intorno a $0{,}9$.
-
-La conseguenza pratica è stata osservata sul campo: il classificatore assegnava
-punteggio elevato anche a corpi completamente immobili, e la correlazione fra il
-punteggio prodotto e il movimento effettivamente presente era $+0{,}139$. Il
-modello non stava ignorando la dinamica per una scelta propria: \textbf{ciò che
-riceveva come dinamica era in gran parte rumore}.
-
-La risposta adottata non è quindi un filtro migliore, ma una formulazione
-diversa delle grandezze dinamiche, descritta nella
-Sezione~\ref{sec:integrali}: sostituire la derivazione con l'accumulazione su
-una finestra mobile.
-
-
-\section{Tre rappresentazioni geometriche dello stesso movimento}
-\label{sec:rappresentazioni}
-
-Dai trentatré \emph{landmark} restituiti dallo stimatore di posa si possono
-costruire descrizioni molto diverse dello stesso movimento. In questo lavoro ne
-sono state considerate tre, che non sono tre modelli in competizione ma tre
-punti di vista sullo stesso dato: insieme formano il bacino di candidate da cui
-la selezione descritta nella Sezione~\ref{sec:dtw} estrae il sottoinsieme
-effettivamente utilizzato.
-
-\begin{itemize}
-    \item \textbf{A1}, la sagoma come ellisse: il corpo trattato come nuvola di
-          punti nel piano immagine, senza conoscenza dell'anatomia;
-    \item \textbf{A2}, la geometria in tre dimensioni: l'unica delle tre che non
-          sia una proiezione, costruita sui \emph{world landmark};
-    \item \textbf{A3}, la geometria riferita al corpo: tutto normalizzato
-          rispetto alla lunghezza del tronco, quindi adimensionale.
-\end{itemize}
-
-I nomi delle grandezze sono prefissati con quello della rappresentazione di
-appartenenza. Non è una precauzione formale: nella versione iniziale del lavoro
-la grandezza \texttt{d\_trunk\_angle} esisteva sia in A2 sia in A3 con unità di
-misura diverse — gradi per fotogramma contro gradi al secondo, con mediane
-$0{,}167$ e $1{,}700$ — ed era l'unica colonna in comune fra i due insiemi. Un
-accorpamento senza prefisso le avrebbe fuse silenziosamente.
-
-\subsection{A1 --- la sagoma come ellisse}
-
-Sette \emph{landmark} — naso, spalle, anche e caviglie — vengono trattati come
-una distribuzione di punti nel piano immagine. Dalla matrice di covarianza si
-ricavano autovalori e autovettori: gli autovettori danno le direzioni principali
-lungo cui il corpo si distribuisce, gli autovalori la dispersione lungo tali
-direzioni.
-
-Intuitivamente il corpo viene approssimato da un'ellisse: l'asse maggiore
-fornisce l'orientamento dominante, il rapporto fra gli assi descrive quanto la
-configurazione appaia allungata o compressa. Le grandezze estratte sono i due
-assi, il loro rapporto, l'inclinazione dell'asse maggiore, le rispettive
-derivate e le due componenti della velocità del baricentro della nuvola.
-
-Il punto di forza di questa rappresentazione è che \emph{non conosce
-l'anatomia}: non le serve identificare correttamente il tronco per accorgersi
-che la sagoma è passata da verticale e stretta a orizzontale e larga. Funziona
-quindi anche quando lo stimatore sbaglia l'attribuzione dei singoli giunti,
-purché la nuvola complessiva sia nella posizione giusta. Il limite è lo stesso:
-non distingue una persona distesa da una chinata in avanti, perché entrambe
-producono un'ellisse orizzontale.
-
-Una precisazione implementativa. L'inclinazione dell'asse di un'ellisse è una
-\emph{direzione}, non un verso: ha periodo $180^\circ$ e non $360^\circ$.
-Trattarla con il periodo sbagliato produce salti artificiali nella serie
-temporale — è stato misurato un passaggio da $201{,}9^\circ$ a $49{,}5^\circ$
-fra due fotogrammi consecutivi, cioè una rotazione fisicamente impossibile — che
-si propagano alla derivata e a ogni grandezza accumulata.
-
-\subsection{A2 --- la geometria in tre dimensioni}
-
-La seconda rappresentazione utilizza i \emph{world landmark}, cioè le coordinate
-metriche tridimensionali stimate dalla rete. È l'unica delle tre a non essere
-una proiezione, e questo la rende potenzialmente meno sensibile al punto di
-vista della telecamera.
-
-Dal punto medio delle spalle e da quello delle anche si ricava il vettore del
-tronco, dal quale si calcola l'angolo rispetto alla verticale del riferimento;
-il naso fornisce la posizione della testa. Le grandezze sono l'angolo del
-tronco, la sua derivata con segno e in modulo, la velocità della testa e
-l'altezza della testa sopra il bacino, normalizzata sulla lunghezza del tronco.
-
-Due precisazioni sono necessarie, e riguardano entrambe il sistema di
-riferimento.
-
-La prima è che il riferimento dei \emph{world landmark} è \emph{canonico e
-centrato sulle anche}, non allineato alla gravità reale. L'angolo così calcolato
-non è quindi un'inclinazione assoluta rispetto al pavimento: è una misura
-relativa al corpo. Resta informativa sui dati, ma chiamarla «inclinazione
-rispetto alla verticale» sarebbe impreciso.
-
-La seconda è più stringente. Poiché il riferimento è centrato sulle anche, il
-bacino \textbf{è l'origine e non si muove per costruzione}. La misura lo
-conferma: su quaranta fotogrammi consecutivi la deviazione standard della sua
-posizione è di $3\cdot10^{-5}$ metri, cioè tre centesimi di millimetro, contro i
-$1{,}75\cdot10^{-2}$ metri del naso — quattrocento volte tanto. Le grandezze
-relative alla traslazione del bacino, presenti nella formulazione iniziale,
-misuravano quindi rumore numerico e sono state rimosse. La traslazione assoluta
-del corpo con questa rappresentazione non è misurabile: la misurano A1 e A3, nel
-piano immagine.
-
-\subsection{A3 --- la geometria riferita al corpo}
-
-La terza rappresentazione utilizza i \emph{landmark} bidimensionali come A1, ma
-con una differenza decisiva: ogni grandezza viene divisa per la lunghezza del
-tronco. Il risultato è adimensionale, quindi indipendente dalla distanza della
-persona dalla telecamera e dalla sua corporatura: la stessa posa a due o a
-cinque metri, su una persona alta o bassa, produce gli stessi numeri.
-
-Il centro del bacino è l'origine del riferimento locale. Le grandezze sono la
-lunghezza del tronco, l'angolo del tronco nel piano immagine e la sua derivata,
-le altezze di testa, ginocchia e caviglie rispetto al bacino, la larghezza delle
-spalle, la velocità del bacino in lunghezze di torso al secondo e la velocità
-della testa relativa al bacino.
-
-È la rappresentazione anatomicamente più ricca — l'unica che osservi gli arti
-inferiori, e sapere che le caviglie sono salite all'altezza del bacino
-distingue una caduta all'indietro da un semplice piegarsi — ma vive nel piano
-immagine, e ne eredita quindi la dipendenza dal punto di vista.
-
-Va inoltre osservato che la normalizzazione rispetto al corpo, che è il pregio
-di questa rappresentazione, ne è anche il limite: normalizzando tutto rispetto
-al bacino, A3 \emph{cancella per costruzione} l'informazione su dove il corpo si
-trovi nella stanza. È il motivo per cui viene affiancata dalla grandezza
-descritta nella Sezione~\ref{sec:pavimento}.
-
-\subsection{Cosa è stato rimosso, e perché}
-
-Rispetto alla formulazione iniziale, che prevedeva dieci grandezze per ciascuna
-rappresentazione, alcune sono state rimosse. Le ragioni sono di tre tipi.
-
-\textbf{Grandezze degenerate per costruzione.} Le due relative alla traslazione
-del bacino in A2, per la ragione discussa sopra.
-
-\textbf{Grandezze dimensionalmente prive di senso.} Ciascuna rappresentazione
-conteneva una grandezza denominata \emph{energia}, calcolata come somma di
-quadrati dei contributi dinamici. Quelle somme sommavano quadrati di gradi, di
-rapporti adimensionali, di pixel e di frazioni di immagine: quantità non
-omogenee, il cui risultato non ha un'unità interpretabile. Sul dataset
-presentavano rapporti fra valore massimo e mediano dell'ordine di $7\cdot10^5$,
-ed erano all'origine della disparità di scala fra le colonne in ingresso — un
-fattore 646 fra la più grande e la più piccola — che senza normalizzazione
-rendeva alcune grandezze invisibili al modello.
-
-\textbf{Derivate seconde.} Le accelerazioni presenti in A2 sono state rimosse
-per la ragione descritta nella Sezione~\ref{sec:rumore}: se la derivata prima
-amplifica il rumore dello stimatore di posa, la derivata seconda lo amplifica
-due volte.
-
-Il bacino risultante conta trentadue grandezze: nove per A1, cinque per A2, nove
-per A3 e la terna integrale di ciascuna rappresentazione, descritta nella
-Sezione~\ref{sec:integrali}.
-
-\subsection{Le trentadue grandezze, per esteso}
-\label{sec:elenco-grandezze}
-
-Le sezioni precedenti hanno descritto il criterio con cui ciascuna
-rappresentazione è costruita. Conviene raccoglierle qui in un solo prospetto,
-perché il resto della tesi vi si riferisce per nome.
-
-\begin{table}[ht]
-\centering
-\caption{Le grandezze calcolate a ogni fotogramma. Le derivate sono tutte
-espresse per secondo; le lunghezze di A3 sono divise per la lunghezza del
-torso e sono quindi adimensionali.}
-\label{tab:grandezze}
-\small
-\begin{tabular}{llp{6.6cm}}
-\toprule
-\textbf{Insieme} & \textbf{Nome} & \textbf{Che cosa misura} \\
-\midrule
-\multirow{8}{*}{\textbf{A1} (9)}
- & \texttt{asse\_mag}        & semiasse maggiore dell'ellisse adattata alla sagoma \\
- & \texttt{asse\_min}        & semiasse minore \\
- & \texttt{allungamento}     & rapporto fra i due assi: alto se il corpo appare allungato \\
- & \texttt{inclinazione}     & orientamento dell'asse maggiore nel piano immagine \\
- & \texttt{d\_inclinazione}  & sua derivata \\
- & \texttt{d\_allungamento}  & derivata del rapporto fra gli assi \\
- & \texttt{d\_asse\_mag}     & derivata del semiasse maggiore \\
- & \texttt{vx}, \texttt{vy}  & velocità del baricentro dei punti, per componente \\
-\midrule
-\multirow{5}{*}{\textbf{A2} (5)}
- & \texttt{angolo\_tronco}   & inclinazione del tronco nello spazio tridimensionale \\
- & \texttt{d\_angolo\_tronco}& sua derivata, con segno \\
- & \texttt{vel\_ang\_tronco} & modulo della stessa derivata \\
- & \texttt{testa\_vel}       & modulo della velocità del naso \\
- & \texttt{testa\_rel\_y}    & altezza del naso rispetto al bacino \\
-\midrule
-\multirow{9}{*}{\textbf{A3} (9)}
- & \texttt{torso\_len}       & lunghezza del torso: è il fattore di normalizzazione \\
- & \texttt{angolo\_tronco}   & inclinazione del tronco nel piano immagine \\
- & \texttt{d\_angolo\_tronco}& sua derivata \\
- & \texttt{testa\_rel\_y}    & altezza della testa rispetto al bacino \\
- & \texttt{ginocchia\_rel\_y}& altezza delle ginocchia rispetto al bacino \\
- & \texttt{caviglie\_rel\_y} & altezza delle caviglie rispetto al bacino \\
- & \texttt{larghezza}        & distanza fra le spalle \\
- & \texttt{hip\_vel}         & velocità del bacino \\
- & \texttt{testa\_vel\_rel}  & velocità della testa rispetto al bacino \\
-\midrule
-\multirow{3}{*}{\textbf{integrali} (3$\times$3)}
- & \texttt{escursione}       & massimo meno minimo sull'ultima finestra di $K$ fotogrammi \\
- & \texttt{percorso}         & somma degli spostamenti in valore assoluto \\
- & \texttt{discesa}          & scarto rispetto al valore più alto della finestra \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-La terna integrale viene calcolata per ciascuna delle tre rappresentazioni ---
-sul centroide per A1, sul naso per A2, sul bacino per A3 --- il che porta il
-totale a $9 + 5 + 9 + 9 = 32$.
-
-Due assenze vanno notate, perché segnalano scelte discusse altrove. Non
-compare alcuna grandezza denominata \emph{energia}: erano tre, una per
-rappresentazione, e sono state rimosse per le ragioni della
-sezione~\ref{sec:integrali}. Non compaiono derivate seconde: le accelerazioni
-presenti nella formulazione iniziale di A2 sono state tolte perché se la
-derivata prima amplifica il rumore dello stimatore, la seconda lo amplifica
-due volte.
-
-\subsection{Una convenzione temporale unica}
-
-Un'ultima precisazione riguarda le derivate. Nella formulazione iniziale A1
-calcolava differenze \emph{per fotogramma} mentre A2 e A3 dividevano per
-$\Delta t$: confrontare A1 con A3 significava quindi confrontare anche due
-convenzioni temporali diverse, e cambiando frame rate una sola delle due
-cambiava scala. Nell'implementazione attuale tutte le derivate sono espresse per
-secondo.
-
-
-\section{B --- coordinate scheletriche grezze}
-\label{sec:metodoB}
-
-La quarta rappresentazione rinuncia alla progettazione manuale: dodici landmark --- spalle, gomiti, polsi, anche, ginocchia, caviglie --- espressi in coordinate relative al centro del bacino, per un vettore di $24$ valori per fotogramma. Alimenta una pipeline non supervisionata: un autoencoder che ne apprende una rappresentazione compressa, seguito da un classificatore.
-
-Serve esclusivamente da termine di paragone \emph{data-driven}, per stabilire se costruire a mano grandezze cinematiche e geometriche produca una classificazione migliore rispetto al lasciare che sia il modello a scoprire la rappresentazione.
-
-
-\section{Grandezze integrali: accumulare invece di derivare}
-\label{sec:integrali}
-
-Le tre rappresentazioni descritte finora contengono, accanto alle grandezze
-statiche, alcune grandezze dinamiche: velocità del bacino, velocità della testa,
-variazione dell'angolo del tronco. Sono le grandezze che dovrebbero distinguere
-una caduta da un cambio di postura controllato, perché la differenza fra i due
-eventi è per sua natura dinamica.
-
-Questa sezione mostra che, calcolate come derivate istantanee, quelle grandezze
-non svolgono il ruolo che dovrebbero, e propone una formulazione alternativa.
-
-\subsection{Il modello non usava la dinamica}
-
-L'osservazione da cui parte l'analisi è sperimentale. Verificando il
-comportamento del classificatore sulle registrazioni domestiche, è emerso che
-esso assegnava punteggio elevato anche a corpi \emph{completamente immobili}, e
-che la correlazione fra il punteggio prodotto e il movimento effettivamente
-presente nella finestra era pari a $+0{,}139$, cioè praticamente nulla.
-
-Il modello, in altre parole, aveva imparato una scorciatoia posturale: un tronco
-orizzontale implicava una caduta, indipendentemente da come il corpo fosse
-arrivato in quella configurazione. È una regola perfetta su un dataset in cui
-nessuno si sdraia mai su un divano, e sbagliata in una casa vera.
-
-La prima ipotesi era che il difetto fosse del classificatore. La verifica ha
-mostrato che il difetto era \emph{a monte}, nelle grandezze che gli venivano
-fornite.
-
-\subsection{Perché derivare amplifica il rumore}
-
-I \emph{landmark} non sono misure dirette del corpo ma stime prodotte dal
-\emph{pose estimator}, e come tali sono affette da rumore. Una velocità
-calcolata come differenza fra fotogrammi consecutivi,
-
-\[
-v(t)=\frac{x(t)-x(t-1)}{\Delta t},
-\]
-
-divide la differenza fra \emph{due stime rumorose} per un intervallo di tempo
-piccolo. Se ciascuna stima ha un errore di deviazione standard $\sigma$, la
-differenza ne ha $\sigma\sqrt{2}$, e la divisione per $\Delta t = 1/\text{fps}$
-la moltiplica per il frame rate. A 18 fotogrammi al secondo, l'errore sulla
-velocità è quindi circa venticinque volte quello sulla posizione.
-
-La derivazione, in sostanza, è un'operazione che amplifica le alte frequenze —
-ed è esattamente lì che vive il rumore dello stimatore di posa.
-
-\subsection{Una misura del fenomeno: l'autocorrelazione a un passo}
-
-Per quantificare quanto di ciascuna grandezza sia segnale e quanto rumore è
-stata misurata l'\textbf{autocorrelazione a un passo}, cioè la correlazione fra
-il valore della grandezza al fotogramma $t$ e il suo valore al fotogramma
-$t-1$:
-
-\[
-\rho_1 = \frac{\operatorname{Cov}\big(x_t,\,x_{t-1}\big)}
-              {\sigma_{x_t}\,\sigma_{x_{t-1}}}.
-\]
-
-L'idea è che un segnale fisico vero cambia con continuità e quindi è molto
-correlato con sé stesso da un fotogramma al successivo; un rumore bianco non lo
-è affatto. I valori misurati sono riportati in
-Tabella~\ref{tab:autocorrelazione}.
-
-\begin{table}[ht]
-\centering
-\caption{Autocorrelazione a un passo delle grandezze dinamiche, misurata sui
-fotogrammi con posa valida di UP-Fall.}
-\label{tab:autocorrelazione}
-\begin{tabular}{lc}
-\hline
-\textbf{Grandezza} & $\boldsymbol{\rho_1}$ \\
-\hline
-\multicolumn{2}{l}{\emph{derivate istantanee}} \\
-\quad Variazione dell'angolo del tronco & 0,176 \\
-\quad Energia del corpo & 0,228 \\
-\quad Velocità del bacino & 0,322 \\
-\quad Velocità della testa & 0,438 \\
-\hline
-\multicolumn{2}{l}{\emph{grandezze integrali}} \\
-\quad Escursione del tronco & 0,916 \\
-\quad Percorso del bacino & 0,939 \\
-\quad Discesa del bacino & 0,911 \\
-\hline
-\end{tabular}
-\end{table}
-
-Il contrasto è netto: le derivate stanno fra $0{,}18$ e $0{,}44$, le grandezze
-integrate fra $0{,}91$ e $0{,}94$.
-
-È però necessaria una precisazione, perché l'autocorrelazione non è una prova
-sufficiente. Un valore basso non dimostra da solo che una grandezza sia rumore,
-così come un valore alto non dimostra che sia informativa per il
-riconoscimento; e una grandezza ottenuta integrando su un intervallo tende
-\emph{per costruzione} a essere più regolare nel tempo. L'autocorrelazione va
-quindi usata come \textbf{spiegazione del fenomeno}, non come sua
-dimostrazione. La dimostrazione è il comportamento discriminativo, riportato
-nel Capitolo~\ref{cap:sperimentale}.
-
-\subsection{La formulazione integrale}
-
-L'alternativa alla derivazione è l'\textbf{accumulazione}: invece di misurare
-quanto il tronco ruota \emph{adesso}, si misura di quanto ha ruotato \emph{in
-tutto} nell'ultimo mezzo secondo. È una descrizione più fedele al fenomeno,
-perché una caduta \emph{è} un'escursione, e produce grandezze che variano
-lentamente invece di oscillare a ogni fotogramma.
-
-È necessario però dichiarare subito che cosa questa formulazione \textbf{non}
-fa, perché l'intuizione naturale è sbagliata e conduce a una conclusione
-errata. Si sarebbe tentati di affermare che accumulando il rumore si cancella,
-poiché un errore a media nulla sommato su molti fotogrammi tende a zero.
-L'argomento vale per una somma di incrementi \emph{con segno}, ma le tre
-grandezze qui introdotte non lo sono:
-
-\begin{itemize}
-    \item il \emph{percorso} è una somma di valori assoluti, e i valori assoluti
-          non si cancellano mai;
-    \item l'\emph{escursione} è una differenza fra massimo e minimo, e il rumore
-          allarga l'intervallo;
-    \item la \emph{discesa} è uno scarto dal massimo recente, e il rumore
-          abbassa il minimo.
-\end{itemize}
-
-Tutte e tre sono quindi funzioni \textbf{monotone crescenti} del rumore. Ciò che
-le rende preferibili alle derivate non è la robustezza, ma la
-\textbf{regolarità}: variano lentamente per costruzione, e non presentano le
-discontinuità che rendono le derivate quasi indistinguibili dal rumore di
-fondo. La Sezione~\ref{sec:rumore-int} misura fin dove questa distinzione
-regge.
-
-Sono state quindi introdotte tre grandezze integrali, calcolate su una finestra
-mobile di $K$ fotogrammi e mai divise per $\Delta t$. Detta $\theta_t$ la
-sequenza dell'angolo del tronco e $(x_t, y_t)$ quella della posizione del punto
-seguito, normalizzata da una scala $s$ che rende le grandezze adimensionali:
-
-\begin{align}
-\text{escursione}_t &= \max_{\tau \in W} \theta_\tau
-                     - \min_{\tau \in W} \theta_\tau
-                     \label{eq:escursione}\\[4pt]
-\text{percorso}_t   &= \frac{1}{s}\sum_{\tau \in W}
-                       \sqrt{(x_\tau - x_{\tau-1})^2 + (y_\tau - y_{\tau-1})^2}
-                     \label{eq:percorso}\\[4pt]
-\text{discesa}_t    &= \frac{1}{s}\Big( y_t - \min_{\tau \in W} y_\tau \Big)
-                     \label{eq:discesa}
-\end{align}
-
-dove $W = \{t-K+1,\dots,t\}$ è la finestra di accumulazione. Le tre grandezze
-rispondono a tre domande diverse: di quanto il tronco ha ruotato in tutto,
-quanta strada ha percorso il corpo, e di quanto è sceso rispetto al punto più
-alto raggiunto di recente.
-
-La normalizzazione $s$ è la lunghezza del tronco per le rappresentazioni
-riferite al corpo e l'asse maggiore dell'ellisse per quella basata su PCA:
-senza di essa il percorso sarebbe espresso in pixel e dipenderebbe dalla
-distanza dalla telecamera.
-
-\subsection{Il vincolo di causalità}
-
-Una precisazione implementativa che ha conseguenze pratiche importanti.
-
-Le equazioni~\eqref{eq:escursione}--\eqref{eq:discesa} si possono calcolare in
-due modi. Il primo è applicare una funzione di finestra mobile a un file di
-feature già completo, quindi \emph{a registrazione conclusa}. È il modo più
-semplice, e produce esattamente gli stessi numeri per un'analisi fuori linea.
-
-Il secondo è mantenere un \textbf{buffer circolare} degli ultimi $K$
-fotogrammi e aggiornarlo a ogni nuovo campione. È il modo più laborioso, ed è
-l'unico compatibile con il funzionamento su dispositivo: la board riceve un
-fotogramma e deve decidere, il video intero non lo possiede.
-
-La distinzione non è formale. In una versione precedente di questo lavoro le
-grandezze integrali erano calcolate nel primo modo, ed è la ragione per cui non
-sono mai arrivate sul dispositivo: i risultati che le riguardavano erano tutti
-calcoli fuori linea, mentre il sistema installato utilizzava la sola
-rappresentazione senza integrali. Nell'implementazione attuale il motore
-geometrico mantiene il buffer, e le stesse grandezze si calcolano identiche
-fuori linea e in tempo reale.
-
-Il costo è un ritardo di riscaldamento: nei primi $K$ fotogrammi dopo l'avvio
-il buffer non è pieno e i valori non sono affidabili. Con $K = 31$ a 18
-fotogrammi al secondo, il periodo di riscaldamento è di circa 1,7 secondi, ed è
-dichiarato esplicitamente dal sistema.
-
-\subsection{La scelta di $K$}
-
-La lunghezza della finestra di accumulazione regola un compromesso: un valore
-piccolo mantiene la reattività ma cancella poco rumore, un valore grande
-stabilizza il segnale ma diluisce l'evento in fotogrammi normali.
-
-Il valore adottato è $K = 31$ fotogrammi, pari a circa 1,7 secondi a 18
-fotogrammi al secondo. La scelta non è arbitraria: nel
-Capitolo~\ref{cap:sperimentale} è riportata la scansione su cinque valori, dalla
-quale risulta che il parametro sposta il tasso di falsi allarmi in ambiente
-reale di un fattore undici. È il tipo di parametro che, non dichiarato, rende
-un risultato non riproducibile.
-
-\subsection{Fin dove regge: rumore indipendente e ambiguità di posa}
-\label{sec:rumore-int}
-
-Poiché le tre grandezze crescono con il rumore, è necessario misurare quanto
-questa proprietà le penalizzi in pratica. La verifica è stata condotta
-iniettando rumore gaussiano indipendente sulle coordinate dei \emph{landmark}
-di UP-Fall, con deviazione espressa in frazione della lunghezza del torso, e
-rimisurando la prestazione.
-
-\begin{table}[ht]
-\centering
-\caption{F2 al crescere del rumore iniettato sui \emph{landmark}. Fra parentesi
-la variazione rispetto all'assenza di rumore.}
-\label{tab:rumore}
-\begin{tabular}{lccc}
-\hline
-$\boldsymbol{\sigma}$ & \textbf{senza integrali} & \textbf{con integrali} & \textbf{sottoinsieme scelto} \\
-\hline
-0     & 0,874 & 0,858 & 0,857 \\
-0,005 & 0,863 \,(--0,011) & 0,864 \,(+0,006) & 0,844 \,(--0,012) \\
-0,010 & 0,855 \,(--0,018) & 0,866 \,(+0,008) & 0,863 \,(+0,007) \\
-0,020 & 0,864 \,(--0,010) & 0,846 \,(--0,012) & 0,836 \,(--0,021) \\
-0,040 & 0,863 \,(--0,011) & 0,856 \,(--0,002) & 0,825 \,(--0,031) \\
-\hline
-\end{tabular}
-\end{table}
-
-Il rumore indipendente \textbf{non degrada apprezzabilmente} nessuno dei tre
-insiemi: quadruplicando l'ampiezza rispetto a quella stimata sulle
-registrazioni domestiche, la perdita massima è $0{,}031$, inferiore alla
-dispersione fra soggetti ($\pm 0{,}08$). Le grandezze integrali, in
-particolare, non si degradano più delle derivate.
-
-La spiegazione è che un errore indipendente su ciascun punto e a ciascun
-fotogramma si media comunque, anche attraverso una funzione monotona, perché
-punti diversi sbagliano in direzioni diverse.
-
-\subsubsection*{L'ambiguità di posa}
-
-Il rumore indipendente non è però l'unica modalità di errore dello stimatore,
-e non è quella che si osserva sul campo. In una ripresa domestica in cui il
-soggetto è vicino alla telecamera e con gli arti scorciati verso l'obiettivo,
-lo stimatore non produce oscillazioni casuali: \textbf{alterna fra due
-interpretazioni plausibili della stessa configurazione} --- quale arto sia
-davanti, dove cada il bacino --- e ciascuna interpretazione resta stabile per
-diversi fotogrammi consecutivi.
-
-L'effetto sulle grandezze accumulate è qualitativamente diverso, ed è stato
-misurato:
-
-\begin{table}[ht]
-\centering
-\caption{Escursione del tronco su finestra mobile, in riprese domestiche.}
-\label{tab:ambiguita}
-\begin{tabular}{lcc}
-\hline
- & \textbf{mediana} & \textbf{massimo} \\
-\hline
-Persona \textbf{ferma} su un divano & 9,0$^\circ$ & \textbf{93,5}$^\circ$ \\
-\textbf{Caduta} reale & 9,0$^\circ$ & 60,7$^\circ$ \\
-\hline
-\end{tabular}
-\end{table}
-
-Una persona immobile produce un'escursione superiore a quella di una caduta.
-Non si tratta di movimento: è la stima che salta fra due configurazioni, e per
-un accumulatore un salto coerente ripetuto è indistinguibile da un movimento
-reale.
-
-Questa è dunque la vulnerabilità effettiva della formulazione integrale, ed è
-diversa da quella che si sarebbe supposta: non il rumore, ma l'ambiguità. La
-difesa non può essere un filtro, perché il segnale spurio è regolare quanto
-quello vero; deve essere un criterio di \textbf{affidabilità della stima}. Lo
-stimatore fornisce una confidenza per ciascun punto --- la stessa grandezza che
-ha rivelato l'occlusione del volto discussa nel
-Capitolo~\ref{cap:sperimentale} --- e quando la confidenza dei punti utilizzati
-cade durante la finestra di accumulazione l'accumulo non è affidabile: il
-sistema deve dichiararlo invece di decidere, come già fa durante il periodo di
-riscaldamento.
-
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.86\textwidth]{figure/fig_rumore.png}
-\caption{Prestazione al crescere del rumore gaussiano iniettato sulle coordinate dei \emph{landmark}, per tre insiemi di grandezze. La banda è la dispersione fra soggetti, ed è più larga di qualunque effetto del rumore: le grandezze integrali non si degradano più delle derivate. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
-\label{fig:rumore}
-\end{figure}
-
-\subsection{Cosa sostituiscono}
-
-L'introduzione delle grandezze integrali si accompagna alla rimozione di tre
-grandezze presenti nella formulazione iniziale, denominate \emph{energie} e
-calcolate come somme di quadrati dei contributi dinamici di ciascuna
-rappresentazione.
-
-Il motivo della rimozione è dimensionale: quelle somme sommavano quadrati di
-gradi, di rapporti adimensionali, di pixel e di frazioni di immagine, cioè
-quantità non omogenee. Il risultato non ha un'unità di misura interpretabile, e
-sul dataset presentava rapporti fra valore massimo e mediano dell'ordine di
-$7\cdot10^{5}$. Erano inoltre all'origine della disparità di scala fra le
-grandezze in ingresso, che senza normalizzazione rendeva alcune colonne
-invisibili al modello.
-
-Le grandezze integrali svolgono lo stesso ruolo — riassumere il contenuto
-dinamico di una finestra in un numero — ma sono dimensionalmente coerenti,
-normalizzate rispetto a una scala corporea e interpretabili singolarmente.
-
-
-\section{L'altezza del bacino dal pavimento}
-\label{sec:pavimento}
-
-La rappresentazione riferita al corpo descritta nella
-Sezione~\ref{sec:rappresentazioni} normalizza ogni grandezza rispetto al
-bacino e alla lunghezza del tronco. È il suo pregio — rende le grandezze
-indipendenti dalla distanza dalla telecamera e dalla corporatura — ma comporta
-una conseguenza che è opportuno rendere esplicita: \textbf{cancella per
-costruzione l'informazione su dove il corpo si trovi nella stanza}.
-
-\subsection{Perché serve}
-
-Il modello, disponendo delle sole grandezze riferite al corpo, apprende una
-regola posturale: un tronco orizzontale implica una caduta. È una regola
-corretta su un dataset in cui nessuno si sdraia su un divano, e sbagliata in
-un'abitazione reale, dove la posizione orizzontale è una condizione ordinaria.
-
-La misura rende la differenza quantitativa. Fra i fotogrammi negativi in cui il
-corpo è orizzontale, l'altezza mediana del bacino vale $+0{,}02$ lunghezze di
-torso nel dataset di laboratorio e $+1{,}47$ nelle registrazioni domestiche.
-Nel primo caso la persona è \emph{a terra} — sdraiarsi sul pavimento è una delle
-attività registrate come normali — nel secondo è su un supporto rialzato. La
-grandezza «corpo orizzontale» non distingue nulla nel primo insieme e distingue
-tutto nel secondo.
-
-\subsection{Come viene stimata}
-
-Il piano del pavimento non viene fornito da nessuno: il sistema lo stima da sé,
-osservando che quando una persona è in piedi il bordo inferiore della sua sagoma
-coincide con il pavimento a quella distanza dalla telecamera.
-
-Si selezionano quindi i fotogrammi in cui il soggetto risulta eretto — rapporto
-altezza/larghezza del riquadro superiore a una soglia, angolo del tronco
-prossimo alla verticale, posa valida — e si raccolgono le coppie (posizione
-orizzontale del bacino, bordo inferiore del riquadro). Su queste si adatta una
-retta
-
-\[
-y_{\text{pav}}(x) = a\,x + c,
-\]
-
-che rappresenta il pavimento nell'immagine, prospettiva compresa: in una ripresa
-non frontale il pavimento non è una riga orizzontale, e la pendenza $a$ ne tiene
-conto.
-
-L'altezza del bacino è quindi la distanza verticale dal piano stimato,
-normalizzata sulla lunghezza del tronco:
-
-\[
-h_{\text{pav}} = \frac{y_{\text{pav}}(x_{\text{bacino}}) - y_{\text{bacino}}}
-                      {L_{\text{tronco}}} .
-\]
-
-La normalizzazione rende la grandezza adimensionale e quindi confrontabile fra
-stanze diverse e fra persone di corporatura diversa. Ciò che resta specifico
-dell'installazione è soltanto il riferimento, cioè i coefficienti $a$ e $c$, e
-il sistema li stima senza chiedere nulla all'utente.
-
-\subsection{Un limite dipendente dal punto di vista}
-
-La grandezza funziona però soltanto se la telecamera vede il pavimento come un
-piano distinto dalla posizione della persona, cioè se è collocata
-approssimativamente all'altezza del busto.
-
-La misura sulle due telecamere del dataset lo mostra con chiarezza. Sulla vista
-laterale la separazione fra le mediane di caduta e non-caduta vale
-$+1{,}43$ lunghezze di torso; sulla vista frontale rialzata vale $-0{,}18$, cioè
-è assente e di segno opposto. Una telecamera zenitale non distingue chi è a
-terra da chi è in piedi, perché entrambi si proiettano nella stessa regione
-dell'immagine.
-
-L'altezza dal pavimento è quindi una grandezza \emph{condizionata
-all'installazione}, e va dichiarata come tale: aggiunge informazione quando la
-telecamera è montata di profilo, non ne aggiunge — e può fuorviare — quando è
-montata in alto.
-
-\subsection{Una conferma arrivata per altra via}
-
-Un riscontro indipendente di quanto questa informazione conti è emerso dalla
-verifica sulle occlusioni riportata nel Capitolo~\ref{cap:sperimentale}.
-Mascherando i \emph{landmark} delle anche — cioè proprio il riferimento rispetto
-a cui la rappresentazione riferita al corpo normalizza tutto — il risultato non
-peggiora ma \textbf{migliora} lievemente.
-
-La spiegazione è che, con il bacino congelato in una posizione fissa, l'altezza
-della testa smette di essere misurata rispetto al bacino e viene misurata
-rispetto a un punto fisso nella stanza: la rappresentazione riferita al corpo si
-trasforma, di fatto, in una rappresentazione riferita all'ambiente. Con
-telecamera fissa, un riferimento fisso è più informativo di uno che si sposta
-insieme alla persona.
-
-È la stessa informazione che $h_{\text{pav}}$ fornisce esplicitamente, ottenuta
-per caso da un esperimento che aveva un altro scopo.
-
-\subsection{I nomi delle configurazioni}
-\label{sec:nomi}
-
-Le tre estensioni descritte nelle ultime due sezioni si combinano, e nel seguito
-vengono richiamate con una notazione compatta. \textbf{A3} indica la
-rappresentazione riferita al corpo nella sua forma di base; \textbf{A3h}
-aggiunge l'altezza del bacino dal pavimento; \textbf{A3i} aggiunge la terna
-integrale al posto delle derivate. Le due estensioni sono indipendenti e
-possono comparire insieme.
-
-Entrambe sono nate dalla validazione in ambiente reale del
-Capitolo~\ref{cap:campo}, non da un'analisi condotta in laboratorio. Vengono
-descritte qui, fra le scelte di metodo, perche' e' su di esse che poggia la
-configurazione finale del sistema; il capitolo che le ha rese necessarie
-dichiara esplicitamente di esserne la causa.
-
-
-\section{Selezione delle grandezze tramite \emph{Dynamic Time Warping}}
-\label{sec:dtw}
-
-Costruito il bacino di trentadue grandezze candidate, resta da stabilire quali
-diano effettivamente una firma temporale distinguibile fra caduta e attività
-quotidiana. Una grandezza può essere geometricamente ben definita e
-computazionalmente economica senza per questo separare le due classi.
-
-\subsection{Perché il DTW}
-
-Il confronto avviene fra serie temporali di durata e velocità diverse: due
-cadute possono avere la stessa struttura dinamica e svolgersi in tempi
-differenti, oppure presentare il picco di una grandezza qualche fotogramma prima
-o dopo. Una distanza punto per punto, come quella euclidea, giudicherebbe
-diverse due curve che hanno la stessa forma ma sono sfasate.
-
-Il \emph{Dynamic Time Warping} confronta invece la \emph{forma} delle due serie,
-deformando l'asse dei tempi alla ricerca dell'allineamento di costo minimo. È
-per questo lo strumento adatto a valutare se una grandezza abbia un andamento
-temporale coerente all'interno di una classe e diverso fra classi.
-
-\subsection{Le tre scelte metodologiche}
-
-\paragraph{Normalizzazione per curva.} Le grandezze hanno scale eterogenee —
-gradi, velocità, rapporti adimensionali — e sui valori grezzi la distanza
-sarebbe dominata da quelle di ampiezza maggiore. Ogni curva viene quindi
-riportata a media nulla e deviazione unitaria. Si perde l'informazione di
-ampiezza assoluta, il che è accettabile perché in questa fase interessa la
-forma.
-
-\paragraph{Vincolo sul cammino di allineamento.} Un DTW libero può deformare
-l'asse dei tempi al punto da far somigliare la curva di un'attività normale a
-quella di una caduta. Si impone quindi che l'allineamento fra due indici
-temporali resti vicino alla diagonale, $|i-j| \leq w$ con $w = 10$ fotogrammi:
-sono ammessi piccoli sfasamenti, non deformazioni prive di senso fisico.
-
-\paragraph{Ricampionamento a lunghezza comune.} È una scelta che deriva
-direttamente dalla precedente, e la sua necessità è stata individuata in fase di
-verifica. Il vincolo $|i-j| \leq w$ non è applicabile a due curve di lunghezza
-diversa senza allargarlo ad almeno la loro differenza, altrimenti nessun cammino
-di allineamento raggiunge il termine. Su questo dataset le riprese di caduta
-durano circa 180 fotogrammi e quelle di attività quotidiana circa 820: le coppie
-\emph{interne} a ciascuna classe hanno quindi lunghezze simili e mantengono la
-banda stretta, mentre le coppie \emph{incrociate} — proprio quelle che devono
-risultare distanti — se la vedono allargare a oltre seicento e si allineano
-quasi senza vincolo.
-
-L'effetto è sistematico e non uniforme: la distanza fra le classi risulta
-deflazionata, e la deflazione colpisce selettivamente le grandezze integrali,
-che sono curve regolari e sotto allineamento libero si deformano l'una
-nell'altra a costo quasi nullo. Prima della correzione, cinque delle nove
-grandezze integrali risultavano al di sotto della soglia di separazione e
-venivano scartate come rumore.
-
-Portando ogni curva a una lunghezza comune il problema si annulla, perché tutte
-le coppie hanno la stessa lunghezza e la banda vale identica per tutte. Si perde
-l'informazione di durata, ed è accettabile per una ragione precisa: la durata di
-una ripresa è identica per tutte e trentadue le grandezze, quindi non può
-contribuire a distinguerle fra loro, mentre il rumore che introduce sì.
-
-\subsection{Il punteggio di separabilità}
-
-Per ciascuna grandezza si calcolano tre popolazioni di distanze: fra curve di
-caduta ($D_{FF}$), fra curve di attività quotidiana ($D_{AA}$) e incrociate
-($D_{FA}$). Una grandezza discriminativa produce curve simili all'interno della
-stessa classe e diverse fra classi, quindi $D_{FF}$ e $D_{AA}$ bassi e $D_{FA}$
-alto. Il punteggio è
-
-\[
-S = \frac{\mu_{FA}}{\mu_{\text{intra}} + \varepsilon},
-\qquad
-\mu_{\text{intra}} = \frac{\mu_{FF} + \mu_{AA}}{2},
-\]
-
-affiancato da una versione che tiene conto anche della dispersione,
-
-\[
-S_{\text{rob}} = \frac{\mu_{FA} - \mu_{\text{intra}}}
-                      {\sigma_{FA} + \sigma_{\text{intra}} + \varepsilon},
-\]
-
-perché un punteggio alto può derivare da valori anomali o da forte variabilità
-invece che da una separazione reale. Un valore $S = 1$ indica assenza di
-separazione: le curve di classi diverse distano quanto quelle della stessa
-classe.
-
-\subsection{Il criterio del minimo fra le due viste}
-
-L'analisi iniziale calcolava un punteggio unico, mescolando le riprese delle due
-telecamere. Questa scelta nasconde però il divario più grande misurato in tutto
-il lavoro.
-
-UP-Fall riprende ogni evento con due telecamere simultanee: una laterale,
-all'altezza del busto, e una frontale rialzata. Una telecamera che guarda
-dall'alto comprime la rotazione del tronco lungo il proprio asse ottico: la
-stessa grandezza che di profilo mostra ottantaquattro gradi di escursione fra
-persona eretta e distesa ne mostra tre dall'alto. Una grandezza che separa
-benissimo da una vista può quindi non separare nulla dall'altra, e mescolando le
-due il crollo resta invisibile fino alla misura sul modello finito.
-
-Il punteggio viene perciò calcolato \emph{separatamente per telecamera}, e la
-selezione usa il \textbf{minimo} fra i due:
-
-\[
-S_{\text{robusto}} = \min\big(S_{\text{cam}_1},\ S_{\text{cam}_2}\big).
-\]
-
-Il minimo e non la media, perché una grandezza ottima da una vista e inutile
-dall'altra è esattamente quella da escludere, e la media la premierebbe. Il
-costo di questo criterio va dichiarato: scarta grandezze valide da una vista
-sola. L'asse maggiore dell'ellisse, per esempio, ottiene sulla vista dall'alto
-il secondo punteggio più alto dell'intera analisi ma un valore mediocre di
-profilo, e viene escluso. È il prezzo di un sistema che deve funzionare senza
-sapere come sia stata montata la telecamera.
-
-\subsection{Ridondanza fra le grandezze scelte}
-
-Il DTW valuta ogni grandezza \emph{isolatamente}: non sa nulla delle altre, e
-quindi se lo stesso fenomeno fisico è misurato in tre modi lo premia tre volte.
-
-Sui dati questa non è un'eventualità teorica. Le prime tre grandezze della
-classifica risultavano correlate fra loro al di sopra di $0{,}94$, ed erano
-tutte descrizioni di «quanto è verticale il tronco»: l'altezza della testa
-rispetto al bacino in due rappresentazioni diverse e l'angolo del tronco. Il
-legame è geometrico — il tronco è un segmento rigido, quindi l'altezza della
-testa vale approssimativamente $L\cos\theta$ — e prenderle tutte e tre
-significherebbe occupare tre posti con un segnale solo.
-
-La selezione è quindi resa consapevole della ridondanza: si scorre la classifica
-dall'alto e si aggiunge una grandezza soltanto se la sua correlazione assoluta
-con \emph{tutte} le già scelte resta al di sotto di una soglia, fissata a
-$0{,}85$. Le grandezze escluse vengono dichiarate insieme a quella che le
-blocca, così l'esclusione è documentata invece di essere semplicemente
-un'assenza dall'elenco.
-
-Un'ultima cautela riguarda i fotogrammi privi di posa: la correlazione si misura
-sui soli fotogrammi con posa valida, perché sugli altri tutte le grandezze
-valgono zero per costruzione e risulterebbero correlate fra loro per un motivo
-che non ha nulla a che vedere con la dinamica del corpo.
-
-\subsection{Un limite dichiarato}
-
-L'analisi qui descritta è una \textbf{preselezione euristica}, non una
-dimostrazione. Nessuna grandezza, presa singolarmente, raggiunge un punteggio
-tale da separare le classi da sola: i valori si collocano fra $1{,}05$ e
-$1{,}31$, mentre $1{,}0$ indica assenza di separazione. Il sottoinsieme va
-valutato \emph{insieme}, e l'arbitro è la validazione incrociata sul modello,
-riportata nel Capitolo~\ref{cap:sperimentale}.
-
-Va inoltre osservato che la selezione dipende dal campione: su un pilota a due
-soggetti la classifica risultava sensibilmente diversa da quella ottenuta su
-dieci, e due grandezze che apparivano fra le migliori si rivelavano al di sotto
-della soglia di separazione una volta esteso il campione.
-
-
-\section{Finestre temporali e divisione dei dati}
-\label{sec:finestre}
-
-Come discusso nella Sezione~\ref{sec:motion}, una caduta non è riconoscibile da
-un singolo fotogramma: alcune attività quotidiane — sedersi rapidamente,
-chinarsi a raccogliere un oggetto — producono in un istante una configurazione
-simile a quella di una caduta, e la differenza sta nella traiettoria temporale.
-Il classificatore lavora quindi su \textbf{finestre}, cioè su sequenze ordinate
-di vettori di grandezze.
-
-\subsection{Lunghezza della finestra}
-
-Detta $f_t$ la rappresentazione al fotogramma $t$, una finestra è
-$X_t = [\,f_t, f_{t+1}, \dots, f_{t+L-1}\,]$, con $L$ da scegliere.
-
-Il compromesso è noto: una finestra corta osserva solo un frammento del
-movimento e può non contenere abbastanza contesto per distinguere una caduta da
-un'attività rapida; una finestra lunga contiene più contesto ma diluisce
-l'evento fra molti fotogrammi normali, e aumenta la latenza decisionale perché
-il sistema deve attendere più fotogrammi prima di classificare.
-
-Il valore utilizzato è $L = 22$ campioni a 9 fotogrammi al secondo, pari a
-$2{,}44$ secondi. La scelta merita due precisazioni.
-
-La prima riguarda la sua origine. Il valore deriva da una scelta iniziale di 45
-campioni a 18 fotogrammi al secondo, riportata alla frequenza di esercizio del
-dispositivo mantenendo invariata la durata coperta. Quel 45 non era però
-giustificato da alcuna misura, ed è stato successivamente sottoposto a
-verifica.
-
-La seconda riguarda l'esito di quella verifica, riportato nel
-Capitolo~\ref{cap:sperimentale}. La durata mediana della fase di caduta è di
-$3{,}11$ secondi, quindi superiore alla finestra: l'ipotesi ragionevole era che
-allungarla migliorasse il risultato. Il confronto su quattro lunghezze — 22, 28,
-36 e 44 campioni, da $2{,}4$ a $4{,}9$ secondi — mostra invece che
-\textbf{nessuna differenza è statisticamente distinguibile}, e che l'andamento
-non è nemmeno monotono. La spiegazione più probabile è che la memoria effettiva
-del sistema non coincida con la finestra: ogni campione porta con sé le
-grandezze integrali accumulate sui 31 fotogrammi precedenti
-(Sezione~\ref{sec:integrali}), cioè $1{,}7$ secondi di storia aggiuntiva.
-
-Il valore 22 non è quindi un'eredità: è un valore verificato contro tre
-alternative.
-
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.74\textwidth]{figure/fig_finestra.png}
-\caption{Prestazione al variare della lunghezza della finestra, a parità di tutto il resto. Le quattro configurazioni sono indistinguibili fra loro rispetto alla dispersione fra soggetti: la lunghezza non è la variabile che decide. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
-\label{fig:finestra}
-\end{figure}
-
-\subsection{Passo e sovrapposizione}
-
-Le finestre sono sovrapposte, con passo di 2 campioni. Il motivo è che una
-caduta può iniziare in un punto qualsiasi della sequenza: con finestre disgiunte
-l'evento potrebbe cadere a cavallo di due finestre e non essere contenuto per
-intero in nessuna delle due.
-
-La sovrapposizione introduce però una criticità di cui la sezione successiva si
-occupa: due finestre consecutive condividono venti campioni su ventidue e sono
-quindi quasi identiche.
-
-
-\section{Definizione del compito ed etichettatura delle finestre}
-\label{sec:compito}
-
-Fino a questo punto il problema è stato descritto come «distinguere una caduta
-da una normale attività quotidiana». È la formulazione corrente in letteratura,
-ma nasconde un'ambiguità che, come mostrerò nel capitolo sperimentale, produce
-l'effetto più grande misurato in tutto questo lavoro.
-
-\subsection{Una caduta è composta da tre fasi, non da una}
-
-Osservando le riprese di caduta del dataset si distinguono tre stati
-fisicamente diversi, che l'annotazione per fotogramma di UP-Fall separa
-esplicitamente:
-
-\begin{itemize}
-    \item \textbf{attività normale}: la persona è in piedi, cammina o si siede;
-    \item \textbf{transizione}: dalla perdita di equilibrio all'arrivo a terra;
-    \item \textbf{stato post-caduta}: la persona è a terra.
-\end{itemize}
-
-Le tre fasi hanno durate molto diverse. Misurando le cinquanta riprese di
-caduta della Camera~1 si ottengono i valori riportati in
-Tabella~\ref{tab:durate_fasi}: la transizione dura circa tre secondi, mentre lo
-stato successivo dura il doppio, e nel funzionamento reale può durare minuti od
-ore.
-
-\begin{table}[ht]
-\centering
-\caption{Durata delle tre fasi, misurata sulle riprese di caduta di UP-Fall
-(Camera~1, dieci soggetti).}
-\label{tab:durate_fasi}
-\begin{tabular}{lccc}
-\hline
-\textbf{Fase} & \textbf{Mediana} & \textbf{Decile 10\%} & \textbf{Decile 90\%} \\
-\hline
-In piedi, prima della caduta & 0,92 s & --- & --- \\
-Transizione (caduta in corso) & 3,11 s & 2,05 s & 3,94 s \\
-Stato post-caduta & 5,97 s & 4,82 s & 6,89 s \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Tre compiti diversi, non tre gradazioni dello stesso}
-
-Da questa scomposizione discende che «rilevare una caduta» non individua un
-compito solo. A seconda di quale fase si assume come positivo se ne definiscono
-tre, con prevalenze, difficoltà e negativi critici diversi:
-
-\begin{itemize}
-    \item \textbf{evento}: positivo se la finestra contiene la transizione.
-          Il sistema riconosce \emph{l'atto} del cadere;
-    \item \textbf{stato}: positivo se la finestra contiene la persona a terra.
-          Il sistema riconosce \emph{la condizione} di essere caduti;
-    \item \textbf{allarme}: positivo se la finestra contiene l'una o l'altra.
-\end{itemize}
-
-La scelta fra i tre non è un dettaglio di preprocessing. Il criterio clinico
-suggerirebbe il terzo, o addirittura il secondo: il danno della \emph{long-lie
-syndrome} dipende dal tempo trascorso a terra, non dall'impatto, e lo stato dura
-molto più a lungo della transizione, offrendo quindi più occasioni di
-rilevamento. Questa è la formulazione che il presente lavoro ha adottato
-inizialmente.
-
-\subsection{Il negativo che rende la scelta non ovvia}
-
-Esiste però una classe di negativi che rende i tre compiti profondamente
-diversi in difficoltà: le persone che si trovano in posizione orizzontale
-\emph{senza} essere cadute.
-
-In UP-Fall una delle attività registrate come normali è \emph{laying}, cioè
-sdraiarsi volontariamente: sono 20.980 fotogrammi, il 18\% dell'intero dataset,
-etichettati come attività quotidiana. Il dataset contiene quindi ventimila
-fotogrammi di persona distesa etichettati come normali e diecimila etichettati
-come post-caduta. \textbf{Nello stato finale i due casi sono quasi
-indistinguibili: la differenza sta unicamente nel modo in cui la persona ci è
-arrivata.}
-
-Questa osservazione è verificabile quantitativamente. Confrontando le mediane
-delle grandezze dinamiche fra le popolazioni di fotogrammi (Tabella
-\ref{tab:dinamica}), la transizione di caduta si separa dallo sdraiarsi
-volontario di uno o due ordini di grandezza, mentre lo stato post-caduta e lo
-stato disteso volontario sono praticamente sovrapposti.
-
-\begin{table}[ht]
-\centering
-\caption{Rapporto fra le mediane delle grandezze dinamiche. La transizione
-discrimina; la posa no.}
-\label{tab:dinamica}
-\begin{tabular}{lcc}
-\hline
-\textbf{Grandezza} & \textbf{Caduta / sdraiarsi} & \textbf{A terra / disteso} \\
-\hline
-Velocità del bacino & 30,1$\times$ & 1,3$\times$ \\
-Escursione del tronco & 42,5$\times$ & 2,8$\times$ \\
-Percorso del bacino & 33,0$\times$ & 1,3$\times$ \\
-Discesa del bacino & 139,4$\times$ & 2,1$\times$ \\
-\hline
-\end{tabular}
-\end{table}
-
-La ragione è fisica e intuitiva: nessuno si sdraia su un divano con
-un'escursione del tronco di trenta gradi in mezzo secondo. Lo stato finale è
-ambiguo per costruzione, la transizione no.
-
-\subsection{Dalle etichette per fotogramma a quella della finestra}
-
-Il classificatore non decide sul singolo fotogramma ma su una finestra di circa
-2,4 secondi, che quasi sempre contiene fotogrammi di fasi diverse. Serve quindi
-una regola di aggregazione.
-
-La regola adottata inizialmente contava i fotogrammi della classe ovunque
-essi fossero nella finestra: cinque fotogrammi di caduta sparsi valevano quanto
-cinque consecutivi. Per un evento che è per natura una dinamica continua il
-criterio è incoerente. È stato quindi sostituito da un criterio
-\textbf{$K$-su-$M$}: la finestra è positiva se esistono almeno $K$ fotogrammi
-della classe all'interno di un blocco locale di $M$ fotogrammi consecutivi.
-
-Formalmente, data la maschera binaria $m_t$ che vale 1 sui fotogrammi della
-classe cercata, la finestra è positiva se
-
-\[
-\max_{i}\ \sum_{t=i}^{i+M-1} m_t \ \geq\ K .
-\]
-
-Il criterio tollera un fotogramma annotato male senza spezzare l'evento, e ha
-due casi particolari utili: con $M = K$ degenera in «$K$ fotogrammi
-consecutivi», con $M$ molto grande nel conteggio totale sulla finestra. Il
-confronto fra criteri diventa quindi una variazione di parametro invece che di
-codice.
-
-I valori utilizzati sono $K = 5$ su $M = 8$ per la transizione e $K = 10$ su
-$M = 15$ per lo stato. Non sono valori ottimizzati: sono soglie di
-preprocessing scelte per imporre una presenza minima della fase nella finestra,
-ed è dichiarata nel Capitolo~\ref{cap:sperimentale} un'analisi di sensibilità.
-
-\subsection{Il metro di valutazione deve essere unico}
-
-Confrontare tre definizioni del compito richiede una cautela: se ciascun
-modello venisse misurato sulla propria definizione di positivo, il confronto non
-sarebbe interpretabile. Il compito \emph{evento} scarta le finestre di stato,
-che sono le più ambigue, e apparirebbe avvantaggiato per un motivo che non ha
-nulla a che vedere con la sua qualità.
-
-Ogni finestra porta quindi \textbf{due etichette}:
-
-\begin{itemize}
-    \item $y_{\text{train}}$, che dipende dalla definizione del compito ed è la
-          variabile dell'esperimento;
-    \item $y_{\text{allarme}}$, fissa per tutte le definizioni: vale 1 se la
-          finestra contiene la transizione \emph{oppure} lo stato. È il metro
-          con cui i tre modelli vengono confrontati.
-\end{itemize}
-
-Le finestre che il compito \emph{evento} esclude dall'addestramento restano
-quindi nell'insieme di verifica, marcate come non addestrabili: tutti i modelli
-sono misurati sullo stesso insieme.
-
-\subsection{Un vocabolario di riferimento}
-
-La tassonomia adottata coincide con quella di \emph{OmniFall}
-\cite{omnifall2025}, un benchmark del 2026 che unifica otto dataset di
-rilevamento cadute — UP-Fall compreso — per un totale di 101 soggetti e 29
-punti di vista, riannotandoli a mano con sedici classi. Quattro di queste sono
-esattamente le distinzioni discusse in questa sezione:
-
-\begin{itemize}
-    \item \texttt{fall} --- l'atto di cadere, da qualunque stato precedente;
-    \item \texttt{fallen} --- essere a terra dopo una caduta;
-    \item \texttt{lie\_down} --- sdraiarsi intenzionalmente;
-    \item \texttt{lying} --- essere disteso dopo esserci andato intenzionalmente.
-\end{itemize}
-
-Gli autori distribuiscono le sole annotazioni e non i video, il che ha permesso
-di applicarle ai dati già estratti senza modificare la pipeline: le etichette
-temporali sono state mappate sui fotogrammi di UP-Fall con una copertura del
-96,4\%, e l'allineamento è verificato dal fatto che le classi \texttt{fall} e
-\texttt{fallen} cadono dove cadono le annotazioni originali del dataset.
-
-L'adozione di questo vocabolario ha due conseguenze utili. La prima è che i
-negativi critici diventano misurabili \emph{dentro} il dataset di
-addestramento, e non soltanto sulle registrazioni domestiche o su un archivio
-esterno. La seconda è che i risultati diventano confrontabili con un benchmark
-pubblicato: OmniFall riporta, con un modello video da 87 milioni di parametri,
-F1 pari a 65,6\% sul riconoscimento dell'evento e \textbf{41,0\% sul
-riconoscimento dello stato}, e osserva che i modelli multimodali di grandi
-dimensioni confondono sistematicamente \texttt{fallen} con \texttt{lying}. Il
-divario fra i due compiti non è quindi un limite di questo lavoro: è un
-problema aperto del settore.
-
-\subsection{Cosa ne segue}
-
-La definizione del compito è stata trattata in questo capitolo come una scelta
-di rappresentazione del problema, alla pari della scelta delle feature, e non
-come un dettaglio di preprocessing. Il Capitolo~\ref{cap:sperimentale} ne misura
-le conseguenze, che risultano di gran lunga superiori a quelle della scelta
-dell'architettura di classificazione.
+Il Capitolo~\ref{cap:contesto} ha stabilito quali requisiti un sistema di
+rilevamento debba soddisfare per essere utile in un'abitazione. Questo capitolo
+colloca il lavoro rispetto alla letteratura: quali soluzioni sono state
+proposte, con quali dati sono state validate, e quali domande restano aperte.
+
+L'ordine è quello delle scelte da compiere. Prima il \emph{sensore}, che
+determina quale informazione sia disponibile; poi la \emph{rappresentazione},
+che stabilisce quale parte di quell'informazione raggiunga il classificatore;
+poi il \emph{modello temporale}; infine i \emph{dati} e i \emph{protocolli} con
+cui il risultato viene misurato. È l'ultimo punto, e non i primi tre, quello da
+cui questo lavoro trae la propria domanda principale.
+
+\section{Tecnologie per il rilevamento delle cadute}
+\label{sec:famiglie}
+
+Una classificazione consolidata distingue i sistemi di rilevamento in tre
+famiglie: dispositivi indossabili, sensori ambientali e sistemi basati su
+visione artificiale~\cite{mubashir, gutierrez}. Le tre osservano lo stesso
+fenomeno fisico attraverso informazioni differenti, e presentano compromessi
+diversi fra accuratezza, invasività, copertura dell'ambiente, costo e
+accettabilità.
+
+\subsection{Indossabili e sensori ambientali}
+
+I sistemi indossabili applicano il sensore al corpo o lo integrano in un
+oggetto di uso quotidiano. Accelerometri e giroscopi sono le tecnologie più
+diffuse, perché misurano direttamente accelerazione, orientamento e velocità
+angolare. Le prime soluzioni impiegavano regole a soglia; gli approcci
+successivi hanno introdotto classificatori supervisionati su finestre
+temporali dei segnali inerziali.
+
+Il vantaggio è che il sensore \emph{segue} la persona e non dipende dal punto
+di vista di una telecamera --- il che, come si vedrà nella
+sezione~\ref{sec:generalizzazione}, elimina alla radice uno dei problemi
+principali dei sistemi vision-based. Il limite è la dipendenza dalla
+\emph{compliance}: il dispositivo va indossato correttamente, mantenuto carico
+e usato con continuità~\cite{gazem}. Per una popolazione anziana il requisito
+non è trascurabile, e agisce in modo perverso, perché colpisce con maggiore
+probabilità proprio i soggetti a rischio più alto.
+
+Una seconda famiglia installa i sensori nell'ambiente: pressione, acustica,
+infrarossi, radar, o dispositivi che osservano variazioni del segnale radio.
+L'utente non deve indossare nulla, ma il vincolo si trasferisce all'ambiente:
+il sistema copre solo le aree strumentate e richiede installazione o
+calibrazione. Molte di queste tecnologie osservano inoltre il movimento in modo
+indiretto, e forniscono una descrizione più povera di un flusso visivo.
+
+Entrambe le famiglie restano rilevanti e in alcuni scenari sono preferibili.
+Questo lavoro si concentra sulla visione perché è l'unica che osserva
+simultaneamente postura, dinamica e relazione del soggetto con l'ambiente senza
+richiedere nulla all'utente --- e perché il vincolo che ne deriva, la
+riservatezza, ammette una soluzione architetturale.
+
+\subsection{Sistemi basati su visione artificiale}
+
+I sistemi vision-based impiegano telecamere RGB, RGB-D, termiche o di altra
+natura. Una rassegna dedicata alla fall detection vision-based ha analizzato 81
+sistemi pubblicati fra il 2015 e il 2020, documentando la transizione da
+descrittori geometrici progettati a mano verso rappresentazioni
+apprese~\cite{gutierrez}. La stessa rassegna segnala però un limite che non è
+stato superato: i dati disponibili contengono in larghissima parte cadute
+\emph{simulate}, e quasi nulla di realmente rappresentativo delle cadute di
+persone anziane.
+
+La visione offre più informazione di molti sensori ambientali: da una sequenza
+si stimano posizione, configurazione corporea, dinamica e interazione con
+l'ambiente. La ricchezza ha però due costi. L'elaborazione di interi fotogrammi
+richiede memoria e capacità di calcolo; e il video contiene informazioni
+identificative del soggetto e dettagli dell'abitazione.
+
+È per questa ragione che una parte della letteratura si è spostata verso
+rappresentazioni intermedie, che usano il fotogramma per estrarre informazione
+strutturata sul corpo e riducono il problema a una sequenza di grandezze
+numeriche. La stima della posa è la più rilevante fra queste, ed è la scelta
+adottata qui per le ragioni esposte nella sezione~\ref{sec:privacy}.
+
+\section{Rappresentazione e classificazione del movimento}
+\label{sec:rappresentazioni-sota}
+
+Il sensore stabilisce quale informazione esista; la rappresentazione stabilisce
+quale parte di essa raggiunga il classificatore. È una distinzione che questo
+lavoro considera centrale, e il Capitolo~\ref{cap:risultati} ne misura le
+conseguenze.
+
+\subsection{Dall'apparenza alla posa}
+
+I primi metodi vision-based si basavano sulla segmentazione del soggetto e su
+caratteristiche geometriche della sagoma: rapporto fra altezza e larghezza del
+rettangolo di contenimento, inclinazione, posizione del baricentro, variazione
+dell'area occupata, distanza apparente dal pavimento. Sono grandezze
+intuitivamente correlate al passaggio da postura eretta a orizzontale, e hanno
+il pregio dell'interpretabilità e del basso costo.
+
+Il loro limite è la dipendenza dalla segmentazione e, soprattutto, dal punto di
+vista. Una persona osservata lateralmente e la stessa persona osservata da una
+telecamera rialzata producono variazioni geometriche molto diverse pur
+eseguendo lo stesso movimento fisico. Il Capitolo~\ref{cap:risultati} quantifica
+questo effetto e mostra che è più grande di quello prodotto da qualunque scelta
+di modello.
+
+Con la diffusione dell'apprendimento profondo l'immagine è diventata essa stessa
+l'ingresso: reti convoluzionali bidimensionali su singoli fotogrammi, reti
+tridimensionali e modelli video su blocchi spazio-temporali. La rappresentazione
+viene appresa dai dati e non è più necessario decidere a priori quali grandezze
+siano informative.
+
+Il vantaggio ha però una contropartita, ed è la ragione per cui questo lavoro
+non segue quella direzione: il modello può appoggiarsi a correlazioni legate a
+sfondo, illuminazione, abbigliamento o disposizione della stanza. Se soggetti,
+telecamere e ambienti sono poco vari, una buona prestazione dentro il dominio
+non garantisce che sia stata appresa una descrizione trasferibile della caduta.
+
+\subsection{Perché serve la dimensione temporale}
+
+Una caduta è un fenomeno temporale e non è caratterizzata dalla sola postura.
+Numerosi approcci introducono quindi esplicitamente il movimento, tramite flusso
+ottico, immagini di storia del movimento, traiettorie, differenze fra fotogrammi
+o grandezze cinematiche derivate da punti del corpo.
+
+L'idea comune è distinguere non soltanto \emph{dove} si trovi il corpo, ma
+\emph{come} vi sia arrivato. Una persona distesa dopo una caduta e una persona
+che si è coricata volontariamente presentano una postura finale molto simile; la
+traiettoria che le precede è diversa. È l'osservazione da cui discende la
+formulazione del compito adottata in questo lavoro, e il
+Capitolo~\ref{cap:risultati} ne misura l'effetto.
+
+I descrittori progettati a mano conservano un vantaggio di interpretabilità:
+velocità, variazioni angolari, distanze e rapporti hanno un significato fisico
+esplicito. Il loro limite è che l'efficacia dipende dalla qualità della
+progettazione e dalla robustezza delle misure da cui derivano. In particolare,
+quando le coordinate di partenza sono \emph{stimate} e non misurate, le
+operazioni differenziali amplificano rumore e instabilità --- un problema che il
+Capitolo~\ref{cap:metodologia} quantifica e che è all'origine di una delle
+scelte metodologiche di questo lavoro.
+
+\subsection{Approcci basati sullo scheletro}
+
+La stima della posa trasforma un'immagine in un insieme di punti anatomici. Il
+classificatore non riceve il contenuto visivo della scena, ma una descrizione
+compatta della configurazione corporea.
+
+Gli approcci skeleton-based sono ampiamente studiati nel riconoscimento delle
+azioni umane. Una rassegna del 2024 che raccoglie oltre cento metodi distingue
+fra rappresentazioni progettate --- geometriche, cinematiche, statistiche --- e
+metodi di apprendimento profondo basati su reti ricorrenti, convoluzionali, a
+grafo, o su meccanismi di attenzione~\cite{huang}. La tassonomia si applica
+direttamente alla fall detection: la posa può essere trattata come insieme di
+coordinate grezze, trasformata in grandezze progettate, oppure interpretata da
+una rete che modelli le relazioni spaziali e temporali fra i giunti.
+
+Per un sistema destinato a un dispositivo a risorse limitate la rappresentazione
+scheletrica offre due vantaggi. Il primo è la compattezza: poche decine di
+valori sostituiscono centinaia di migliaia di componenti RGB. Il secondo è
+l'interpretabilità, perché ogni variazione del segnale si riconduce a una parte
+del corpo.
+
+Nessuno dei due rende però la posa una misura esatta. I \emph{landmark} sono
+stime prodotte da una rete, e risentono di occlusioni, scorci prospettici,
+illuminazione, risoluzione e configurazioni rare; le coordinate bidimensionali
+dipendono inoltre dal punto di vista. Una catena basata sulla posa sposta quindi
+parte della difficoltà dal classificatore allo stimatore e alla geometria
+costruita sopra di esso. Il Capitolo~\ref{cap:edge} mostra che questo
+spostamento ha una conseguenza pratica non prevista: è lo stimatore, e non il
+classificatore, il componente che non si trasferisce fra macchine diverse.
+
+L'interesse verso questa famiglia è testimoniato da lavori di fall detection che
+combinano scheletro e modelli sequenziali. Lin et al., ad esempio, estraggono la
+posa con OpenPose e confrontano LSTM e GRU per modellarne l'evoluzione
+temporale~\cite{lin}. È esattamente il confronto che il presente lavoro riprende
+--- con la differenza, discussa nella sezione~\ref{sec:posizionamento}, di
+mantenere costante tutto il resto della catena.
+
+\section{Modellazione temporale e classificatori}
+\label{sec:modelli-sota}
+
+Fissata la rappresentazione, la fall detection diventa un problema di
+classificazione di sequenze. La letteratura propone soluzioni che vanno dai
+classificatori tradizionali su grandezze progettate fino alle architetture ad
+attenzione.
+
+\subsection{Grandezze progettate e apprendimento automatico tradizionale}
+
+Nei sistemi basati su grandezze progettate la conoscenza del fenomeno è
+incorporata nella rappresentazione, non nel modello. Il classificatore riceve
+inclinazione, velocità, altezza relativa, traiettoria o energia del movimento, e
+deve separare le classi nello spazio così definito.
+
+Macchine a vettori di supporto, $k$ vicini più prossimi, alberi decisionali e
+foreste casuali sono stati ampiamente impiegati. Il vantaggio è il costo
+computazionale ridotto e la possibilità di esaminare direttamente l'importanza
+delle variabili. Questi modelli costituiscono inoltre un riferimento
+indispensabile per una domanda che il presente lavoro pone esplicitamente: se
+un'architettura sequenziale stia realmente sfruttando dipendenze temporali che
+un classificatore non sequenziale non può cogliere.
+
+\subsection{Reti ricorrenti}
+
+Le reti ricorrenti sono la scelta intuitiva quando l'ingresso è una sequenza.
+LSTM e GRU introducono meccanismi di memoria e di controllo del flusso pensati
+per conservare informazione nel tempo e attenuare le difficoltà delle reti
+ricorrenti semplici sulle dipendenze lunghe.
+
+LSTM impiega una cella di memoria e più meccanismi di controllo; GRU adotta una
+struttura più compatta e, a parità di dimensione dello stato, richiede meno
+parametri. Per un sistema destinato a hardware limitato è ragionevole
+\emph{ipotizzare} che questa differenza offra un buon compromesso fra capacità
+temporale e costo --- ed è l'ipotesi da cui il presente lavoro è partito.
+
+La presenza in letteratura di sistemi skeleton-based costruiti proprio su LSTM e
+GRU mostra che l'ipotesi non è arbitraria~\cite{lin}. I confronti fra
+architetture sono però difficili da interpretare quando cambiano
+contemporaneamente dati, grandezze, pre-elaborazione, divisione degli insiemi e
+soglia decisionale. Isolare l'effetto della sola architettura richiede un
+protocollo in cui tutto il resto resti invariato, ed è ciò che il
+Capitolo~\ref{cap:protocollo} costruisce.
+
+\subsection{Convoluzioni temporali}
+
+Le convoluzioni si applicano anche lungo il tempo. Una rete convoluzionale
+monodimensionale apprende schemi locali all'interno della sequenza e, con
+maggiore profondità o campo ricettivo, integra informazione proveniente da
+intervalli più ampi.
+
+A differenza delle reti ricorrenti non richiede uno stato aggiornato campione
+per campione, e consente maggiore parallelizzazione. Il confronto con LSTM e GRU
+permette di verificare se la dinamica della caduta richieda davvero memoria
+ricorrente, oppure sia riconoscibile da schemi locali.
+
+\subsection{Reti a grafo e architetture ad attenzione}
+
+Lo scheletro ha naturalmente struttura di grafo: i punti sono i nodi, le
+connessioni anatomiche gli archi. Le reti convoluzionali su grafo sono per
+questo una delle famiglie principali nel riconoscimento delle azioni, perché
+modellano simultaneamente relazioni spaziali fra giunti ed evoluzione temporale.
+
+I modelli ad attenzione hanno introdotto una strategia diversa: assegnano peso
+differente ai vari istanti e mettono in relazione diretta elementi anche
+distanti nella sequenza. Le rassegne recenti collocano reti ricorrenti,
+convoluzionali, a grafo e ad attenzione come le quattro linee principali di
+sviluppo~\cite{huang}.
+
+L'evoluzione verso architetture più sofisticate rende \emph{plausibile}
+attendersi un effetto rilevante della scelta del modello. L'aumento di
+complessità non garantisce però una migliore generalizzazione, soprattutto
+quando i dati sono pochi o quando la rappresentazione in ingresso incorpora già
+molta informazione temporale. È la tensione che motiva il confronto controllato
+del Capitolo~\ref{cap:risultati}, e il cui esito è il risultato principale di
+questo lavoro.
+
+\section{Dati e protocolli di valutazione}
+\label{sec:dati-sota}
+
+La qualità di un sistema di rilevamento non è separabile dal modo in cui il
+dato è raccolto e il protocollo definito. La raccolta di cadute reali presenta
+vincoli etici e pratici evidenti: non è possibile provocare deliberatamente
+incidenti in persone fragili per costruire un archivio rappresentativo.
+
+Gran parte dei riferimenti pubblici contiene quindi cadute simulate da
+volontari giovani e sani, e la rassegna di Gutiérrez et al. identifica proprio
+la scarsità di dati reali come uno dei limiti principali dei sistemi
+vision-based~\cite{gutierrez}. Ciò non rende inutili gli archivi simulati: sono
+necessari per sviluppare e confrontare metodi in condizioni controllate. Occorre
+però distinguere che cosa misurino da che cosa lascino non osservato --- ed è
+questa distinzione, più di ogni altra cosa, il filo conduttore della parte
+sperimentale di questo lavoro.
+
+\subsection{Gli archivi pubblici, e UP-Fall}
+
+Fra gli archivi impiegati nella letteratura vision-based compaiono UR-Fall,
+Le2i, Multiple Cameras Fall Dataset e UP-Fall, oltre a raccolte più recenti.
+Differiscono per numero di soggetti, attività quotidiane, tipi di caduta, punti
+di vista, frequenza di ripresa e criteri di annotazione, e l'eterogeneità rende
+privo di senso confrontare direttamente valori di $F$-score ottenuti su archivi
+diversi.
+
+UP-Fall è particolarmente rilevante per questo lavoro. È multimodale e comprende
+17 soggetti giovani e sani, 11 attività, più prove per attività e due telecamere
+sincronizzate~\cite{upfall}. La presenza di due viste consente di studiare
+esplicitamente l'effetto della geometria di ripresa --- che il
+Capitolo~\ref{cap:risultati} sfrutta --- e la varietà delle attività quotidiane
+permette di costruire negativi più realistici di quelli disponibili in archivi
+composti quasi soltanto da cadute e posture erette.
+
+Gli autori stessi sottolineano il carattere simulato delle cadute. Movimenti
+eseguiti volontariamente da soggetti giovani differiscono, per velocità,
+reazione protettiva e dinamica dell'impatto, dalle cadute accidentali di persone
+anziane. L'archivio va quindi inteso come ambiente controllato per lo sviluppo
+del metodo, non come rappresentazione dell'uso domestico.
+
+\subsection{Che cosa non si vede in laboratorio}
+
+Il divario fra simulazione e realtà è documentato anche fuori dalla visione
+artificiale. Una rassegna dedicata ai metodi di valutazione in condizioni reali
+osserva che lo sviluppo e le prove sono stati storicamente condotti su cadute
+simulate, e che le prestazioni peggiorano quando gli stessi algoritmi vengono
+riesaminati su dati della vita quotidiana~\cite{broadley}.
+
+La stessa rassegna mette in evidenza un problema metodologico che questo lavoro
+incontrerà direttamente: negli studi reali non è semplice definire in modo
+uniforme che cosa costituisca un \emph{non-evento}, né come contare i falsi
+allarmi. Un sistema continuamente attivo produce una sequenza di decisioni nel
+tempo, non un insieme finito di esempi indipendenti. Metriche costruite sulla
+finestra e metriche costruite sull'evento rispondono quindi a domande diverse,
+e la sezione~\ref{sec:finestra-evento} riprende il punto.
+
+Un passo recente verso una valutazione uniforme è OmniFall. Schneider et al.
+unificano otto archivi pubblici in una tassonomia comune --- circa quattordici
+ore di registrazioni, 101 soggetti, 29 viste --- e introducono un protocollo che
+valuta il trasferimento da dati controllati a video di incidenti
+reali~\cite{omnifall}. Il vocabolario distingue inoltre le azioni
+\emph{transitorie}, come \texttt{fall} e \texttt{lie\_down}, dagli \emph{stati}
+statici, come \texttt{fallen} e \texttt{lying}.
+
+Quella distinzione è il contributo di OmniFall che più conta per questo lavoro,
+perché rende esplicito che riconoscere l'atto del cadere e riconoscere una
+persona già a terra \textbf{non sono lo stesso problema}. Il
+Capitolo~\ref{cap:metodologia} adotta il vocabolario e il
+Capitolo~\ref{cap:risultati} ne misura le conseguenze.
+
+\subsection{Tre livelli di generalizzazione}
+\label{sec:generalizzazione}
+
+Anche dentro lo stesso archivio, il modo in cui si costruiscono gli insiemi
+cambia radicalmente il significato del risultato.
+
+Finestre sovrapposte estratte dalla stessa ripresa sono fortemente correlate: se
+vengono distribuite a caso fra addestramento e verifica, il modello viene
+giudicato su sequenze quasi identiche a quelle già viste. La divisione
+\textbf{per soggetto} è più severa, perché impone di generalizzare verso persone
+assenti dall'addestramento, e protocolli come il \emph{leave-one-subject-out}
+rendono inoltre visibile la dispersione fra individui, che una media aggregata
+nasconde. Il Capitolo~\ref{cap:protocollo} mostra che nel presente lavoro
+questa dispersione è dello stesso ordine di molte delle differenze che si
+vorrebbero misurare.
+
+Per i sistemi vision-based esiste un secondo livello: la generalizzazione fra
+\textbf{punti di vista}. Una grandezza bidimensionale può essere molto
+informativa da una vista laterale e degenerare quando lo stesso movimento è
+osservato dall'alto. Un confronto fra viste misura quindi una proprietà diversa
+da quella misurata dal confronto fra soggetti.
+
+Il terzo livello, il trasferimento fra \textbf{archivi}, è il più difficile:
+cambiano insieme persone, ambiente, telecamera, frequenza di ripresa,
+annotazione e distribuzione delle attività. Un sistema che vi conservi capacità
+discriminativa fornisce un'indicazione di generalità molto più forte di un
+modello misurato soltanto nel proprio dominio. Il Capitolo~\ref{cap:risultati}
+compie tutte e tre le verifiche, e mostra che rispondono a domande distinte.
+
+\section{Dal riferimento di laboratorio al funzionamento reale}
+\label{sec:finestra-evento}
+
+I limiti degli archivi si riflettono direttamente sulle metriche. Un
+classificatore può ottenere valori elevati e produrre un numero di allarmi
+incompatibile con l'uso quotidiano. Valutare un sistema di rilevamento richiede
+quindi di distinguere almeno tre livelli: la qualità della singola decisione, il
+comportamento temporale delle decisioni, e il comportamento operativo del
+sistema nel suo insieme.
+
+\subsection{Prevalenza e negativi difficili}
+
+Negli archivi le cadute devono essere abbastanza frequenti da permettere
+addestramento e valutazione. Nella vita quotidiana avviene il contrario: la
+classe positiva è rara e il sistema osserva per la quasi totalità del tempo
+attività ordinarie. La sezione~\ref{sec:falsiallarmi} ha svolto il conto.
+
+In queste condizioni diventano centrali i \textbf{negativi difficili}: attività
+normali che condividono caratteristiche con la classe positiva. Sedersi di
+scatto, inginocchiarsi, chinarsi e soprattutto \emph{sdraiarsi volontariamente}
+producono posture o traiettorie parzialmente simili a una caduta. Se questi casi
+sono assenti o sottorappresentati, un modello può apprendere scorciatoie che
+funzionano sul riferimento e generano falsi allarmi in casa.
+
+L'aspetto collega il problema della rappresentazione a quello della definizione
+del bersaglio. Se la classe positiva è definita attraverso la postura finale a
+terra, distinguerla da una persona volontariamente distesa è intrinsecamente
+difficile; se è definita attraverso la transizione, il sistema osserva anche la
+dinamica che ha condotto a quello stato. La letteratura sta rendendo la
+distinzione sempre più esplicita~\cite{omnifall}, e questo lavoro la misura.
+
+\subsection{Dalla finestra all'evento}
+
+La maggior parte dei classificatori temporali produce una decisione per ogni
+finestra. Un sistema installato in casa deve invece produrre \emph{eventi} di
+allarme, e le due quantità non coincidono.
+
+Se una situazione genera dieci finestre positive consecutive, il sistema può
+aggregarle in un unico evento; al contrario una finestra isolata può essere
+soppressa da una regola di persistenza. Meccanismi di persistenza, sospensione o
+conferma temporale modificano quindi il numero di allarmi senza cambiare le
+metriche calcolate sulla finestra.
+
+Precisione, richiamo e $F$-score sulla finestra restano perciò necessari ma non
+sufficienti. Un sistema destinato al funzionamento continuo va valutato anche in
+falsi allarmi per unità di tempo, durata delle attivazioni improprie e capacità
+di rilevare eventi distinti. Il passaggio dalla finestra all'evento è parte del
+sistema, non una presentazione dei suoi numeri; il Capitolo~\ref{cap:campo}
+misura di quanto le due grandezze differiscano sulle registrazioni condotte in
+questo lavoro.
+
+\subsection{Validazione in tempo reale e dispositivi edge}
+
+Un'ultima distanza fra prototipo e sistema riguarda il dispositivo di
+esecuzione. Molti lavori riportano accuratezza e complessità del classificatore
+senza misurare l'intera catena su hardware reale. In una catena vision-based il
+costo comprende però acquisizione, decodifica, eventuale rilevamento della
+persona, stima della posa, costruzione delle grandezze, classificazione e logica
+temporale.
+
+Una rassegna sistematica del 2026, ristretta ai soli sistemi vision-based con
+tempi di inferenza misurati su hardware fisico, ha selezionato \textbf{undici
+studi a partire da 588 record}~\cite{nabizade}. Nove degli undici impiegano
+dispositivi edge. Gli autori evidenziano due limiti persistenti: l'assenza di
+prove in condizioni reali con persone anziane, e la dipendenza da piccoli
+archivi controllati con cadute simulate.
+
+Il dato mostra che «tempo reale» ed «edge» non sono proprietà teoriche
+dell'architettura: la velocità va misurata sul dispositivo di destinazione e
+sulla catena completa. Il Capitolo~\ref{cap:edge} lo fa, e aggiunge
+un'osservazione che la rassegna non copre: quando una parte del sistema mantiene
+stato temporale --- come accade agli stimatori di posa --- l'equivalenza fra due
+piattaforme \textbf{non} discende dall'identità del classificatore.
+
+\section{Posizionamento del presente lavoro}
+\label{sec:posizionamento}
+
+Dalla letteratura emergono due linee che motivano direttamente questo lavoro, e
+conviene enunciarle come domande.
+
+\paragraph{La prima riguarda il modello.} Grandezze progettate, foreste casuali,
+reti ricorrenti, convoluzionali, a grafo e ad attenzione mostrano che esistono
+molte strategie plausibili per modellare una sequenza scheletrica, e la
+progressione suggerisce che scegliere bene conti. Ma i confronti pubblicati
+variano quasi sempre più di una cosa alla volta. \emph{Quanto incide davvero la
+scelta dell'architettura, se rappresentazione, dati e protocollo restano
+costanti?}
+
+\paragraph{La seconda riguarda ciò che si misura.} Cadute simulate, differenze
+di punto di vista, spostamento di dominio, negativi difficili e trasformazione
+di decisioni consecutive in eventi possono modificare il comportamento del
+sistema senza comparire in una metrica calcolata fuori
+linea~\cite{broadley, omnifall, nabizade}. \emph{Che cosa un archivio di
+laboratorio non riesce a misurare, e con quali conseguenze su chi lo usa per
+scegliere?}
+
+Il presente lavoro si colloca fra le due. Adotta una rappresentazione basata
+sulla posa, compatta e interpretabile, e confronta a parità di protocollo
+descrizioni geometriche e temporali diverse insieme a più famiglie di
+classificatori. La valutazione viene poi estesa oltre il singolo riferimento:
+divisione per soggetto, variazione del punto di vista, trasferimento verso un
+archivio esterno, comportamento in registrazioni domestiche continue, e
+funzionamento sul dispositivo effettivamente impiegato.
+
+Anticipando gli esiti --- che i capitoli sperimentali stabiliscono e che qui
+servono solo a rendere leggibile la struttura del seguito --- la risposta alla
+prima domanda è \emph{molto meno di quanto ci si aspettasse}, e la risposta alla
+seconda è che l'archivio di laboratorio non ordina male le alternative, ma
+\emph{non le distingue}, con effetti pratici equivalenti.
+
+Il Capitolo~\ref{cap:metodologia} descrive la costruzione della rappresentazione
+e delle grandezze fornite ai modelli; il Capitolo~\ref{cap:protocollo} definisce
+il protocollo di misura; i capitoli successivi misurano quali componenti della
+catena incidano realmente sul comportamento del sistema.
