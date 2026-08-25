@@ -71,10 +71,35 @@ I sistemi vision-based impiegano telecamere RGB, RGB-D, termiche o di altra
 natura. Una rassegna dedicata alla fall detection vision-based ha analizzato 81
 sistemi pubblicati fra il 2015 e il 2020, documentando la transizione da
 descrittori geometrici progettati a mano verso rappresentazioni
-apprese~\cite{gutierrez}. La stessa rassegna segnala però un limite che non è
-stato superato: i dati disponibili contengono in larghissima parte cadute
-\emph{simulate}, e quasi nulla di realmente rappresentativo delle cadute di
-persone anziane.
+apprese~\cite{gutierrez}. La stessa rassegna rileva che i dati disponibili
+contengono in larghissima parte cadute \emph{simulate}, e quasi nulla di
+realmente rappresentativo delle cadute accidentali di persone anziane.
+
+\paragraph{Perché la simulazione non è un difetto del settore.} Conviene
+dichiarare subito come questa osservazione vada intesa, perché la formulazione
+corrente la presenta spesso come una mancanza, e non lo è. Provocare
+deliberatamente cadute in persone anziane o fragili per costruire un archivio
+non è praticabile né eticamente ammissibile: la simulazione non è una scorciatoia,
+è \textbf{l'unica via disponibile} per ottenere il numero di esempi positivi che
+un classificatore richiede. Le cadute accidentali di anziani si possono
+raccogliere soltanto per osservazione, in tempi lunghi e in quantità minime, ed è
+precisamente ciò che le rende preziose e rare.
+
+L'osservazione va quindi riformulata come una domanda operativa: \emph{che cosa,
+di preciso, la simulazione non conserva?} La risposta è documentata almeno per
+la componente dinamica. Kangas et al. hanno confrontato cadute accidentali reali
+di persone anziane, raccolte con sensori indossati per sei mesi, con cadute
+sperimentali eseguite da soggetti di mezza età, e hanno riscontrato che la firma
+dell'evento differisce~\cite{kangasreali}: la grandezza più indicativa non è il
+picco di decelerazione ma la sua rapidità di crescita, e nelle cadute reali
+compaiono spesso impatti multipli, assenti negli altri movimenti. Chi cade
+davvero non esegue il movimento che un volontario esegue sapendo di doverlo
+eseguire.
+
+Questo lavoro adotta pertanto un archivio di cadute simulate, e lo dichiara per
+quello che è: uno strumento necessario allo sviluppo, non una rappresentazione
+dell'uso domestico. La distanza fra i due viene misurata, non assunta, nei
+Capitoli~\ref{cap:risultati} e~\ref{cap:campo}.
 
 La visione offre più informazione di molti sensori ambientali: da una sequenza
 si stimano posizione, configurazione corporea, dinamica e interazione con
@@ -301,6 +326,37 @@ reazione protettiva e dinamica dell'impatto, dalle cadute accidentali di persone
 anziane. L'archivio va quindi inteso come ambiente controllato per lo sviluppo
 del metodo, non come rappresentazione dell'uso domestico.
 
+\subsection{La composizione dell'archivio, che è il problema azionabile}
+\label{sec:composizione}
+
+Accertato che la simulazione della classe positiva è un vincolo e non una
+scelta, resta un secondo aspetto sul quale invece si può intervenire, ed è la
+\textbf{composizione} dell'insieme.
+
+Il punto non è che le attività quotidiane siano poche. Nell'archivio impiegato
+in questo lavoro sono la maggioranza netta: sui fotogrammi della telecamera
+laterale, l'\SI{85.99}{\percent} è attività normale, il \SI{4.80}{\percent} è
+transizione di caduta e il \SI{9.21}{\percent} è permanenza a terra. A livello
+di finestra i positivi sono il \SI{12.36}{\percent}. Il rapporto fra negativi e
+positivi è quindi di circa sette a uno.
+
+Il problema è che in un'abitazione quel rapporto è di \emph{milioni} a uno ---
+il conto è nella sezione~\ref{sec:falsiallarmi} --- e che un rapporto di sette a
+uno non è un'approssimazione di un rapporto di un milione a uno: è un problema
+diverso. Nessun archivio potrebbe correggere lo squilibrio, perché farlo
+richiederebbe di registrare anni di vita ordinaria per ogni caduta osservata.
+
+Ne discende che la composizione va giudicata su un criterio diverso dalla
+proporzione. Ciò che conta non è \emph{quante} siano le attività quotidiane, ma
+\textbf{quali}: se fra i negativi manchino quelli che in esercizio causano
+davvero gli errori. Sedersi di scatto, inginocchiarsi, chinarsi e soprattutto
+distendersi volontariamente producono configurazioni parzialmente simili a
+quelle di una caduta, e sono i casi su cui un sistema installato sbaglia.
+L'archivio impiegato qui contiene la distensione volontaria fra le attività
+registrate, ed è ciò che rende possibile la verifica del
+Capitolo~\ref{cap:risultati}; ma la sezione~\ref{sec:negativi} mostra che
+l'esserci non basta, perché conta anche \emph{dove} la persona si distende.
+
 \subsection{Che cosa non si vede in laboratorio}
 
 Il divario fra simulazione e realtà è documentato anche fuori dalla visione
@@ -381,6 +437,7 @@ comportamento temporale delle decisioni, e il comportamento operativo del
 sistema nel suo insieme.
 
 \subsection{Prevalenza e negativi difficili}
+\label{sec:negativi}
 
 Negli archivi le cadute devono essere abbastanza frequenti da permettere
 addestramento e valutazione. Nella vita quotidiana avviene il contrario: la
