@@ -178,36 +178,69 @@ La stima della posa trasforma un'immagine in un insieme di punti anatomici. Il
 classificatore non riceve il contenuto visivo della scena, ma una descrizione
 compatta della configurazione corporea.
 
-Gli approcci skeleton-based sono ampiamente studiati nel riconoscimento delle
-azioni umane. Una rassegna del 2024 che raccoglie oltre cento metodi distingue
-fra rappresentazioni progettate --- geometriche, cinematiche, statistiche --- e
-metodi di apprendimento profondo basati su reti ricorrenti, convoluzionali, a
-grafo, o su meccanismi di attenzione~\cite{huang}. La tassonomia si applica
-direttamente alla fall detection: la posa può essere trattata come insieme di
-coordinate grezze, trasformata in grandezze progettate, oppure interpretata da
-una rete che modelli le relazioni spaziali e temporali fra i giunti.
+Gli approcci basati sullo scheletro sono ampiamente studiati nel
+riconoscimento delle azioni umane. Una rassegna del 2023, che raccoglie circa
+duecentocinquanta risultati da oltre settanta studi pubblicati fra il 2019 e il
+marzo 2023, li organizza in quattro famiglie --- ricorrenti, convoluzionali, a
+grafo, ibride --- e distingue le caratteristiche geometriche progettate a mano
+dalle rappresentazioni apprese~\cite{nguyen}.
 
-Per un sistema destinato a un dispositivo a risorse limitate la rappresentazione
-scheletrica offre due vantaggi. Il primo è la compattezza: poche decine di
-valori sostituiscono centinaia di migliaia di componenti RGB. Il secondo è
-l'interpretabilità, perché ogni variazione del segnale si riconduce a una parte
-del corpo.
+\paragraph{La distinzione che questo lavoro mette alla prova.} Quella
+distinzione non è una classificazione bibliografica: individua due strategie
+alternative, e questo lavoro le percorre entrambe per confrontarle. I punti
+possono essere impiegati \textbf{direttamente come coordinate}, lasciando che
+sia il modello a scoprire quali relazioni contino; oppure trasformati in
+\textbf{grandezze progettate} che descrivano esplicitamente angolo del tronco,
+altezze relative, velocità. Il Capitolo~\ref{cap:metodologia} costruisce
+entrambe --- tre rappresentazioni geometriche e una rappresentazione a
+coordinate grezze --- e il Capitolo~\ref{cap:risultati} le mette a confronto a
+parità di protocollo. È il modo di rispondere alla domanda se progettare a mano
+le grandezze porti un vantaggio, invece di assumerlo.
 
-Nessuno dei due rende però la posa una misura esatta. I \emph{landmark} sono
-stime prodotte da una rete, e risentono di occlusioni, scorci prospettici,
-illuminazione, risoluzione e configurazioni rare; le coordinate bidimensionali
-dipendono inoltre dal punto di vista. Una catena basata sulla posa sposta quindi
-parte della difficoltà dal classificatore allo stimatore e alla geometria
-costruita sopra di esso. Il Capitolo~\ref{cap:edge} mostra che questo
-spostamento ha una conseguenza pratica non prevista: è lo stimatore, e non il
-classificatore, il componente che non si trasferisce fra macchine diverse.
+\paragraph{I due vantaggi attesi, e quanto reggono alla misura.} Alla
+rappresentazione scheletrica vengono attribuite due proprietà utili a un
+sistema destinato a hardware limitato. Entrambe sono reali, ma nessuna delle
+due funziona esattamente come ci si aspetterebbe, e conviene dirlo qui perché i
+capitoli sperimentali lo misurano.
 
-L'interesse verso questa famiglia è testimoniato da lavori di fall detection che
-combinano scheletro e modelli sequenziali. Lin et al., ad esempio, estraggono la
-posa con OpenPose e confrontano LSTM e GRU per modellarne l'evoluzione
-temporale~\cite{lin}. È esattamente il confronto che il presente lavoro riprende
---- con la differenza, discussa nella sezione~\ref{sec:posizionamento}, di
-mantenere costante tutto il resto della catena.
+La prima è la \textbf{compattezza}: poche decine di valori sostituiscono
+centinaia di migliaia di componenti RGB, e il costo della classificazione crolla
+di conseguenza. Il Capitolo~\ref{cap:edge} misura però che, sulla catena
+completa, la classificazione pesa per il \SI{5.8}{\percent} del tempo e la stima
+della posa per l'\SI{88.4}{\percent}. La compattezza è quindi un vantaggio
+autentico, ma agisce sulla parte piccola del problema: \textbf{ridurre
+ulteriormente il classificatore non serve a nulla}, e il vincolo di calcolo si
+sposta interamente sullo stimatore.
+
+La seconda è l'\textbf{interpretabilità}: ogni variazione del segnale si
+riconduce a una parte del corpo. Questa regge senza riserve, ed è ciò che rende
+possibile un esperimento che su una rappresentazione appresa non si potrebbe
+nemmeno formulare --- oscurare selettivamente spalle, caviglie o bacino e
+misurare quanto ciascun gruppo contribuisca
+(Capitolo~\ref{cap:risultati}).
+
+\paragraph{Il costo, che è dove si concentra la fragilità.} La posa non è una
+misura ma una stima, e risente di occlusioni, illuminazione, risoluzione,
+scorci prospettici e configurazioni corporee rare; le coordinate bidimensionali
+dipendono inoltre dal punto di vista.
+
+Una catena basata sulla posa sposta dunque parte della difficoltà dal
+classificatore allo stimatore e alla geometria costruita sopra di esso. È una
+constatazione che la letteratura fa in termini generali, e che questo lavoro
+trova in una forma precisa e non prevista: il Capitolo~\ref{cap:edge} mostra
+che, fra due macchine diverse, il classificatore si trasferisce in modo
+\emph{esatto} mentre lo stimatore \emph{no} --- perché mantiene stato fra
+fotogrammi, e differenze infinitesime si amplificano lungo la sequenza. Il
+componente fragile della catena non è quello su cui si concentra la letteratura.
+
+\paragraph{Il precedente diretto.} L'interesse verso questa famiglia è
+testimoniato da lavori di fall detection che combinano scheletro e modelli
+sequenziali. Lin et al. estraggono la posa con OpenPose e confrontano LSTM e
+GRU per modellarne l'evoluzione temporale~\cite{lin}: è, nella sostanza, la
+stessa domanda da cui muove questo lavoro. La differenza sta nel modo di
+porla --- mantenendo costante tutto il resto della catena e misurando quanti
+soggetti servirebbero perché la differenza osservata sia dichiarabile --- ed è
+discussa nella sezione~\ref{sec:posizionamento}.
 
 \section{Modellazione temporale e classificatori}
 \label{sec:modelli-sota}
@@ -276,7 +309,7 @@ I modelli ad attenzione hanno introdotto una strategia diversa: assegnano peso
 differente ai vari istanti e mettono in relazione diretta elementi anche
 distanti nella sequenza. Le rassegne recenti collocano reti ricorrenti,
 convoluzionali, a grafo e ad attenzione come le quattro linee principali di
-sviluppo~\cite{huang}.
+sviluppo~\cite{nguyen}.
 
 L'evoluzione verso architetture più sofisticate rende \emph{plausibile}
 attendersi un effetto rilevante della scelta del modello. L'aumento di
@@ -549,7 +582,7 @@ campo~\cite{gomes}.
 
 \paragraph{Il modello di classificazione.} Foreste casuali, reti ricorrenti,
 convoluzioni temporali, reti a grafo e architetture ad attenzione sono
-strategie plausibili per lo stesso problema~\cite{huang}, e nella fall
+strategie plausibili per lo stesso problema~\cite{nguyen}, e nella fall
 detection esistono lavori che confrontano direttamente ricorrenti diverse su
 rappresentazione scheletrica~\cite{lin}. I risultati riportati in lavori
 differenti sono però difficili da confrontare, perché cambiano
