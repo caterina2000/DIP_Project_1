@@ -318,12 +318,22 @@ finestra e metriche costruite sull'evento rispondono quindi a domande diverse,
 e la sezione~\ref{sec:finestra-evento} riprende il punto.
 
 Un passo recente verso una valutazione uniforme è OmniFall. Schneider et al.
-unificano otto archivi pubblici in una tassonomia comune --- circa quattordici
-ore di registrazioni, 101 soggetti, 29 viste --- e introducono un protocollo che
-valuta il trasferimento da dati controllati a video di incidenti
-reali~\cite{omnifall}. Il vocabolario distingue inoltre le azioni
-\emph{transitorie}, come \texttt{fall} e \texttt{lie\_down}, dagli \emph{stati}
-statici, come \texttt{fallen} e \texttt{lying}.
+unificano otto archivi allestiti in una tassonomia comune a sedici classi ---
+quindicimila riprese per ottanta ore complessive, con annotazione per
+fotogramma --- e articolano il riferimento in tre domini: gli archivi
+allestiti, un insieme sintetico, e un insieme di sole verifiche costituito da
+\textbf{video di incidenti reali}~\cite{omnifall}. Il vocabolario distingue
+le azioni \emph{transitorie}, come \texttt{fall} e \texttt{lie\_down}, dagli
+\emph{stati} statici, come \texttt{fallen} e \texttt{lying}.
+
+Il risultato che gli autori riportano su quella distinzione merita di essere
+citato per esteso, perché è la corroborazione più diretta della scelta
+metodologica di questo lavoro: sugli eventi reali i modelli valutati senza
+adattamento \emph{continuano a confondere lo stato} \texttt{fallen}
+\emph{con} \texttt{lying}, mentre quelli addestrati su scene che contengono
+esplicitamente la permanenza a terra fanno sensibilmente meglio. La confusione
+non è fra caduta e attività quotidiana: è fra una persona a terra e una
+persona distesa.
 
 Quella distinzione è il contributo di OmniFall che più conta per questo lavoro,
 perché rende esplicito che riconoscere l'atto del cadere e riconoscere una
@@ -420,16 +430,18 @@ costo comprende però acquisizione, decodifica, eventuale rilevamento della
 persona, stima della posa, costruzione delle grandezze, classificazione e logica
 temporale.
 
-Una rassegna sistematica del 2026, ristretta ai soli sistemi vision-based con
-tempi di inferenza misurati su hardware fisico, ha selezionato \textbf{undici
-studi a partire da 588 record}~\cite{nabizade}. Nove degli undici impiegano
-dispositivi edge. Gli autori evidenziano due limiti persistenti: l'assenza di
-prove in condizioni reali con persone anziane, e la dipendenza da piccoli
-archivi controllati con cadute simulate.
+Una mappatura sistematica del 2026 raccoglie \textbf{433 studi primari}
+pubblicati fino al 2025, selezionati da cinque banche dati con doppio
+screening indipendente, e dedica una parte specifica alle prove di
+schieramento: fotogrammi al secondo, latenza, e piattaforma hardware
+effettivamente impiegata~\cite{gomes}. Che quella parte debba essere
+\emph{cercata} attraverso una rassegna dedicata, invece di comparire di
+norma accanto alle metriche, è già indicativo di quanto raramente venga
+riportata.
 
-Il dato mostra che «tempo reale» ed «edge» non sono proprietà teoriche
+Il punto è che «tempo reale» ed «edge» non sono proprietà teoriche
 dell'architettura: la velocità va misurata sul dispositivo di destinazione e
-sulla catena completa. Il Capitolo~\ref{cap:edge} lo fa, e aggiunge
+sulla catena completa, non sul solo classificatore. Il Capitolo~\ref{cap:edge} lo fa, e aggiunge
 un'osservazione che la rassegna non copre: quando una parte del sistema mantiene
 stato temporale --- come accade agli stimatori di posa --- l'equivalenza fra due
 piattaforme \textbf{non} discende dall'identità del classificatore.
@@ -437,40 +449,81 @@ piattaforme \textbf{non} discende dall'identità del classificatore.
 \section{Posizionamento del presente lavoro}
 \label{sec:posizionamento}
 
-Dalla letteratura emergono due linee che motivano direttamente questo lavoro, e
-conviene enunciarle come domande.
+Dalla letteratura emerge un quadro nel quale esistono molte soluzioni
+tecnicamente valide, ma restano aperte alcune questioni che diventano
+particolarmente importanti quando si passa da un riferimento di laboratorio a
+un sistema destinato all'utilizzo reale. Sono quattro, e ciascuna corrisponde a
+una parte della verifica sperimentale di questo lavoro.
 
-\paragraph{La prima riguarda il modello.} Grandezze progettate, foreste casuali,
-reti ricorrenti, convoluzionali, a grafo e ad attenzione mostrano che esistono
-molte strategie plausibili per modellare una sequenza scheletrica, e la
-progressione suggerisce che scegliere bene conti. Ma i confronti pubblicati
-variano quasi sempre più di una cosa alla volta. \emph{Quanto incide davvero la
-scelta dell'architettura, se rappresentazione, dati e protocollo restano
-costanti?}
+\paragraph{La rappresentazione del movimento.} Il corpo può essere descritto
+direttamente attraverso le immagini, attraverso la sagoma, mediante coordinate
+scheletriche, oppure attraverso grandezze geometriche e cinematiche costruite
+sui \emph{landmark}. Ogni soluzione ha vantaggi e limiti diversi quanto a
+interpretabilità, costo computazionale e dipendenza dal punto di vista, e la
+rassegna di Gutiérrez et al. documenta come il settore si sia spostato dai
+descrittori progettati verso le rappresentazioni apprese senza che la questione
+si sia chiusa~\cite{gutierrez}. La mappatura sistematica del 2026, su 433 studi
+primari, conferma che la tripartizione fra progettazione delle grandezze,
+apprendimento profondo e modelli ibridi resta la struttura del
+campo~\cite{gomes}.
 
-\paragraph{La seconda riguarda ciò che si misura.} Cadute simulate, differenze
-di punto di vista, spostamento di dominio, negativi difficili e trasformazione
-di decisioni consecutive in eventi possono modificare il comportamento del
-sistema senza comparire in una metrica calcolata fuori
-linea~\cite{broadley, omnifall, nabizade}. \emph{Che cosa un archivio di
-laboratorio non riesce a misurare, e con quali conseguenze su chi lo usa per
-scegliere?}
+\paragraph{Il modello di classificazione.} Foreste casuali, reti ricorrenti,
+convoluzioni temporali, reti a grafo e architetture ad attenzione sono
+strategie plausibili per lo stesso problema~\cite{huang}, e nella fall
+detection esistono lavori che confrontano direttamente ricorrenti diverse su
+rappresentazione scheletrica~\cite{lin}. I risultati riportati in lavori
+differenti sono però difficili da confrontare, perché cambiano
+contemporaneamente dati, rappresentazione e protocollo: è la ragione per cui il
+riferimento OmniFall è stato costruito, e i suoi autori indicano proprio nella
+divergenza dei protocolli di valutazione «da un articolo all'altro» il motivo
+per cui l'utilità reale dei modelli resta poco chiara~\cite{omnifall}.
 
-Il presente lavoro si colloca fra le due. Adotta una rappresentazione basata
-sulla posa, compatta e interpretabile, e confronta a parità di protocollo
-descrizioni geometriche e temporali diverse insieme a più famiglie di
-classificatori. La valutazione viene poi estesa oltre il singolo riferimento:
-divisione per soggetto, variazione del punto di vista, trasferimento verso un
-archivio esterno, comportamento in registrazioni domestiche continue, e
-funzionamento sul dispositivo effettivamente impiegato.
+Diventa quindi interessante chiedersi \textbf{quanto la scelta
+dell'architettura influenzi realmente il risultato, quando il resto della
+catena viene mantenuto costante}. È una domanda che richiede un esperimento
+progettato per rispondervi, non una raccolta di numeri pubblicati.
 
-Anticipando gli esiti --- che i capitoli sperimentali stabiliscono e che qui
-servono solo a rendere leggibile la struttura del seguito --- la risposta alla
-prima domanda è \emph{molto meno di quanto ci si aspettasse}, e la risposta alla
-seconda è che l'archivio di laboratorio non ordina male le alternative, ma
-\emph{non le distingue}, con effetti pratici equivalenti.
+\paragraph{Il significato della classe positiva.} Riconoscere la transizione di
+caduta, riconoscere lo stato successivo a terra e decidere quando generare un
+allarme sono problemi collegati ma non equivalenti. La distinzione fra azione e
+stato, introdotta esplicitamente nei riferimenti più recenti, permette di
+formulare il problema in modo più preciso~\cite{omnifall}, e il risultato che
+gli autori riportano su di essa --- la persistenza della confusione fra
+\texttt{fallen} e \texttt{lying} --- mostra che la distinzione non è
+terminologica.
 
-Il Capitolo~\ref{cap:metodologia} descrive la costruzione della rappresentazione
-e delle grandezze fornite ai modelli; il Capitolo~\ref{cap:protocollo} definisce
-il protocollo di misura; i capitoli successivi misurano quali componenti della
-catena incidano realmente sul comportamento del sistema.
+\paragraph{La generalizzazione.} Le cadute simulate sono uno strumento
+necessario per lo sviluppo, ma non riproducono le condizioni che un sistema
+incontra in un'abitazione: la rassegna di Broadley et al. sui metodi di
+valutazione in condizioni reali conclude che le prove sul campo sono
+intrinsecamente difficili, che gli studi disponibili usano insiemi piccoli, e
+che manca accordo perfino su come contare i falsi allarmi e su che cosa
+costituisca un non-evento~\cite{broadley}. Cambiamenti di soggetto, punto di
+vista, ambiente e archivio modificano il comportamento della catena, così come
+lo modifica il passaggio dall'esecuzione fuori linea a un dispositivo reale ---
+un aspetto che, come rileva la mappatura del 2026, viene documentato di
+rado~\cite{gomes}.
+
+\subsection{Che cosa fa questo lavoro}
+
+Il presente lavoro si colloca all'interno di queste quattro questioni.
+
+Viene adottata una rappresentazione basata sulla posa, sulla quale sono
+costruite e confrontate diverse descrizioni geometriche e temporali del
+movimento. Più famiglie di classificatori vengono poi valutate mantenendo
+invariati, per quanto possibile, dati e protocollo, così da isolare il ruolo
+del modello.
+
+La valutazione non si limita al comportamento su un singolo riferimento, ma
+considera la generalizzazione verso soggetti assenti dall'addestramento, la
+variazione del punto di vista, il trasferimento verso un archivio esterno e il
+comportamento della catena in condizioni più vicine a quelle d'uso.
+
+Il sistema viene infine considerato nella sua interezza, includendo il
+passaggio dalle singole decisioni agli eventi di allarme e la verifica
+dell'esecuzione sul dispositivo effettivamente impiegato.
+
+Il Capitolo~\ref{cap:metodologia} descrive il modo in cui il video viene
+trasformato nella rappresentazione utilizzata dal sistema; il
+Capitolo~\ref{cap:protocollo} definisce il protocollo con cui le diverse
+scelte vengono confrontate.

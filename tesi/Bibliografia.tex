@@ -161,17 +161,20 @@ Asif et al., {\it Pose-based fall representations}, 2020.
 
 % --- Il divario laboratorio/realta': i riferimenti che lo misurano ---
 
-\bibitem{omnifall} D. Schneider, M. Sarfraz, C. Uhlemann, Z. Cao, Y. Wang,
-A. Roitberg, R. Stiefelhagen, {\it OmniFall: From Staged Through Synthetic to
-Wild --- A Unified Multi-Domain Dataset for Robust Fall Detection},
-arXiv:2505.19889, 2025.
-% VERIFICATO 2026-08-17. Unifica otto dataset pubblici (CMDFall, UP-Fall,
-% Le2i, GMDCSA24, CAUCA Fall, EDF, OCCU, MCFD) per ~80 h annotate a livello
-% di fotogramma, piu' un insieme di cadute reali "in the wild" e uno
-% sintetico da 12k video. Numeri usati nel Cap. 1 e nel Cap. 6: modello
-% addestrato su UP-Fall da F1 72,9% in dominio a 16,9% su cadute vere;
-% Le2i da 100% a 58,8%; fallen-state da 97,7% a 33,1%.
-% Sostituisce il segnaposto {liu}, che era inventato.
+\bibitem{omnifall} D. Schneider, Z. Marinov, M. Mistol, Z. Zhong, A. Jaus,
+R. D\"uger, R. Baur, M. S. Sarfraz, R. Stiefelhagen, {\it OmniFall: From Staged
+Through Synthetic to Wild --- A Unified Multi-Domain Dataset for Robust Fall
+Detection}, arXiv:2505.19889, 2025.
+% VERIFICATO 2026-08-25 sull'abstract. Quindicimila riprese, ottanta ore,
+% annotazione per fotogramma, tassonomia unica a SEDICI classi. Tre domini:
+% OF-Staged (otto archivi allestiti, divisioni per soggetto e per vista),
+% OF-Synthetic (dodicimila riprese, 17 h), OF-In-the-Wild (sole verifiche,
+% incidenti reali). La distinzione fra azioni transitorie (fall, sit down,
+% lie down, stand up) e stati statici (fallen, sitting, lying, standing,
+% walking, other) e' quella adottata nel Capitolo 3.
+% Frase chiave dell'abstract: «zero-shot models keep confusing fallen with
+% lying, whereas models fine-tuned on synthetic data with explicit
+% fallen-state scenes do substantially better».
 
 \bibitem{zobi} % [DA CERCARE] citato nel Cap. 1 per la vulnerabilita'
 % alle occlusioni
@@ -238,33 +241,53 @@ detection: Principles and approaches}, Neurocomputing, {\bf 100} (2013),
 144--152.
 % La tripartizione indossabili / ambientali / visione.
 
-\bibitem{gutierrez} J. Gutiérrez, V. Rodríguez, S. Martin, {\it Comprehensive
+\bibitem{gutierrez} J. Guti\'errez, V. Rodr\'iguez, S. Martin, {\it Comprehensive
 Review of Vision-Based Fall Detection Systems}, Sensors, {\bf 21}(3) (2021),
 947.
+% VERIFICATO 2026-08-25. Ottantuno sistemi vision-based pubblicati nei cinque
+% anni precedenti. Identifica la scarsita' di dati reali come limite
+% principale del settore.
 % 81 sistemi fra il 2015 e il 2020. Documenta la transizione dai descrittori
 % progettati alle rappresentazioni apprese, e identifica la scarsita' di dati
 % reali come limite principale del settore.
 
-\bibitem{huang} Rassegna 2024 sul riconoscimento delle azioni basato su
-scheletro: oltre cento metodi, distinti in rappresentazioni progettate e
-metodi profondi (ricorrenti, convoluzionali, a grafo, ad attenzione).
-% [DA COMPLETARE] recuperare autori, titolo esatto e sede prima della consegna.
+\bibitem{huang} {\it A Survey on 3D Skeleton-Based Action Recognition Using
+Learning Method}, Cyborg and Bionic Systems, 2024. DOI 10.34133/cbsystems.0100.
+% Rassegna sul riconoscimento delle azioni da scheletro, organizzata per
+% architettura: lavori su caratteristiche progettate a mano e lavori su
+% rappresentazioni apprese (convoluzionali, a grafo, ibride).
+% [DA COMPLETARE] l'elenco degli autori non e' stato recuperato: l'editore
+% non consente l'accesso automatico alla pagina. Va aggiunto a mano.
 
 \bibitem{lin} C.-B. Lin, Z. Dong, W.-K. Kuan, Y.-F. Huang, {\it A Framework for
 Fall Detection Based on OpenPose Skeleton and LSTM/GRU Models}, Applied
 Sciences, {\bf 11}(1) (2021), 329.
+% VERIFICATO 2026-08-25. DOI 10.3390/app11010329.
 % Il confronto LSTM/GRU su scheletro: il precedente diretto della domanda
 % posta nel Capitolo 5.
 
 \bibitem{broadley} R. W. Broadley, J. Klenk, S. B. Thies, L. P. J. Kenney,
 M. H. Granat, {\it Methods for the Real-World Evaluation of Fall Detection
 Technology: A Scoping Review}, Sensors, {\bf 18}(7) (2018), 2060.
+% VERIFICATO 2026-08-25. DOI 10.3390/s18072060. Ventidue articoli inclusi.
+% Conclusione degli autori: le prove in condizioni reali sono intrinsecamente
+% difficili, gli studi usano insiemi piccoli, e non c'e' accordo su come
+% quantificare la capacita' di evitare i falsi allarmi ne' su come
+% identificare i non-eventi.
 % Sviluppo e prove condotti prevalentemente su cadute simulate; difficolta' di
 % definire il non-evento e di contare i falsi allarmi in esercizio continuo.
 
-\bibitem{nabizade} Rassegna sistematica 2026 sui sistemi vision-based con tempi
-di inferenza misurati su hardware fisico: undici studi selezionati su 588
-record, nove dei quali su dispositivi edge.
-% [DA COMPLETARE] recuperare autori, titolo esatto e sede prima della consegna.
+\bibitem{gomes} M. E. N. Gomes, P. S. G. de Mattos Neto, C. Zanchettin,
+L. N. Matos, B. S. Morais, {\it Fall Detection Based on Computer Vision: A
+Systematic Mapping Study}, IEEE Journal of Biomedical and Health Informatics,
+2026.
+% VERIFICATO 2026-08-25. 433 studi primari fino al 2025, cinque banche dati,
+% doppio screening indipendente, flusso ispirato a PRISMA. Tassonomia a tre
+% livelli (feature engineering, apprendimento profondo, modelli ibridi) e una
+% valutazione DEDICATA a efficienza e prove di schieramento: fotogrammi al
+% secondo, latenza, piattaforma hardware.
+%
+% SOSTITUISCE il segnaposto `nabizade` (undici studi su 588 record, nove su
+% dispositivi edge), di cui non e' stato trovato riscontro il 2026-08-25.
 
 \end{thebibliography}
