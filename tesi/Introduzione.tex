@@ -3,49 +3,124 @@
 \setcounter{chapter}{0}
 
 % ---------------------------------------------------------------------
-% Scritta il 2026-08-18.
+% RISCRITTA IL 2026-08-26 sul modello dell'introduzione della tesi
+% triennale della candidata, che procede per cinque movimenti in prosa
+% continua e SENZA titoli interni:
 %
-% Questo file era vuoto (tre righe di intestazione). L'anticipazione dei
-% risultati stava in fondo al Cap. 1, dove faceva danno: il lettore
-% arrivava al Cap. 6 -- che e' il capitolo in cui il lavoro vero viene
-% fatto -- avendone gia' sentito la conclusione, e lo leggeva come un
-% riassunto.
+%   1. il campo, e perche' e' interessante
+%   2. cio' che non si capisce ancora
+%   3. l'obiettivo di questa tesi
+%   4. il risultato principale, annunciato UNA VOLTA e con il rimando
+%      preciso al capitolo che lo produce
+%   5. «Nel dettaglio la tesi e' cosi' suddivisa. Nel Capitolo 1...»
 %
-% Qui l'anticipazione e' al posto giusto per convenzione, e il Cap. 1
-% torna a fare il suo mestiere: porre la domanda.
+% Le tre \section* della versione precedente sono state tolte: in una
+% introduzione da novecento parole erano titoli ogni trecento.
 %
-% REGOLA per il Cap. 1: puo' dire "l'esito e' nel Capitolo X", non puo'
-% dire il numero.
+% ATTENZIONE: la mappa dei capitoli descrive la struttura a CINQUE
+% capitoli. I \ref si risolvono da soli, ma restituiscono la numerazione
+% corretta solo dopo la fusione di Protocollo dentro Risultati e di
+% Deployment dentro Ambiente reale.
 % ---------------------------------------------------------------------
 
-Una persona anziana su cinque cade almeno una volta all'anno, e sei cadute su dieci avvengono in casa~\cite{passi}. È l'ambiente in cui si cade di più ed è, insieme, quello in cui può non esserci nessuno ad accorgersene: la gravità delle conseguenze non dipende soltanto dall'impatto, ma dal tempo che la persona trascorre a terra prima del soccorso.
+Il rilevamento automatico delle cadute è uno dei problemi centrali
+dell'\emph{Ambient Assisted Living}, e ha ricevuto negli ultimi anni
+un'attenzione considerevole: una persona anziana su cinque cade almeno una
+volta all'anno, e sei cadute su dieci avvengono in casa~\cite{passi}. Sui
+dataset di riferimento i sistemi pubblicati dichiarano prestazioni molto
+elevate --- il 99,58\% sulla vista frontale di UP-Fall per un'architettura che
+combina convoluzioni temporali e un \emph{encoder} basato su
+attenzione~\cite{tcnte}, oltre il 94\% medio per un modello a grafo su tre
+flussi~\cite{gcn3stream}. È tuttavia noto che quei valori non descrivono il
+comportamento dei sistemi una volta installati.
 
-Questo lavoro affronta il problema con una telecamera e un dispositivo di calcolo da poche decine di euro. Il sistema classifica cadute contro attività quotidiane a partire dalla \emph{posa} della persona --- un insieme di coordinate di giunti --- invece che dai fotogrammi: l'immagine viene scartata alla fonte, e ciò che il classificatore riceve non contiene volto, abbigliamento né sfondo. È un \emph{privacy-by-design} architetturale e non dichiarativo, ed è la condizione perché un sistema di questo tipo sia accettabile in un'abitazione privata.
+Sono stati compiuti diversi tentativi di misurare l'entità dello scarto.
+Bagalà e colleghi hanno rieseguito tredici algoritmi pubblicati, che
+dichiaravano sensibilità fra il 76\% e il 100\% su cadute simulate, sopra un
+archivio di ventinove cadute reali: la sensibilità media misurata è stata del
+$57{,}0\%$~\cite{bagala}. Più di recente, il benchmark OmniFall ha mostrato che
+i modelli valutati fuori dal dominio di addestramento continuano a confondere
+la persona caduta con la persona semplicemente distesa~\cite{omnifall}. Le
+cause del divario non sono però una sola, e vengono attribuite ora al
+protocollo di valutazione, ora alla natura simulata delle cadute, ora alla
+differenza fra l'ambiente di sviluppo e quello di installazione. Quale di esse
+pesi di più, e con quali conseguenze per chi deve scegliere fra due alternative
+progettuali, resta una domanda aperta.
 
-L'ipotesi da verificare è duplice. Da un lato che l'intera catena --- stima della posa, costruzione delle feature, classificazione --- possa girare in tempo reale su un nodo \emph{edge} a basso costo, rendendo superflui sia un server con GPU sia la trasmissione dei dati fuori dall'abitazione. Dall'altro che una rete ricorrente compatta sia la scelta appropriata per il classificatore, come il prototipo di partenza assumeva.
+L'obiettivo di questa tesi è portare un prototipo di rilevamento cadute basato
+sulla posa da un sistema che \emph{dichiara} prestazioni a un sistema che le
+\emph{misura}, e verificarne l'esecuzione su un dispositivo \emph{edge} da
+circa cento euro dal quale nessuna immagine esce. La rappresentazione impiegata
+è quella scheletrica: ogni fotogramma viene ridotto a un insieme di coordinate
+di giunti, e l'immagine viene scartata alla fonte, cosicché ciò che raggiunge
+il classificatore non contiene volto, abbigliamento né sfondo. È una forma di
+\emph{privacy-by-design} architetturale e non dichiarativa, ed è la condizione
+perché un sistema di questo tipo risulti accettabile in un'abitazione privata.
 
-\section*{Che cosa il lavoro ha trovato}
+Il lavoro muove da due ipotesi, entrambe ereditate dal prototipo di partenza:
+che l'intera catena --- stima della posa, costruzione delle grandezze,
+classificazione --- possa essere eseguita in tempo reale su hardware a basso
+costo, e che una rete ricorrente compatta sia la scelta appropriata per il
+classificatore.
 
-La prima ipotesi regge. L'intera catena gira su una board da circa cento euro a 26,5 fotogrammi al secondo, senza che alcun dato lasci il dispositivo. Il costo si distribuisce però in modo inatteso: la stima della posa occupa l'88,4\% del tempo di calcolo, il classificatore il 5,8\%. Tutto il lavoro di confronto fra architetture agisce quindi su un ventesimo del problema.
+La prima ipotesi regge. La catena completa gira su un dispositivo da circa
+cento euro a 26,5 fotogrammi al secondo, senza che alcun dato lasci la
+macchina; il costo per fotogramma si distribuisce però in modo inatteso, con
+l'$88{,}4\%$ speso nella stima della posa e il $5{,}8\%$ nella classificazione.
+La seconda ipotesi non regge, e la ragione è più interessante della smentita:
+cinque architetture confrontate a parità assoluta di protocollo si collocano
+tutte entro $0{,}066$ della metrica di riferimento, contro una dispersione fra
+soggetti compresa fra $0{,}08$ e $0{,}12$, e nessuna coppia risulta
+distinguibile. Il confronto che invece separa nettamente vale $0{,}438$, ed è
+quello fra due posizioni della telecamera.
 
-La seconda ipotesi non regge, ma non nel modo previsto. Cinque architetture confrontate a parità di protocollo --- due ricorrenti, una bidirezionale, un \emph{encoder} basato su attenzione e un classificatore non sequenziale --- si collocano tutte entro $0{,}042$ della metrica di riferimento, contro una dispersione fra soggetti di $\pm 0{,}08$--$0{,}11$: nessuna coppia è distinguibile. Il confronto che invece separa nettamente vale $0{,}438$, ed è quello fra due posizioni della telecamera. La variabile che decide non è il modello, è dove si monta l'ottica.
-
-\section*{Il risultato che non era fra le domande}
-
-La validazione in ambiente domestico ha prodotto la conclusione che questo lavoro considera il proprio contributo principale, e che non era fra gli obiettivi di partenza.
-
-Alcuni interventi progettati per rendere il sistema robusto in una casa \emph{peggiorano} la metrica calcolata sul dataset di riferimento, e la migliorano di due ordini di grandezza in una casa vera. La causa è verificabile e non dipende dal modello: nei due insiemi le persone orizzontali \emph{che non sono cadute} sono di tipo opposto --- a terra in laboratorio, dove sdraiarsi sul pavimento è una delle attività registrate; su un divano in casa, un torso e mezzo più in alto. La condizione che quegli interventi servono a gestire non è rappresentata nell'insieme su cui li si giudicava.
-
-Ne segue un enunciato che si ritiene valga oltre il caso particolare:
+Il risultato che questo lavoro considera il proprio contributo principale non
+era però fra le domande di partenza, ed è emerso dalla validazione in ambiente
+domestico. Nel Capitolo~\ref{cap:campo} viene misurato che fra la
+configurazione di riferimento e quella adottata corrono $0{,}055$ di $F_2$ in
+laboratorio --- una differenza interna alla dispersione fra soggetti, che
+quindi non si può dichiarare --- e un fattore \textbf{cinquantadue} sui falsi
+allarmi prodotti in un'abitazione reale. La causa è verificabile e non dipende
+dal modello: nei due insiemi le persone orizzontali \emph{che non sono cadute}
+sono di tipo opposto, a terra in laboratorio, dove sdraiarsi sul pavimento è
+una delle attività registrate, e su un divano in casa, un torso e mezzo più in
+alto. Ne segue un enunciato che si ritiene valga oltre il caso particolare:
 
 \begin{quote}
-Un insieme di verifica non può misurare un miglioramento su una condizione che non rappresenta. E se lo si impiega ugualmente, non si limita a sovrastimare le prestazioni: \textbf{ordina in modo errato le alternative}, indicando la direzione sbagliata con la stessa apparente sicurezza con cui indicherebbe quella giusta.
+Un insieme di verifica non può misurare un miglioramento su una condizione che
+non rappresenta. E se lo si impiega ugualmente, non si limita a sovrastimare le
+prestazioni: \textbf{ordina in modo errato le alternative}, indicando la
+direzione sbagliata con la stessa apparente sicurezza con cui indicherebbe
+quella giusta.
 \end{quote}
 
-È la formulazione sperimentale dell'osservazione da cui il lavoro ha preso avvio --- i sistemi che dichiarano risultati eccellenti e falliscono nella pratica --- con un'aggravante che l'osservazione originale non conteneva: il numero dichiarato non è soltanto ottimistico, è \emph{fuorviante nella scelta}.
+La forma più forte di questo enunciato è quantitativa, e riguarda quale domanda
+valga la pena porre. Distinguere due definizioni dell'evento da riconoscere
+richiede due soggetti; distinguere una GRU da una LSTM ne richiederebbe
+centotredici.
 
-\section*{Struttura dell'elaborato}
+Nel dettaglio la tesi è così suddivisa. Nel Capitolo~\ref{cap:contesto} viene
+inquadrato il problema clinico, vengono dichiarati i requisiti rispetto ai
+quali il sistema andrà giudicato e viene formulato il problema di
+classificazione. Nel Capitolo~\ref{cap:stato_arte} vengono richiamate le
+soluzioni proposte in letteratura --- sensori, rappresentazioni, modelli
+temporali, dati e protocolli --- allo scopo di fissare i concetti impiegati nel
+seguito e di dichiarare quali alternative il lavoro confronta e quali no. Nel
+Capitolo~\ref{cap:metodologia} viene descritta la catena che porta dal video
+alle grandezze in ingresso al classificatore: la stima della posa, le tre
+rappresentazioni geometriche, le grandezze accumulate, la selezione del
+sottoinsieme e la definizione del compito. Nel Capitolo~\ref{cap:risultati}
+viene costruito il protocollo di misura, dal quale dipende l'interpretabilità
+di ogni numero successivo, e vengono riportati i confronti condotti in
+laboratorio. Infine, nel Capitolo~\ref{cap:campo} il sistema viene portato sul
+dispositivo, ne viene caratterizzato il costo e viene messo in esercizio in due
+abitazioni reali; è il capitolo in cui il problema viene riformulato. Il
+Capitolo~\ref{cap:conclusioni} discute contributi e limiti.
 
-Il Capitolo~\ref{cap:contesto} inquadra il problema clinico, argomenta la scelta della rappresentazione basata sulla posa, e dichiara i quattro requisiti rispetto ai quali il sistema andrà giudicato. Il Capitolo~\ref{cap:stato_arte} colloca il lavoro rispetto alla letteratura, e mostra che le due domande da cui muove --- quanto pesi la scelta dell'architettura, e che cosa un archivio di laboratorio non riesca a misurare --- sono aperte anche fuori da questo elaborato. Il Capitolo~\ref{cap:metodologia} descrive la catena che porta dal video alle grandezze in ingresso al classificatore. Il Capitolo~\ref{cap:protocollo} costruisce il protocollo di misura, ed è il capitolo da cui dipende l'interpretabilità di ogni numero successivo. Il Capitolo~\ref{cap:risultati} riporta i confronti sperimentali, il Capitolo~\ref{cap:edge} il \emph{porting} sul dispositivo e la caratterizzazione del suo costo, il Capitolo~\ref{cap:campo} la validazione in abitazioni reali. Il Capitolo~\ref{cap:conclusioni} discute contributi e limiti.
-
-Tre risultati di questo lavoro sono \emph{negativi} rispetto alle scelte che lo avevano orientato: l'acceleratore neurale del dispositivo non viene utilizzato, l'architettura ricorrente di partenza non è giustificata dai dati, e un filtro geometrico progettato per ridurre i falsi allarmi peggiora il bilancio complessivo. Sono riportati come tali, perché una scelta verificata e smentita è un risultato, mentre una scelta assunta e mai messa alla prova non lo è.
+Tre risultati di questo lavoro sono \emph{negativi} rispetto alle scelte che lo
+avevano orientato: l'acceleratore neurale del dispositivo non viene
+utilizzato, l'architettura ricorrente di partenza non è giustificata dai dati,
+e un filtro geometrico progettato per ridurre i falsi allarmi peggiora il
+bilancio complessivo. Sono riportati come tali, perché una scelta verificata e
+smentita è un risultato, mentre una scelta assunta e mai messa alla prova non
+lo è.

@@ -31,7 +31,10 @@ QUI = os.path.dirname(os.path.abspath(__file__))
 os.chdir(QUI)
 
 CAPITOLI = sorted(glob.glob('Cap*.tex'))
-FILE = CAPITOLI + ['Introduzione.tex', 'Bibliografia.tex']
+# Conclusioni.tex non si chiama Cap*: dal 26 agosto e' un file a se',
+# e senza questa riga la sua etichetta `cap:conclusioni` risulta assente
+# e i rimandi dell'Introduzione vengono segnalati come orfani.
+FILE = CAPITOLI + ['Conclusioni.tex', 'Introduzione.tex', 'Bibliografia.tex']
 FILE = [f for f in FILE if os.path.exists(f)]
 
 problemi = []
@@ -85,7 +88,7 @@ for f in FILE:
 
 # ------------------------------------------------------------------ figure
 vuote = []
-for f in CAPITOLI:
+for f in CAPITOLI + ['Conclusioni.tex']:
     t = leggi(f)
     for m in re.finditer(r'\\begin\{figure\}.*?\\end\{figure\}', t, re.S):
         b, n = m.group(0), riga_di(t, m.start())
@@ -107,8 +110,14 @@ if os.path.exists('Bibliografia.tex'):
                     if not r.lstrip().startswith('%'))
     chiavi = set(re.findall(r'\\bibitem\{([^}]+)\}', bib))
     usate = collections.defaultdict(set)
+    # stessa ragione della ibitem qui sopra: una \cite dentro un
+    # commento non viene compilata, quindi non puo' uscire come [?].
+    # Senza questa riga, documentare in testa a un capitolo quali chiavi
+    # sono state corrette fa segnalare come non definite proprio quelle.
     for f in FILE:
-        for m in re.findall(r'\\cite\{([^}]+)\}', leggi(f)):
+        vivo = chr(10).join(r for r in leggi(f).split(chr(10))
+                            if not r.lstrip().startswith('%'))
+        for m in re.findall(r'\\cite\{([^}]+)\}', vivo):
             for k in m.split(','):
                 usate[k.strip()].add(f)
     for k in sorted(set(usate) - chiavi):
@@ -124,7 +133,7 @@ print('=' * 74)
 print('\n%-16s %7s %7s %5s %6s' % ('file', 'righe', 'parole', 'sez.', 'fig.'))
 print('-' * 46)
 tot = 0
-for f in CAPITOLI + ['Introduzione.tex']:
+for f in ['Introduzione.tex'] + CAPITOLI + ['Conclusioni.tex']:
     if not os.path.exists(f):
         continue
     t = leggi(f)

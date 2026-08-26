@@ -2,37 +2,44 @@
 \label{cap:stato_arte}
 
 % ---------------------------------------------------------------------
-% RISCRITTO IL 2026-08-25. Terza stesura.
+% QUARTA STESURA, 2026-08-26. Riscritta sulla nuova versione del Cap. 1.
 %
-% Prima stesura: 5.271 parole, venticinque rimandi ai capitoli
-% sperimentali, diciannove paragrafi con citazione su centosette.
-% Seconda: 2.645 parole, ma otto sottosezioni, sei delle quali dentro
-% la stessa sezione e lunghe fra 104 e 189 parole. Un titolo ogni
-% duecento parole.
+% Il Capitolo 1, riscritto dalla candidata, assorbe ora tre argomenti che
+% nelle stesure precedenti stavano qui: la scelta della visione contro gli
+% indossabili, la scelta della posa con la motivazione di riservatezza, e
+% il conto sulla frequenza di base. Questa stesura li TOGLIE e vi rimanda:
+% dirli due volte in due capitoli consecutivi e' la ragione per cui la
+% versione precedente non reggeva alla rilettura.
 %
-% Questa stesura applica due criteri.
+% CRITERIO DI RILEVANZA. Restano le famiglie che il lavoro confronta e
+% quelle che dichiara di non confrontare. Le reti a grafo compaiono come
+% menzione dentro l'elenco delle famiglie, non come sottosezione: non sono
+% mai state provate. Sono fuori anche optical flow, CNN 3D e i singoli
+% classificatori tradizionali (SVM, k-NN): il lavoro non li impiega.
 %
-% RILEVANZA. Sono state tolte le parti che descrivono cose che la tesi
-% non impiega: il confronto fra elaborazione diretta dell'immagine e
-% posa (la scelta e' argomentata nel Cap. 1 sulla riservatezza, non
-% qui), e la trattazione estesa delle reti a grafo, mai provate in
-% questo lavoro. Di entrambe resta una menzione, perche' un lettore che
-% conosce il settore si aspetta di trovarle, ma non una sezione.
+% ATTENZIONE AI DUE NUMERI. OmniFall: quindicimila riprese, ottanta ore,
+% sedici classi -- VERIFICATO 2026-08-25 sull'abstract. Una stesura
+% precedente riportava «quattordici ore, 101 soggetti, 29 viste»: non
+% corrisponde, non reintrodurlo. La rassegna skeleton-based e' Nguyen
+% 2023 (Sensors 23(11):5121), non una «review del 2024 con oltre cento
+% metodi».
 %
-% GERARCHIA. Le sei sottosezioni della sezione sui dati sono diventate
-% \paragraph: hanno un nome ma non una voce nell'indice, che e' il
-% trattamento giusto per un blocco da centocinquanta parole.
+% GERARCHIA. Cinque sezioni, zero sottosezioni. I blocchi da centocinquanta
+% parole sono \paragraph: hanno un nome, non una voce nell'indice.
 % ---------------------------------------------------------------------
 
-Il Capitolo~\ref{cap:contesto} ha definito il problema applicativo e i
-requisiti del sistema. Questo capitolo richiama le soluzioni proposte in
-letteratura e i limiti dei protocolli con cui vengono valutate, allo scopo di
-fissare i concetti e la terminologia impiegati nel resto della trattazione.
+Il Capitolo~\ref{cap:contesto} ha definito il problema applicativo, i requisiti
+di un sistema destinato a un'abitazione e le difficoltà che il passaggio dal
+dato controllato all'uso reale introduce. Questo capitolo colloca il lavoro
+rispetto alla letteratura e fissa i termini impiegati nel resto della
+trattazione.
 
 L'ordine seguito è quello delle scelte da compiere: il sensore, che determina
 quale informazione sia disponibile; la rappresentazione, che stabilisce quale
 parte di essa raggiunga il classificatore; il modello temporale; infine i dati
-e i protocolli di valutazione.
+e i protocolli con cui i sistemi vengono valutati. Le motivazioni già date nel
+capitolo precedente non vengono ripetute. Qui si dichiara, per ciascuna scelta,
+quali alternative la letteratura offre e quali fra esse questo lavoro confronta.
 
 \section{Tecnologie per il rilevamento delle cadute}
 \label{sec:famiglie}
@@ -50,8 +57,8 @@ la persona e non dipende dal punto di vista di una telecamera. Il limite è la
 dipendenza dalla \emph{compliance} dell'utente: il dispositivo va indossato
 correttamente, mantenuto carico e usato con continuità~\cite{gazem}.
 
-I sensori \emph{ambientali}, quali pressione, acustica, infrarossi e radar, non
-richiedono nulla all'utente, ma trasferiscono il vincolo all'ambiente: il
+I sensori \emph{ambientali} --- pressione, acustica, infrarossi, radar ---
+non richiedono nulla all'utente, ma trasferiscono il vincolo all'ambiente: il
 sistema copre soltanto le aree strumentate e richiede installazione o
 calibrazione. Molte di queste tecnologie osservano inoltre il movimento in modo
 indiretto, e forniscono una descrizione più povera di un flusso visivo.
@@ -62,12 +69,10 @@ fra il 2015 e il 2020, documentando la transizione da descrittori geometrici
 progettati a mano verso rappresentazioni apprese~\cite{gutierrez}. La visione
 fornisce più informazione di molti sensori ambientali: da una sequenza si
 stimano posizione, configurazione corporea, dinamica e interazione con
-l'ambiente. Comporta però due costi: l'elaborazione di interi fotogrammi
-richiede memoria e capacità di calcolo, e il video contiene informazioni
-identificative del soggetto e dell'abitazione.
-
-Il presente lavoro adotta la visione, e affronta il secondo costo con la scelta
-architetturale descritta nella sezione~\ref{sec:privacy}.
+l'ambiente. Comporta però due costi, entrambi discussi nel
+Capitolo~\ref{cap:contesto}: l'elaborazione di interi fotogrammi richiede
+memoria e capacità di calcolo, e il video contiene informazioni identificative
+del soggetto e dell'abitazione.
 
 \section{Rappresentazione del movimento}
 \label{sec:rappresentazioni-sota}
@@ -78,15 +83,19 @@ quale parte di essa raggiunga il classificatore.
 I primi metodi vision-based impiegavano caratteristiche geometriche della
 sagoma segmentata: rapporto fra altezza e larghezza del rettangolo di
 contenimento, inclinazione, posizione del baricentro, variazione dell'area
-occupata. Con la diffusione dell'apprendimento profondo l'immagine è diventata
-essa stessa l'ingresso del modello, e la rappresentazione viene appresa dai
-dati. In entrambi i casi la descrizione resta però legata all'apparenza della
-scena, e quindi a sfondo, illuminazione e disposizione dell'ambiente.
+occupata. Sono descrittori semplici e interpretabili, ma dipendono dalla
+qualità della segmentazione e dal punto di vista: lo stesso movimento produce
+variazioni molto diverse nel piano immagine se osservato di lato, di fronte o
+da una telecamera rialzata. Con la diffusione dell'apprendimento profondo
+l'immagine è diventata essa stessa l'ingresso del modello, e la
+rappresentazione viene appresa dai dati. In entrambi i casi la descrizione
+resta legata all'apparenza della scena, e quindi a sfondo, illuminazione e
+disposizione dell'ambiente.
 
 La stima della posa trasforma invece un'immagine in un insieme di punti
 anatomici: il classificatore riceve una descrizione della configurazione
-corporea e non del contenuto visivo. È la scelta adottata in questo lavoro,
-per le ragioni di riservatezza esposte nella sezione~\ref{sec:privacy}.
+corporea e non del contenuto visivo. È la scelta adottata in questo lavoro, per
+le ragioni esposte nel Capitolo~\ref{cap:contesto}.
 
 Gli approcci basati sullo scheletro sono ampiamente studiati nel
 riconoscimento delle azioni umane. Una rassegna del 2023, che raccoglie circa
@@ -97,7 +106,7 @@ alternative: i punti possono essere impiegati direttamente come coordinate,
 lasciando che sia il modello a scoprire quali relazioni contino, oppure
 trasformati in grandezze progettate che descrivano esplicitamente angolo del
 tronco, altezze relative e velocità. Il Capitolo~\ref{cap:metodologia}
-costruisce entrambe.
+costruisce entrambe e le confronta a parità di protocollo.
 
 Alla rappresentazione scheletrica vengono attribuite due proprietà utili a un
 sistema destinato a hardware limitato. La prima è la \emph{compattezza}: poche
@@ -110,7 +119,8 @@ La posa non è però una misura ma una stima, e risente di occlusioni,
 illuminazione, risoluzione e scorci prospettici; le coordinate bidimensionali
 dipendono inoltre dal punto di vista. Una catena basata sulla posa sposta
 quindi parte della difficoltà dal classificatore allo stimatore e alla
-geometria costruita sopra di esso.
+geometria costruita sopra di esso --- ed è una difficoltà che questo lavoro
+misura invece di assumere.
 
 Nella fall detection questa impostazione è già stata impiegata con modelli
 sequenziali: Lin et al. estraggono la posa con OpenPose e confrontano LSTM e
@@ -141,11 +151,12 @@ rappresentazione e non nel modello, e classificatori quali le foreste casuali
 hanno costo ridotto e permettono di esaminare l'importanza delle variabili. Un
 classificatore che non modella l'ordine dei campioni è inoltre necessario per
 stabilire se un modello sequenziale stia effettivamente sfruttando dipendenze
-temporali.
+temporali: è il controllo che rende interpretabile l'intero confronto.
 
 Questo lavoro confronta reti ricorrenti, convoluzioni temporali, un modello ad
-attenzione e un classificatore non sequenziale; le reti a grafo non vengono
-considerate.
+attenzione e un classificatore non sequenziale. \textbf{Le reti a grafo non
+vengono considerate}, e la dichiarazione vale quanto il confronto: non sono
+state provate, quindi su di esse il lavoro non dice nulla.
 
 La progressione verso architetture più espressive rende plausibile attendersi
 un effetto rilevante della scelta del modello. I confronti pubblicati sono
@@ -154,27 +165,38 @@ grandezze, pre-elaborazione, divisione degli insiemi e soglia decisionale.
 Isolare l'effetto della sola architettura richiede un protocollo in cui il
 resto della catena resti invariato.
 
+\begin{Ques}
+Quanto la scelta dell'architettura influenza il risultato, quando
+rappresentazione, dati e protocollo vengono mantenuti costanti?
+\end{Ques}
+
 \section{Dati e protocolli di valutazione}
 \label{sec:dati-sota}
 
-La raccolta di cadute reali presenta vincoli etici e pratici evidenti: non è
+\paragraph{Le cadute simulate sono un vincolo, non una scorciatoia.} La
+raccolta di cadute reali presenta vincoli etici e pratici evidenti: non è
 possibile provocare deliberatamente incidenti in persone fragili per costruire
 un archivio. Gran parte dei riferimenti pubblici contiene quindi cadute
-simulate da volontari giovani e sani.
-
-La simulazione non è pertanto una scorciatoia metodologica, ma l'unica via
+simulate da volontari giovani e sani, e la simulazione è l'unica via
 disponibile per ottenere il numero di esempi positivi che un classificatore
 richiede. La domanda pertinente è un'altra: che cosa, di preciso, la
-simulazione non conserva. Per la componente dinamica la risposta è
-documentata. Kangas et al. hanno confrontato cadute accidentali reali di
-persone anziane, raccolte con sensori indossati per sei mesi, con cadute
-sperimentali eseguite da soggetti di mezza età: la grandezza più indicativa
-risulta essere la rapidità di crescita della decelerazione anziché il suo
-picco, e nelle cadute reali compaiono impatti multipli, assenti negli altri
+simulazione non conserva. Per la componente dinamica la risposta è documentata.
+Kangas et al. hanno confrontato cadute accidentali reali di persone anziane,
+raccolte con sensori indossati per sei mesi, con cadute sperimentali eseguite
+da soggetti di mezza età: la grandezza più indicativa risulta essere la
+rapidità di crescita della decelerazione anziché il suo picco, e nelle cadute
+reali compaiono impatti multipli, assenti negli altri
 movimenti~\cite{kangasreali}.
 
+\paragraph{Quanto costa, misurato.} Bagalà et al. hanno riesaminato tredici
+algoritmi pubblicati su un archivio di ventinove cadute reali: la sensibilità
+media misurata è del $57{,}0\% \pm 27{,}3$, contro il 76--100\% che gli stessi
+algoritmi dichiaravano su cadute simulate~\cite{bagala}. Il divario non è un
+margine di errore: è un cambio di ordine di grandezza nella conclusione.
+
 \paragraph{Gli archivi pubblici.} Fra quelli impiegati nella letteratura
-vision-based compaiono UR-Fall, Le2i, Multiple Cameras Fall Dataset e UP-Fall.
+vision-based compaiono UR-Fall~\cite{urfall}, Le2i, Multiple Cameras Fall
+Dataset e UP-Fall.
 Differiscono per numero di soggetti, attività, tipi di caduta, punti di vista,
 frequenza di ripresa e criteri di annotazione, e l'eterogeneità rende privo di
 significato il confronto diretto fra valori di $F$-score ottenuti su archivi
@@ -185,6 +207,17 @@ l'effetto della geometria di ripresa, e la varietà delle attività quotidiane
 permette di costruire negativi più realistici di quelli disponibili in archivi
 composti quasi soltanto da cadute e posture erette.
 
+\paragraph{I valori riportati, e il protocollo che li produce.} Sui dati
+controllati la letteratura riporta accuratezze elevatissime: un'architettura
+che combina convoluzioni temporali e un \emph{encoder} basato su attenzione
+raggiunge il 99,58\% sulla vista frontale di UP-Fall~\cite{tcnte}, mentre un
+modello a grafo su tre flussi supera il 94\% medio su UR-Fall e
+UP-Fall~\cite{gcn3stream}. Scheurer et al. mostrano però che ottimizzare per
+utenti noti e per utenti sconosciuti sono problemi distinti, con divari che
+superano i venti punti di accuratezza sugli stessi dati~\cite{scheurer}. Un
+valore elevato non è quindi interpretabile senza il protocollo che lo ha
+prodotto.
+
 \paragraph{Verificabilità.} Fra gli ottantuno sistemi recensiti da Gutiérrez
 et al. la maggioranza è stata valutata su dati propri, per i quali non
 risultava accesso pubblico al momento della revisione~\cite{gutierrez}. Un
@@ -192,15 +225,12 @@ risultato ottenuto su cadute simulate resta confrontabile se l'archivio è
 disponibile; un risultato ottenuto su un archivio privato non è né
 confrontabile né riproducibile.
 
-\paragraph{Prevalenza e negativi difficili.} Negli archivi le cadute devono
-essere abbastanza frequenti da permettere addestramento e valutazione, mentre
-nella vita quotidiana la classe positiva è rara; la
-sezione~\ref{sec:falsiallarmi} ne ha svolto il conto. Il rapporto fra negativi
-e positivi non è tuttavia il criterio con cui giudicare la composizione di un
-archivio, perché nessun archivio potrebbe riprodurre il rapporto reale: farlo
-richiederebbe di registrare anni di vita ordinaria per ogni caduta osservata.
-Il criterio pertinente riguarda \emph{quali} negativi siano presenti. Diventano
-allora centrali i \emph{negativi difficili}, cioè le attività ordinarie che
+\paragraph{Quali negativi, non quanti.} Il rapporto fra negativi e positivi non
+è il criterio con cui giudicare la composizione di un archivio, perché nessun
+archivio potrebbe riprodurre il rapporto reale: farlo richiederebbe di
+registrare anni di vita ordinaria per ogni caduta osservata. Il criterio
+pertinente riguarda \emph{quali} negativi siano presenti. Diventano allora
+centrali i \emph{negativi difficili}, cioè le attività ordinarie che
 condividono caratteristiche con la classe positiva: sedersi di scatto,
 inginocchiarsi, chinarsi e distendersi volontariamente producono configurazioni
 parzialmente simili a quelle di una caduta. Se tali attività sono assenti o
@@ -208,8 +238,8 @@ sottorappresentate, il modello può apprendere scorciatoie che funzionano
 sull'archivio e generano falsi allarmi in esercizio.
 
 \paragraph{Azioni e stati.} Un passo recente verso una valutazione uniforme è
-OmniFall, che unifica otto archivi allestiti in una tassonomia comune a sedici
-classi, quindicimila riprese per ottanta ore con annotazione per
+OmniFall, che unifica otto archivi in una tassonomia comune a sedici classi,
+quindicimila riprese per ottanta ore con annotazione per
 fotogramma~\cite{omnifall}. Il vocabolario distingue le azioni
 \emph{transitorie}, come \texttt{fall} e \texttt{lie\_down}, dagli \emph{stati}
 statici, come \texttt{fallen} e \texttt{lying}. Su un insieme di verifica
@@ -218,7 +248,9 @@ valutati senza adattamento continuano a confondere lo stato \texttt{fallen} con
 \texttt{lying}, mentre quelli addestrati su scene contenenti esplicitamente la
 permanenza a terra ottengono risultati sensibilmente migliori. La confusione
 documentata non riguarda quindi la distinzione fra caduta e attività
-quotidiana, ma quella fra una persona a terra e una persona distesa.
+quotidiana, ma quella fra una persona a terra e una persona distesa: è la
+stessa distinzione che il Capitolo~\ref{cap:contesto} ha introdotto discutendo
+la formulazione del compito.
 
 \paragraph{Tre livelli di generalizzazione.} Anche all'interno dello stesso
 archivio il modo in cui si costruiscono gli insiemi determina il significato
@@ -234,7 +266,9 @@ bidimensionale può essere informativa da una vista laterale e degenerare
 quando lo stesso movimento è osservato dall'alto. Il terzo livello, il
 trasferimento fra \emph{archivi}, è il più severo, perché cambiano insieme
 persone, ambiente, telecamera, frequenza di ripresa, annotazione e
-distribuzione delle attività.
+distribuzione delle attività; Alanazi et al. riportano un modello a grafo che
+passa dal 99,81\% sul proprio dominio a circa il 50\%, con un $F_1$ dell'1,38\%,
+su un archivio diverso~\cite{vira}.
 
 \paragraph{Dalla finestra all'evento.} La maggior parte dei classificatori
 temporali produce una decisione per ogni finestra, mentre un sistema installato
@@ -258,58 +292,31 @@ piattaforma hardware effettivamente impiegata~\cite{gomes}. La velocità di
 esecuzione non è quindi una proprietà dell'architettura, ma una misura da
 compiere sul dispositivo di destinazione e sulla catena completa.
 
-\section{Questioni aperte e posizionamento del lavoro}
-\label{sec:posizionamento}
-
-Dalla letteratura emerge un quadro nel quale esistono molte soluzioni
-tecnicamente valide, e restano aperte quattro questioni che diventano rilevanti
-nel passaggio da un archivio di riferimento a un sistema destinato
-all'utilizzo reale.
-
-La prima riguarda la \emph{rappresentazione del movimento}: immagine, sagoma,
-coordinate scheletriche e grandezze progettate presentano vantaggi e limiti
-diversi quanto a interpretabilità, costo computazionale e dipendenza dal punto
-di vista~\cite{gutierrez, gomes}.
-
-La seconda riguarda il \emph{modello di classificazione}. Le famiglie
-richiamate nella sezione~\ref{sec:modelli-sota} sono tutte strategie plausibili
-per lo stesso problema~\cite{nguyen, lin}, ma i risultati riportati in lavori
-differenti sono difficili da confrontare, perché variano contemporaneamente
-dati, rappresentazione e protocollo~\cite{omnifall}.
-
-\begin{Ques}
-Quanto la scelta dell'architettura influenza il risultato, quando
-rappresentazione, dati e protocollo vengono mantenuti costanti?
-\end{Ques}
-
-La terza riguarda il \emph{significato della classe positiva}: riconoscere la
-transizione di caduta, riconoscere lo stato successivo a terra e decidere
-quando generare un allarme sono problemi collegati ma non
-equivalenti~\cite{omnifall}.
-
-La quarta riguarda la \emph{generalizzazione}, poiché cambiamenti di soggetto,
-punto di vista, ambiente e archivio modificano il comportamento della catena,
-così come il passaggio dall'esecuzione fuori linea a un dispositivo
-reale~\cite{broadley, gomes}.
-
 \begin{Ques}
 Che cosa un archivio di laboratorio non riesce a misurare, e con quali
 conseguenze per chi lo impiega per scegliere fra alternative?
 \end{Ques}
 
-\bigskip
+\section{Posizionamento del lavoro}
+\label{sec:posizionamento}
 
-Il presente lavoro si colloca all'interno di queste questioni. Viene adottata
-una rappresentazione basata sulla posa, sulla quale sono costruite e
-confrontate diverse descrizioni geometriche e temporali del movimento; più
-famiglie di classificatori vengono valutate mantenendo invariati, per quanto
-possibile, dati e protocollo. La valutazione non si limita al comportamento su
-un singolo archivio, ma considera la generalizzazione verso soggetti assenti
-dall'addestramento, la variazione del punto di vista, il trasferimento verso un
-archivio esterno e il comportamento della catena in condizioni più vicine a
-quelle d'uso. Il sistema viene infine considerato nella sua interezza,
-includendo il passaggio dalle singole decisioni agli eventi di allarme e la
-verifica dell'esecuzione sul dispositivo impiegato.
+Le due domande appena poste delimitano il perimetro dell'elaborato.
+
+Viene adottata una rappresentazione basata sulla posa, sulla quale sono
+costruite e confrontate diverse descrizioni geometriche e temporali del
+movimento; più famiglie di classificatori vengono valutate mantenendo
+invariati, per quanto possibile, dati e protocollo. La valutazione non si
+limita al comportamento su un singolo archivio, ma considera la
+generalizzazione verso soggetti assenti dall'addestramento, la variazione del
+punto di vista, il trasferimento verso un archivio esterno e il comportamento
+della catena in condizioni più vicine a quelle d'uso. Il sistema viene infine
+considerato nella sua interezza, includendo il passaggio dalle singole
+decisioni agli eventi di allarme e la verifica dell'esecuzione sul dispositivo
+impiegato.
+
+Restano fuori, e vanno dichiarate: le reti a grafo, mai provate; la sintesi di
+punti di vista, discussa fra gli sviluppi; e il rilevamento multi-persona, che
+è stato realizzato ma che nessun archivio pubblico permette di valutare.
 
 Il Capitolo~\ref{cap:metodologia} descrive il modo in cui il video viene
 trasformato nella rappresentazione utilizzata dal sistema; il
