@@ -13,11 +13,14 @@
 %        \cite{kangas2015falsealarm}-> \cite{kangas}
 %        \cite{scheurer2019aidemoi} -> \cite{aidemoi}
 %
-%  2. QUATTRO CITAZIONI AGGIUNTE dove il testo gia' faceva l'affermazione:
-%     mediapipe e blazepose sullo stimatore di posa, asif sull'invarianza
-%     all'aspetto, zobi sulle coordinate instabili in occlusione. Erano
-%     citate solo nella versione precedente di questo capitolo e senza di
-%     esse restavano voci di bibliografia mai citate.
+%  2. DUE CITAZIONI AGGIUNTE dove il testo gia' faceva l'affermazione:
+%     mediapipe e blazepose sullo stimatore di posa.
+%
+%     Il 26 agosto ne erano state aggiunte altre due, asif e zobi, per non
+%     lasciare voci di bibliografia orfane. Erano SEGNAPOSTO INVENTATI
+%     ([ISS-114](../docs/ISSUES.md)): ritirate lo stesso giorno insieme
+%     alle voci. Non reintrodurle. Una voce orfana e' un fastidio, una
+%     voce inventata e' un'altra cosa.
 %
 %  3. Refusi e decimali all'italiana (0,049 invece di 0.049), per
 %     coerenza con il resto della tesi.
@@ -73,7 +76,7 @@ L'utilizzo di una telecamera all'interno di un'abitazione introduce un requisito
 
 Per affrontare questa criticità, il presente lavoro adotta un approccio basato su \emph{pose estimation}. Il video viene utilizzato soltanto nella fase iniziale per stimare la posa del soggetto: a partire dai fotogrammi RGB vengono estratti i principali \emph{landmark} scheletrici mediante MediaPipe~\cite{mediapipe}, costruito sul modello BlazePose~\cite{blazepose}, dai quali sono poi calcolate feature geometriche e cinematiche compatte.
 
-La classificazione non avviene quindi direttamente sui pixel, ma su una rappresentazione ridotta e interpretabile del movimento umano. Invece di utilizzare informazioni come volto, texture, abbigliamento o sfondo, il sistema lavora su grandezze legate alla configurazione e alla dinamica del corpo, quali la posizione relativa dei segmenti corporei, l'orientamento del tronco, le velocità e le variazioni temporali. A questa proprietà se ne accompagna una statistica: le rappresentazioni basate sulla posa sono in larga misura invarianti alle caratteristiche estetiche del soggetto~\cite{asif}, il che riduce il rischio che il modello apprenda l'aspetto delle persone osservate invece del movimento.
+La classificazione non avviene quindi direttamente sui pixel, ma su una rappresentazione ridotta e interpretabile del movimento umano. Invece di utilizzare informazioni come volto, texture, abbigliamento o sfondo, il sistema lavora su grandezze legate alla configurazione e alla dinamica del corpo, quali la posizione relativa dei segmenti corporei, l'orientamento del tronco, le velocità e le variazioni temporali. A questa proprietà se ne accompagna una conseguenza diretta: poiché volto, texture e abbigliamento non raggiungono il classificatore, il modello non può apprendere l'aspetto delle persone osservate al posto del movimento. È una proprietà della catena, non un'ipotesi da verificare.
 
 Questa impostazione è coerente con un approccio \emph{privacy-by-design}, poiché riduce l'esposizione di dati visivi sensibili. Inoltre, mantenendo l'elaborazione localmente sul dispositivo \emph{edge}, il sistema può essere progettato affinché verso l'esterno vengano trasmessi soltanto metadati o eventi di allarme, senza inviare continuamente immagini dell'utente verso server remoti.
 
@@ -105,7 +108,7 @@ A ciò si aggiungono variazioni di illuminazione, distanza dalla telecamera, amb
 
 Un secondo problema riguarda le occlusioni. Negli ambienti domestici o assistenziali reali il soggetto non si muove necessariamente in campo libero: letti, sedie, tavoli, mobili o altri elementi dell'arredamento possono coprire parzialmente il corpo, soprattutto durante le fasi finali di una caduta o quando la persona si trova vicina al pavimento.
 
-In tali condizioni lo stimatore di posa può perdere alcuni landmark o produrre coordinate instabili~\cite{zobi}. Poiché le grandezze cinematiche utilizzate dal classificatore vengono costruite a partire da tali punti, gli errori della fase percettiva possono propagarsi alla rappresentazione del movimento e influenzare la classificazione finale.
+In tali condizioni lo stimatore di posa può perdere alcuni landmark o produrre coordinate instabili; il Capitolo~\ref{cap:risultati} misura quanto questo pesi sul risultato finale, mascherando in modo controllato gruppi di punti corporei. Poiché le grandezze cinematiche utilizzate dal classificatore vengono costruite a partire da tali punti, gli errori della fase percettiva possono propagarsi alla rappresentazione del movimento e influenzare la classificazione finale.
 
 Questi aspetti mostrano che il problema non consiste soltanto nell'addestrare un modello su un dataset offline, ma nel valutare l'intera catena che precede la decisione. Per questo motivo, nella validazione del sistema non ci si può limitare a \emph{precision}, \emph{recall} e $F$-score, ma devono essere considerate anche la stabilità temporale delle predizioni, la sensibilità alle occlusioni, la coerenza rispetto alla frequenza dei fotogrammi, il costo computazionale dell'inferenza e il numero di falsi allarmi prodotti per unità di tempo.
 
