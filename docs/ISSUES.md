@@ -49,44 +49,6 @@ lunga.
 
 ---
 
-<a id="iss-111"></a>
-### ISS-111 — Il fattore fra le due viste non si riproduce dal file citato
-
-**Trovata:** 2026-08-26 · **Gravita': media** · **Stato: APERTA**
-
-`tesi/Cap5.tex:88` dichiara che il rapporto fra l'escursione dell'angolo del
-tronco osservata dalle due telecamere vale **1,90x**, e aggiunge che «una
-misura indipendente, calcolata senza passare dai file di feature intermedi,
-conferma 1,90x». La didascalia di `fig:viewpoint_dist` dichiara che «in **tre**
-sequenze la vista rialzata osserva quanto quella laterale».
-
-Il file che il capitolo indica come sorgente,
-`risultati/cinque_soggetti/exp013_camera_viewpoint.csv`, dice altro:
-
-| | |
-|---|---|
-| coppie | 25 (5 soggetti x 5 tipi di caduta, attivita' 1-5) |
-| medie | cam1 71,0 gradi, cam2 35,7 gradi |
-| **rapporto delle medie** | **1,99x** |
-| **sequenze con cam2 >= cam1** | **2** |
-
-Provate le varianti: media dei rapporti 2,87, mediana 2,79; il filtro sulla
-quota di pose valide non sposta nulla (1,98 a qualunque soglia). **Nessuna
-combinazione produce 1,90 ne' tre sequenze.**
-
-Non si conclude che il testo sia sbagliato: 1,90 potrebbe venire dalla
-«misura indipendente» citata, cioe' da una procedura diversa da questo CSV.
-Si conclude che **la sorgente dichiarata non produce il numero dichiarato**.
-
-**La figura stampa cio' che il file dice**, quindi al momento figura e testo
-si contraddicono.
-
-**Intervento previsto.** Ritrovare la procedura che produce 1,90 e dichiararla
-come sorgente, oppure allineare testo e didascalia a 1,99 e a «due sequenze».
-Fino ad allora la figura non va inserita nel testo.
-
----
-
 <a id="iss-110"></a>
 ### ISS-110 — Due versioni divergenti dei capitoli, e i fatti che tornano indietro
 
@@ -121,27 +83,6 @@ compilano come riferimento.
 ogni fusione va fatta confrontando i numeri contro i commenti `% VERIFICATO`
 in `Bibliografia.tex`, mai a memoria. I due numeri di OmniFall e Nguyen sono
 ora protetti da un avviso in testa a `tesi/Cap2.tex`.
-
----
-
-<a id="iss-109"></a>
-### ISS-109 — Le rappresentazioni si chiamano A1 nella tesi e A nella lettera
-
-**Trovata:** 2026-08-26 · **Gravita': bassa** · **Stato: APERTA**
-
-`tesi/Cap3.tex:232` intitola la prima rappresentazione «A1 --- la sagoma come
-ellisse». La lettera al relatore del 17 agosto dichiara invece: «Si chiamano
-A, A2 e A3 --- non esiste un "A1", il primo e' semplicemente A.»
-
-Il relatore ha in mano la lettera, quindi la divergenza va sanata. Il codice
-usa `A1`: `src/geometry.py:92` definisce `NOMI_A1` e le dieci colonne portano
-il prefisso `A1_`. Rinominare il codice costerebbe una riestrazione, quindi la
-scelta economica e' tenere `A1` nella tesi e **dichiarare la rinomina** dove le
-tre rappresentazioni vengono introdotte.
-
-**Intervento previsto.** Una riga in `Cap3.tex`, sezione «Tre rappresentazioni
-geometriche», che dichiari il cambio di nome rispetto alla comunicazione
-precedente.
 
 ---
 
@@ -300,6 +241,67 @@ il resto. 28 copre la caduta mediana, 36 il decile 90%.
 ---
 
 ## Risolti
+
+<a id="iss-111"></a>
+### ISS-111 — Il fattore fra le due viste non si riproduceva dal file citato
+
+**Trovata:** 2026-08-26 · **Risolta:** 2026-08-26 · **Gravita': media**
+
+Il capitolo dichiarava $1{,}90	imes$ e «tre sequenze su 24»; il file indicato
+come sorgente dava altro. Rileggendo il capitolo per intero e' emerso che i
+valori discordanti non erano due ma **quattro**, tutti dentro due paragrafi
+consecutivi.
+
+| affermazione nel testo | valore dal file |
+|---|---|
+| medie 71,0 / 35,7 gradi | corretto |
+| 18 su 25 e 6 su 25 sopra i 60 gradi | corretto |
+| rapporto delle medie 1,99 | corretto |
+| deviazioni standard 25,3 e 24,4 | **25,8 e 24,9** |
+| rapporto per sequenza da 0,33 a 13,22 | **da 0,39 a 6,21** |
+| «in 3 casi su 24» | **2 su 25** |
+| «rieseguendo si ottiene 1,90» | **1,99** |
+
+Il paragrafo che doveva *correggere* il valore preliminare di $4{,}32	imes$
+ne dichiarava uno diverso da quello riportato dodici righe sopra, e diceva
+«il valore di riferimento e' quello riportato sopra».
+
+**Intervento.** I quattro valori sono stati riportati a quelli calcolati da
+`risultati/cinque_soggetti/exp013_camera_viewpoint.csv`. La menzione di una
+«misura indipendente che conferma 1,90» e' stata **ritirata**: non e'
+verificabile, e il file dichiarato come sorgente dice 1,99. Il paragrafo di
+correzione ora nomina il file e dichiara che la correzione dimezza l'effetto
+senza cambiarne la direzione.
+
+Con il testo allineato, `fig_viewpoint_dist.png` **e' stata inserita**: le
+figure mancanti passano da tre a una.
+
+**Verificato con:** ricalcolo di tutti e sette i valori dal CSV;
+`python tesi/controlla.py` -> «Nessun problema».
+
+---
+
+<a id="iss-109"></a>
+### ISS-109 — Le rappresentazioni si chiamavano A1 nella tesi e A nella lettera
+
+**Trovata:** 2026-08-26 · **Risolta:** 2026-08-26 · **Gravita': bassa**
+
+Il codice usa `A1` (`src/geometry.py:92`, colonne con prefisso `A1_`), il
+Capitolo 3 usava `A1` nei titoli ma `A (PCA 2D)` nella tabella dei landmark, e
+il Capitolo 4 usava `A (PCA 2D)` nella tabella delle rappresentazioni. Tre
+nomi per la stessa cosa, in due capitoli e una tabella.
+
+**Intervento.** Adottato `A1` ovunque, con la forma discorsiva usata nei
+titoli: «A1 --- descrittori della sagoma», «A2 --- descrittori
+tridimensionali», «A3 --- descrittori riferiti al corpo». Nessun residuo di
+`A (PCA 2D)`, `physics 3D`, `body-centric 2D`.
+
+**Resta da sapere** che la lettera al relatore del 17 agosto dichiarava «non
+esiste un A1, il primo e' semplicemente A». Se la nomenclatura torna in
+discussione con lui, la tesi usa `A1` e il codice pure.
+
+---
+
 
 <a id="iss-112"></a>
 ### ISS-112 — Le soglie di etichettatura erano dichiarate in due posti

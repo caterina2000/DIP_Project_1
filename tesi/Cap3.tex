@@ -107,10 +107,10 @@ Lo stimatore restituisce una posa completa, ma le rappresentazioni ne selezionan
 \toprule
 Rappresentazione & Indici & Landmark impiegati \\
 \midrule
-A (PCA 2D) & 0, 11, 12, 23, 24, 27, 28 & naso, spalle, anche, caviglie \\
-A2 (physics 3D) & 0, 11, 12, 23, 24 & naso, spalle, anche \\
-A3 (body-centric 2D) & 0, 11, 12, 23--28 & naso, spalle, anche, ginocchia, caviglie \\
-B (scheletro grezzo) & 12 punti & spalle, gomiti, polsi, anche, ginocchia, caviglie \\
+A1 --- sagoma & 0, 11, 12, 23, 24, 27, 28 & naso, spalle, anche, caviglie \\
+A2 --- tridimensionale & 0, 11, 12, 23, 24 & naso, spalle, anche \\
+A3 --- riferita al corpo & 0, 11, 12, 23--28 & naso, spalle, anche, ginocchia, caviglie \\
+B --- scheletro grezzo & 12 punti & spalle, gomiti, polsi, anche, ginocchia, caviglie \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -421,9 +421,21 @@ secondo.
 \paragraph{B --- coordinate scheletriche grezze.}
 \label{sec:metodoB}
 
-La quarta rappresentazione rinuncia alla progettazione manuale: dodici landmark --- spalle, gomiti, polsi, anche, ginocchia, caviglie --- espressi in coordinate relative al centro del bacino, per un vettore di $24$ valori per fotogramma. Alimenta una pipeline non supervisionata: un autoencoder che ne apprende una rappresentazione compressa, seguito da un classificatore.
+Una quarta rappresentazione rinuncia alla progettazione manuale: dodici
+landmark --- spalle, gomiti, polsi, anche, ginocchia, caviglie --- espressi in
+coordinate relative al centro del bacino, per un vettore di $24$ valori per
+fotogramma, dati in ingresso a un autoencoder seguito da un classificatore.
+L'idea è stabilire se costruire a mano grandezze cinematiche produca una
+classificazione migliore rispetto al lasciare che sia il modello a scoprire la
+rappresentazione.
 
-Serve esclusivamente da termine di paragone \emph{data-driven}, per stabilire se costruire a mano grandezze cinematiche e geometriche produca una classificazione migliore rispetto al lasciare che sia il modello a scoprire la rappresentazione.
+\textbf{Non entra nei confronti di questo lavoro, e va detto qui e non
+altrove.} Appartiene al prototipo di partenza; l'unica esecuzione disponibile
+valutava i due approcci su verità di riferimento diverse, e per questo il
+Capitolo~\ref{cap:risultati} la cita come lavoro preliminare e non come
+confronto. Le rappresentazioni effettivamente messe a confronto a parità di
+protocollo sono le tre descritte sopra e il sottoinsieme che ne seleziona la
+Sezione~\ref{sec:dtw}.
 
 
 \section{Grandezze integrali in alternativa alle derivate istantanee}
@@ -865,6 +877,14 @@ temporale coerente all'interno di una classe e diverso fra classi.
 
 \subsection{Impostazione della misura di distanza}
 
+Confrontare due curve con il DTW richiede tre scelte, e nessuna delle tre è
+neutra: come normalizzare le curve prima di metterle a confronto, quanto
+permettere all'asse dei tempi di deformarsi, e se conservare o meno
+l'informazione di durata. Agiscono in direzioni diverse --- la prima rende
+confrontabili grandezze di scala diversa, la seconda impedisce che il
+confronto diventi troppo permissivo, la terza rinuncia deliberatamente a una
+parte del segnale --- e vanno quindi dichiarate insieme.
+
 \paragraph{Normalizzazione per curva.} Le grandezze hanno scale eterogenee —
 gradi, velocità, rapporti adimensionali — e sui valori grezzi la distanza
 sarebbe dominata da quelle di ampiezza maggiore. Ogni curva viene quindi
@@ -1007,9 +1027,9 @@ simile a quella di una caduta, e la differenza sta nella traiettoria temporale.
 Il classificatore lavora quindi su \textbf{finestre}, cioè su sequenze ordinate
 di vettori di grandezze.
 
-\subsection{Finestratura e sovrapposizione}
+\subsection{Lunghezza e sovrapposizione della finestra}
 
-\paragraph{Lunghezza della finestra.}
+
 
 Detta $f_t$ la rappresentazione al fotogramma $t$, una finestra è
 $X_t = [\,f_t, f_{t+1}, \dots, f_{t+L-1}\,]$, con $L$ da scegliere.

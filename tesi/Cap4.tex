@@ -37,6 +37,17 @@ dataset di partenza.
 
 \section{Sbilanciamento delle classi e scelta della metrica}
 
+Prima di misurare qualcosa serve stabilire con quale metro, e in questo
+problema la scelta non è una convenzione di presentazione. La classe positiva
+è rara e i due errori non hanno lo stesso costo: un metro scelto male non
+rende il risultato meno leggibile, lo rende \emph{fuorviante}, perché premia
+configurazioni diverse da quelle che servirebbero.
+
+Questa sezione fissa il metro e dichiara perché quello e non un altro. La
+dichiarazione avviene prima di osservare i dati di verifica, ed è essa stessa
+parte del protocollo: una metrica scelta dopo, fra quelle che davano il
+numero migliore, non misura il sistema ma la ricerca di chi lo valuta.
+
 \paragraph{I numeri del problema.}
 
 Il sottoinsieme di UP-Fall utilizzato in questo lavoro comprende \num{57786} fotogrammi della telecamera laterale, distribuiti su 109 riprese e 10 soggetti, con posa valida sul \SI{91.6}{\percent} dei fotogrammi. L'etichettatura è a tre classi, assegnata fotogramma per fotogramma:
@@ -84,6 +95,12 @@ Due precisazioni sull'uso che se ne fa. La prima: $\beta = 2$ è stato \textbf{d
 Durante l'addestramento le classi vengono riequilibrate tramite pesi inversamente proporzionali alla frequenza, calcolati \textbf{sul solo insieme di addestramento di ciascun fold} e registrati nei metadati della run. L'alternativa del sottocampionamento della classe maggioritaria è stata scartata: con \num{344} finestre positive, ridurre le negative allo stesso numero avrebbe scartato oltre il \SI{94}{\percent} dei dati disponibili, in un contesto in cui il numero di soggetti è già il vincolo dominante.
 
 \section{Partizionamento dei dati e validazione leave-one-subject-out}
+
+Fissato il metro, resta da stabilire su quali dati misurare. È la scelta che
+nell'impostazione iniziale ha prodotto il difetto più costoso, ed è anche
+quella in cui l'errore è meno visibile: una divisione sbagliata non fa fallire
+nulla e non solleva alcuna eccezione. Produce semplicemente un numero più alto
+di quello che il sistema meriterebbe, e lo produce in silenzio.
 
 \paragraph{Il difetto.}
 
@@ -134,7 +151,20 @@ La conseguenza è che una differenza di due o tre centesimi fra due configurazio
 
 \section{Normalizzazione e selezione della soglia decisionale}
 
+Fra i dati grezzi e la decisione stanno due trasformazioni: la normalizzazione
+delle grandezze in ingresso e la soglia applicata alla probabilità in uscita.
+Entrambe sono state all'origine di un difetto dell'impostazione iniziale, ed
+entrambe nella stessa forma --- un parametro stimato sull'insieme sbagliato.
+Le due sottosezioni che seguono le trattano nell'ordine in cui agiscono sul
+dato.
+
 \subsection{Stima dei parametri di normalizzazione}
+
+È l'intervento più economico dell'intera revisione del protocollo --- poche
+righe di codice --- ed è quello che ha spiegato il fallimento più vistoso del
+progetto. Ciò che conta non è tuttavia la sua presenza, ma su quali dati i
+suoi parametri vengano stimati: è lì che si decide se la misura finale
+significhi qualcosa.
 
 \paragraph{La causa accertata di un fallimento.}
 
@@ -167,6 +197,11 @@ I parametri della normalizzazione vengono salvati insieme al modello e distribui
 Il rischio è che ciò accada in silenzio. Un vettore non normalizzato ha la stessa forma di uno normalizzato: il classificatore lo accetta e restituisce una probabilità, che semplicemente non significa nulla. Per questa ragione il pacchetto distribuito include un insieme di campioni di verifica con le predizioni attese, e la coincidenza viene controllata prima di ogni impiego.
 
 \subsection{Regole di scelta della soglia}
+
+La soglia trasforma un punteggio continuo in una decisione binaria. Dove venga
+scelta conta quanto il valore che assume, e il confronto fra le regole
+possibili --- riportato più avanti in questa sottosezione --- ha un esito che
+non era quello atteso.
 
 \paragraph{Il difetto.}
 
@@ -313,6 +348,16 @@ Soggetti condivisi fra i due insiemi & 5 su 5 & \textbf{zero} \\
 \section{Effetto della geometria di ripresa}
 \label{sec:viewpoint}
 
+Fra le variabili che questo lavoro ha potuto isolare, questa produce l'effetto
+più grande.
+
+UP-Fall riprende ogni evento con due telecamere sincronizzate: la prima
+laterale, all'incirca all'altezza del busto, che vede la persona di profilo;
+la seconda frontale e più alta, che la vede dall'alto. Stesso soggetto, stessa
+caduta, stesso istante --- cambia soltanto il punto da cui si guarda. È una
+condizione che nessun'altra misura di questo capitolo può avere, e rende il
+degrado attribuibile con certezza a una sola causa.
+
 \paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
 sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
 ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
@@ -321,10 +366,6 @@ soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
 vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
 sezioni misurate su dieci.
 
-
-È il risultato centrale del lavoro.
-
-Il dataset riprende ogni evento con \textbf{due telecamere simultanee}: una laterale (Camera1) e una frontale rialzata (Camera2). Stesso soggetto, stessa caduta, stesso istante — cambia solo da dove si guarda. È una condizione sperimentale rara, perché isola il punto di vista da ogni altra variabile.
 
 \paragraph{Perché una vista rialzata perde l'informazione.}
 
@@ -343,11 +384,11 @@ Sequenze con escursione sopra 60° & \textbf{18 su 25} & 6 su 25 \\
 \end{tabular}
 \end{center}
 
-Il rapporto fra le medie è $1{,}99\times$. Va però preferito il \textbf{conteggio} al rapporto, per una ragione che il dato stesso impone: le deviazioni standard ($25{,}3$ e $24{,}4$) valgono un terzo del valore medio, e il rapporto calcolato sequenza per sequenza spazia da $0{,}33\times$ a $13{,}22\times$. In \textbf{3 casi su 24} Camera2 osserva quanto o meglio di Camera1.
+Il rapporto fra le medie è $1{,}99\times$. Va però preferito il \textbf{conteggio} al rapporto, per una ragione che il dato stesso impone: le deviazioni standard ($25{,}8$ e $24{,}9$) valgono più di un terzo del valore medio, e il rapporto calcolato sequenza per sequenza spazia da $0{,}39\times$ a $6{,}21\times$. In \textbf{2 sequenze su 25} Camera2 osserva quanto o più di Camera1.
 
 Il fenomeno è reale e sistematico, ma molto variabile: una media da sola lo descrive male, e la Figura~\ref{fig:viewpoint_dist} ne mostra la distribuzione completa.
 
-\paragraph{Una correzione a un risultato precedente.} Una versione preliminare di questa misura riportava un fattore $4{,}32\times$ ($80{,}5°$ contro $18{,}6°$). Quel valore \textbf{non si riproduce}: proveniva da cinque sequenze di un solo soggetto, e rieseguendo la stessa procedura si ottiene $1{,}90\times$. Una misura indipendente, calcolata senza passare dai file di feature intermedi, conferma $1{,}90\times$. Il valore di riferimento è quello riportato sopra.
+\paragraph{Una correzione a un risultato precedente.} Una versione preliminare di questa misura riportava un fattore $4{,}32\times$ ($80{,}5°$ contro $18{,}6°$). Quel valore \textbf{non si riproduce}: proveniva da cinque sequenze di un solo soggetto. Rieseguendo la procedura su tutte le venticinque sequenze si ottiene il $1{,}99\times$ riportato sopra, che è il valore ricalcolabile da \texttt{risultati/cinque\_soggetti/exp013\_camera\_viewpoint.csv} e l'unico che questo lavoro sostiene. La correzione dimezza l'effetto dichiarato senza toccarne la direzione, ed è la ragione per cui il paragrafo precedente preferisce il conteggio al rapporto.
 
 \paragraph{Quanto costa in accuratezza.}
 
@@ -391,12 +432,20 @@ Restano $0{,}194$ di divario rispetto alla condizione a vista unica. Due punti d
 
 \begin{figure}[htbp]
 \centering
-% FIGURA 4.0 — fig_4_0_viewpoint_distribuzione.png. DA GENERARE.
-\caption{Distribuzione dell'escursione dell'angolo del tronco sulle 25 sequenze, per telecamera. È l'unica rappresentazione difendibile del fenomeno: le medie da sole nascondono che in tre sequenze la vista rialzata osserva quanto quella laterale.}
+\includegraphics[width=.72\textwidth]{figure/fig_viewpoint_dist.png}
+\caption{Escursione dell'angolo del tronco sulle venticinque sequenze, una linea per coppia simultanea. È la rappresentazione difendibile del fenomeno: la media da sola nasconde che in due sequenze --- in rosso --- la vista rialzata osserva quanto quella laterale, e che il rapporto per sequenza spazia da $0{,}39$ a $6{,}21$. Misura a cinque soggetti. Prodotta da \texttt{pipeline/figure\_tesi.py} su \texttt{risultati/cinque\_soggetti/exp013\_camera\_viewpoint.csv}.}
 \label{fig:viewpoint_dist}
 \end{figure}
 
 \section{Confronto fra rappresentazioni e fra architetture}
+
+Le due domande di questa sezione sono quelle da cui il progetto è partito:
+quale descrizione del movimento convenga dare al classificatore, e quale
+classificatore convenga usare. Vengono trattate insieme per due ragioni. La
+prima è che la risposta ha in entrambi i casi la stessa natura. La seconda è
+che l'ultima sottosezione --- quanti soggetti servirebbero per dichiarare una
+differenza --- si applica a tutte e due, e separarle costringerebbe a
+ripeterla.
 
 \subsection{Confronto fra rappresentazioni}
 \label{sec:featureset}
@@ -408,9 +457,9 @@ Le tre rappresentazioni del Capitolo~\ref{cap:metodologia}, sulla stessa configu
 \toprule
 Rappresentazione & F2 & Recall \\
 \midrule
-A2 (grandezze fisiche 3D) & 0,867 $\pm$ 0,099 & --- \\
-A3 (body-centric 2D) & 0,857 $\pm$ 0,088 & \textbf{0,929} \\
-A (PCA 2D) & 0,834 $\pm$ 0,121 & --- \\
+A2 --- descrittori tridimensionali & 0,867 $\pm$ 0,099 & --- \\
+A3 --- descrittori riferiti al corpo & 0,857 $\pm$ 0,088 & \textbf{0,929} \\
+A1 --- descrittori della sagoma & 0,834 $\pm$ 0,121 & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -484,13 +533,13 @@ prestazione dipenda dal trattare la finestra come una sequenza.
 \begin{center}
 \begin{tabular}{lrrrrr}
 \toprule
-Modello & $F_2$ & Recall & Falsi neg. & Parametri & Addestramento \\
+Modello & $F_2$ & Recall & Falsi neg. & Falsi pos. & Parametri & Addestr. \\
 \midrule
-LSTM        & \textbf{0,858 $\pm$ 0,082} & 0,934 & 102 & 32.227 & 16,6 min \\
-GRU         & 0,847 $\pm$ 0,085 & 0,928 & 105 & 24.483 & 22,7 min \\
-Transformer & 0,846 $\pm$ 0,100 & \textbf{0,939} & \textbf{89} & 34.499 & 11,5 min \\
-CNN 1D      & 0,833 $\pm$ 0,118 & 0,937 & 95 & 46.147 & 11,1 min \\
-Foresta casuale & 0,792 $\pm$ 0,080 & 0,807 & 271 & --- & \textbf{0,2 min} \\
+LSTM        & \textbf{0,858 $\pm$ 0,082} & 0,934 & 102 & 807 & 32.227 & 16,6 min \\
+GRU         & 0,847 $\pm$ 0,085 & 0,928 & 105 & 885 & 24.483 & 22,7 min \\
+Transformer & 0,846 $\pm$ 0,100 & \textbf{0,939} & \textbf{89} & 1.028 & 34.499 & 11,5 min \\
+CNN 1D      & 0,833 $\pm$ 0,118 & 0,937 & 95 & 1.161 & 46.147 & 11,1 min \\
+Foresta casuale & 0,792 $\pm$ 0,080 & 0,807 & 271 & \textbf{421} & --- & \textbf{0,2 min} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -599,16 +648,31 @@ confronto.
 
 \section{Analisi di sensibilità}
 
+Tre controlli chiudono altrettante domande che l'impostazione ereditata dal
+prototipo lasciava aperte: quanto pesi la dimensione del modello, quanto la
+frequenza dei fotogrammi, e quanto la disponibilità dei singoli punti
+corporei.
+
+Nessuno dei tre apre un filone di ricerca, e nessuno produce il risultato
+principale del capitolo. Servono a stabilire che quelle tre scelte non stiano
+determinando ciò che si osserva --- una conclusione utile soltanto se il
+controllo viene effettivamente eseguito, e priva di valore se viene assunta.
+
+\paragraph{Provenienza delle misure di questa sezione.} Tutte e tre risalgono
+all'impianto a \textbf{cinque} soggetti e non sono state ripetute dopo
+l'estensione a dieci. Sono riportate perché la conclusione che sostengono è di
+un ordine di grandezza superiore alla dispersione fra soggetti, e nessun
+riallineamento può ribaltarla; i valori assoluti, però, vanno letti come
+indicativi e non confrontati cifra per cifra con quelli delle sezioni misurate
+su dieci.
+
 \paragraph{Dimensione del modello.}
 \label{sec:dimensione}
 
-\paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
-sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
-ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
-sostengono è di un ordine di grandezza superiore alla dispersione fra
-soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
-vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
-sezioni misurate su dieci.
+La foresta installata sul dispositivo impiega cinquanta alberi. Il valore era
+stato ereditato dal prototipo, e la domanda è se una foresta più grande
+farebbe meglio: sei dimensioni fra dieci e quattrocento alberi, a parità di
+tutto il resto.
 
 
 \begin{center}
@@ -624,27 +688,20 @@ Alberi & F2 & Falsi negativi & Latenza \\
 
 \textbf{Il modello più piccolo è migliore \emph{e} quattro volte più veloce.} La spiegazione sta nella dimensione dei dati: con 4.990 finestre e 223 positivi, 200 alberi hanno capacità sufficiente per memorizzare la variabilità individuale dei soggetti disponibili invece della struttura comune dell'evento.
 
-Lo conferma l'andamento della dispersione fra fold, che \textbf{cresce in modo monotono} con la dimensione: $0{,}028$ a 25 alberi, $0{,}051$ a 400. I modelli grandi non sono solo meno accurati su questi dati — sono anche i \textbf{meno stabili fra soggetti}, che in un sistema destinato a persone diverse da quelle osservate è il difetto peggiore.
+Lo conferma l'andamento della dispersione fra fold, che \textbf{cresce in modo monotono da venticinque alberi in su}: $0{,}028$ a 25, $0{,}040$ a 50, $0{,}041$ a 100, $0{,}050$ a 200, $0{,}051$ a 400. I modelli grandi non sono solo meno accurati su questi dati --- sono anche i \textbf{meno stabili fra soggetti}, che in un sistema destinato a persone diverse da quelle osservate è il difetto peggiore.
 
-È il miglior risultato del progetto, ed è il modello più semplice.
+Va detto però che le barre di errore della Figura~\ref{fig:dimensione} si sovrappongono tutte: applicando il criterio dichiarato nella Sezione~\ref{sec:baseline}, \textbf{le sei dimensioni non sono distinguibili fra loro}. Ciò che la misura stabilisce non è che cinquanta alberi siano il valore ottimo, ma che aumentare la dimensione non compra nulla e costa latenza in modo lineare. È il motivo per cui il valore ereditato è stato mantenuto invece che sostituito.
 
 \begin{figure}[htbp]
 \centering
-% FIGURA 4.4 — F2 e latenza al variare del numero di alberi, doppio asse.
-% Sorgente: scripts/out/exp017_rf_size.json. DA GENERARE.
-\caption{F2 e latenza al variare del numero di alberi. Le due curve hanno l'ottimo dalla stessa parte, il che è raro: di norma accuratezza e costo si scambiano.}
+\includegraphics[width=.82\textwidth]{figure/fig_dimensione.png}
+\caption{$F_2$ e latenza al variare del numero di alberi. Le barre sono la dispersione fra fold e si sovrappongono tutte: la figura mostra che nessuna dimensione è distinguibile dalle altre in accuratezza, mentre la latenza cresce di un fattore trenta. Misura a cinque soggetti. Prodotta da \texttt{pipeline/figure\_tesi.py} su \texttt{risultati/cinque\_soggetti/exp017\_rf\_size.json}.}
 \label{fig:dimensione}
 \end{figure}
 
 \paragraph{Effetto del frame rate.}
 
-\paragraph{Provenienza di questa misura.} Le esecuzioni riportate in questa
-sezione risalgono all'impianto a \textbf{cinque} soggetti e non sono state
-ripetute dopo l'estensione a dieci. Sono riportate perché la conclusione che
-sostengono è di un ordine di grandezza superiore alla dispersione fra
-soggetti, e nessun riallineamento può ribaltarla; i valori assoluti, però,
-vanno letti come indicativi e non confrontati cifra per cifra con quelli delle
-sezioni misurate su dieci.
+
 
 \label{sec:framerate}
 
