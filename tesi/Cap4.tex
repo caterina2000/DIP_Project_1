@@ -77,7 +77,7 @@ F_\beta = (1 + \beta^2)\,\frac{\mathrm{precision} \cdot \mathrm{recall}}{\beta^2
 
 \noindent con $\beta = 2$, che assegna al recall un peso quadruplo rispetto alla precision.
 
-Due precisazioni sull'uso che se ne fa. La prima: $\beta = 2$ è stato \textbf{dichiarato prima} di osservare i dati di verifica, e non scelto a posteriori fra i valori che producevano il numero migliore. La seconda, più importante: $F_2$ resta una sintesi, e in alcune circostanze nasconde ciò che dovrebbe mostrare. Nel Capitolo~\ref{cap:risultati} si incontrerà un caso in cui $F_2$ varia entro la dispersione fra fold mentre il recall cala di quattro punti e le cadute non rilevate raddoppiano: la precision compensa e la sintesi resta stabile. Per questa ragione recall, falsi negativi e falsi positivi vengono riportati sempre in chiaro accanto a $F_2$, e nessuna decisione di questo lavoro è presa sulla sola sintesi.
+Due precisazioni sull'uso che se ne fa. La prima: $\beta = 2$ è stato \textbf{dichiarato prima} di osservare i dati di verifica, e non scelto a posteriori fra i valori che producevano il numero migliore. La seconda, più importante: $F_2$ resta una sintesi, e in alcune circostanze nasconde ciò che dovrebbe mostrare. Più avanti in questo capitolo si incontrerà un caso in cui $F_2$ varia entro la dispersione fra fold mentre il recall cala di quattro punti e le cadute non rilevate raddoppiano: la precision compensa e la sintesi resta stabile. Per questa ragione recall, falsi negativi e falsi positivi vengono riportati sempre in chiaro accanto a $F_2$, e nessuna decisione di questo lavoro è presa sulla sola sintesi.
 
 \paragraph{Riequilibrio delle classi.}
 
@@ -126,11 +126,11 @@ Con dieci soggetti il LOSO costa dieci addestramenti invece di uno, ma è l'unic
 
 \paragraph{La statistica rilevante è la dispersione, non la media.}
 
-Questo punto condiziona la lettura di tutto il Capitolo~\ref{cap:risultati} e merita di essere enunciato esplicitamente.
+Questo punto condiziona la lettura di tutti i risultati che seguono, e merita di essere enunciato esplicitamente.
 
 La deviazione standard fra fold non è una nota a margine della media: è la misura di quanto il risultato dipenda da chi capita nella verifica. Nelle run di questo lavoro tale deviazione si colloca fra $\pm 0{,}05$ e $\pm 0{,}14$, ed è quindi dello stesso ordine di grandezza di molte delle differenze che si vorrebbero confrontare. Raddoppiare i soggetti da cinque a dieci non l'ha ridotta in modo apprezzabile, il che è di per sé un risultato: la variabilità non è rumore di campionamento che si media via, è differenza fra persone.
 
-La conseguenza è che una differenza di due o tre centesimi fra due configurazioni \textbf{non è una differenza}, ed è più corretto dichiararle indistinguibili che proclamare un vincitore. Nel Capitolo~\ref{cap:risultati} questo criterio verrà applicato con coerenza, anche quando porta a rinunciare a conclusioni che i numeri grezzi sembrerebbero autorizzare.
+La conseguenza è che una differenza di due o tre centesimi fra due configurazioni \textbf{non è una differenza}, ed è più corretto dichiararle indistinguibili che proclamare un vincitore. Nelle sezioni sperimentali che seguono questo criterio verrà applicato con coerenza, anche quando porta a rinunciare a conclusioni che i numeri grezzi sembrerebbero autorizzare.
 
 \section{Normalizzazione e selezione della soglia decisionale}
 
@@ -158,7 +158,7 @@ Alle feature con distribuzione fortemente asimmetrica — energie e velocità, c
 
 L'applicazione congiunta della normalizzazione e dello split per soggetto porta il rapporto fra le scale da \textbf{646} a un intervallo compreso fra \num{1.05} e \num{1.35}, e il numero di soggetti condivisi fra addestramento e verifica da dieci su dieci a \textbf{zero}. Sugli stessi dati e con lo stesso modello, $F_1$ passa da \num{0.0000} a \num{0.234}, con \num{144} veri positivi contro nessuno.
 
-Il valore di \num{0.234} resta modesto, e il Capitolo~\ref{cap:risultati} mostrerà che la ragione non risiede né nel modello né nel protocollo. Ciò che conta qui è che il modello ha smesso di essere degenere: da quel momento le sue metriche misurano qualcosa.
+Il valore di \num{0.234} resta modesto, e le sezioni che seguono mostreranno che la ragione non risiede né nel modello né nel protocollo. Ciò che conta qui è che il modello ha smesso di essere degenere: da quel momento le sue metriche misurano qualcosa.
 
 \paragraph{Lo scaler è parte del modello.}
 

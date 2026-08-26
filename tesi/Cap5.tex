@@ -260,7 +260,7 @@ Il dato che merita una discussione è l'ultima riga prima del totale. \textbf{Il
 
 Dieci minuti di carico continuo, 18.291 inferenze: deriva della latenza $+3{,}9\%$, frequenza dell'acceleratore invariata a 950~MHz, temperature stabili fra 60 e 63~$^\circ$C. Nessun rallentamento automatico.
 
-La verifica è stata estesa dalla sessione del Capitolo~\ref{cap:campo}: \textbf{cinque ore continue}, picco di $79{,}5\,^\circ$C con andamento a plateau dopo circa quaranta minuti, e frame rate senza gradini. L'assenza di gradini è il criterio: un dispositivo che si rallenta da solo mostra cali bruschi, non una deriva lenta.
+La verifica è stata estesa a una delle sessioni domestiche descritte nella seconda parte di questo capitolo: \textbf{cinque ore continue}, picco di $79{,}5\,^\circ$C con andamento a plateau dopo circa quaranta minuti, e frame rate senza gradini. L'assenza di gradini è il criterio: un dispositivo che si rallenta da solo mostra cali bruschi, non una deriva lenta.
 
 \paragraph{Tre limiti che solo l'esercizio prolungato rivela.}
 
@@ -708,7 +708,7 @@ La riga decisiva è l'ultima. Da $K = 31$ a $K = 45$ \textbf{l'F2 di laboratorio
 
 I blocchi costruiti per far sbagliare il sistema hanno prodotto tre risultati che vale la pena separare.
 
-\paragraph{Il modello non guardava la dinamica.} L'obiezione naturale al problema del divano è che sdraiarsi e cadere hanno dinamiche diverse --- una lenta e controllata, l'altra rapida --- e che il modello dovrebbe distinguerle senza sapere dove si trova il corpo. La verifica ha mostrato che il modello assegnava punteggi alti anche a corpi completamente immobili, con una correlazione fra punteggio e movimento effettivo di $+0{,}139$: praticamente nulla. La causa non era il modello ma le grandezze fornite, ed è discussa nel Capitolo~\ref{cap:risultati}: le derivate istantanee hanno autocorrelazione a un fotogramma fra 0,11 e 0,41, contro 0,84--0,93 delle grandezze statiche. Ciò che arrivava al modello come dinamica era in gran parte rumore.
+\paragraph{Il modello non guardava la dinamica.} L'obiezione naturale al problema del divano è che sdraiarsi e cadere hanno dinamiche diverse --- una lenta e controllata, l'altra rapida --- e che il modello dovrebbe distinguerle senza sapere dove si trova il corpo. La verifica ha mostrato che il modello assegnava punteggi alti anche a corpi completamente immobili, con una correlazione fra punteggio e movimento effettivo di $+0{,}139$: praticamente nulla. La causa non era il modello ma le grandezze fornite, ed è discussa nel Capitolo~\ref{cap:metodologia}: le derivate istantanee hanno autocorrelazione a un fotogramma fra 0,11 e 0,41, contro 0,84--0,93 delle grandezze statiche. Ciò che arrivava al modello come dinamica era in gran parte rumore.
 
 \paragraph{Il tracciamento multi-persona funziona e non è validabile.} È stato implementato con un'identità e un motore di feature indipendenti per ciascuna persona in scena. Nell'unica finestra in cui è stato messo alla prova --- 291 fotogrammi con due persone contemporaneamente visibili --- non ha prodotto alcuno scambio di soggetto. Ma nessuno degli archivi pubblici disponibili contiene più persone in scena: UP-Fall ne ha una sola nel 99,8\% dei fotogrammi. La capacità che serve davvero in una casa è precisamente quella che nessun dato di laboratorio può misurare, e settantun secondi di prova non la sostituiscono.
 
