@@ -122,6 +122,11 @@ Si dichiarano senza attenuazioni, e alcuni sono sufficienti a delimitare quanto 
 \section{Sviluppi}
 \label{sec:sviluppi}
 
+Le direzioni che seguono non sono un elenco di possibilita': sono le cinque
+che questo lavoro ha incontrato senza poterle percorrere, e per ciascuna e'
+noto che cosa manchi per farlo. Sono ordinate per quanto sbloccano il resto,
+non per quanto sono interessanti.
+
 \paragraph{Taratura della soglia senza etichette, sul tasso di base stimato.} Il crollo cross-dataset si scompone in due parti: due terzi sono taratura della soglia --- il modello continua a ordinare correttamente le finestre --- e un terzo è perdita reale. La parte di taratura si correggerebbe con cadute etichettate dell'ambiente di destinazione, che chi installa non possiede. Fissare la soglia a un percentile della distribuzione dei punteggi osservati recupera il 70\% di quel divario su UR-Fall, portando l'F2 da $0{,}073$ a $0{,}449$; ma richiede di assumere il tasso di base, e su una casa quell'assunzione produrrebbe fra 84 e 1.690 falsi allarmi all'ora, perché fissa il tasso di allarme invece di misurarlo. La direzione promettente non è assumere il tasso ma \emph{stimarlo}, per esempio da un periodo iniziale in cui si assuma l'assenza di cadute --- ipotesi realistica in una casa e falsa in un archivio.
 
 \paragraph{Mappa del contesto tramite rilevamento degli oggetti.} La distinzione fra divano e pavimento è oggi affidata a una stima automatica del piano del pavimento. Un rilevamento dei mobili eseguito \emph{all'avvio} e non per fotogramma --- i mobili non si muovono --- avrebbe costo nullo in esercizio e fornirebbe il contesto in modo diretto.

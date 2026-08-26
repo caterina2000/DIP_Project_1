@@ -34,8 +34,11 @@ al lavoro svolto per ottenerla.
 
 La seconda parte porta il sistema in due abitazioni reali. Il suo risultato
 principale non e' un numero di prestazione: e' che \textbf{l'insieme di
-verifica su cui l'intero settore misura ordina in modo errato le alternative
-progettuali}.
+verifica su cui l'intero settore misura rende indistinguibili alternative che
+in esercizio differiscono di ordini di grandezza}. Non ne sbaglia l'ordine ---
+una versione precedente di questo lavoro lo sosteneva, e la
+Sezione~\ref{sec:rovesciamento} spiega perche' quella conclusione sia stata
+ritirata --- ma comprime lo scarto fino a renderlo non dichiarabile.
 
 \section{Piattaforma hardware e vincoli di porting}
 
@@ -58,7 +61,7 @@ La differenza che conta non è il prezzo assoluto ma il \textbf{costo per stanza
 
 \paragraph{Gli ostacoli del porting.}
 
-Sezione breve, e volutamente conservata: sono difficoltà che un lavoro puramente simulativo non incontra, e documentarle è parte del contributo di un capitolo sul \emph{deployment}.
+Tre difficoltà, riportate perché un lavoro puramente simulativo non le incontra e documentarle è parte del contributo di un capitolo sul \emph{deployment}. Hanno una proprietà in comune: nessuna delle tre produce un messaggio d'errore che indichi la causa.
 
 \paragraph{L'architettura del processore.} Il RK3576 implementa ARMv8.0. I pacchetti MediaPipe recenti sono compilati per ARMv8.1 e usano le istruzioni atomiche LSE, assenti nel set precedente: l'esecuzione termina con \texttt{illegal instruction}, senza alcun messaggio che indichi la causa reale. L'unica versione funzionante è la 0.10.9.
 
@@ -107,6 +110,15 @@ Ne segue una regola operativa che questo lavoro ha adottato dopo il secondo epis
 \section{Confronto fra stimatori di posa e configurazione operativa}
 \label{sec:npu}
 
+Con lo stimatore di partenza eseguito sulla CPU il dispositivo non regge il
+carico. Questa sezione descrive la strada percorsa per farlo reggere ---
+portare la percezione sull'acceleratore neurale, il che comporta cambiare
+stimatore --- e si chiude con la decisione di non percorrerla.
+
+Occupa lo spazio che occupa perché il lavoro speso per ottenere quel risultato
+negativo è stato consistente, e perché una scelta verificata e smentita è un
+risultato, mentre una scelta assunta e mai messa alla prova non lo è.
+
 \paragraph{Il punto di partenza non è utilizzabile.}
 
 MediaPipe eseguito sulla CPU del dispositivo impiega \textbf{92,6~ms per fotogramma} a livello di sistema, cioè \textbf{10,8~fps}. Il Capitolo~\ref{cap:risultati} ha misurato che a 9~fps le cadute non rilevate raddoppiano rispetto ai 18~fps del dataset: la configurazione di partenza è quindi già sotto la soglia, e non è una base su cui costruire.
@@ -145,7 +157,7 @@ Su tutto ciò che accade in piedi i due stimatori sono indistinguibili. Il divar
 
 Il punto è che \texttt{torso\_len} è il \textbf{denominatore dell'intera normalizzazione body-centric}. Un suo errore non resta locale: si propaga a ogni feature del vettore, ed è sistematico e correlato con la classe — cioè la forma di errore peggiore possibile, perché imita il segnale che si vuole misurare.
 
-\paragraph{Il confronto a parità di protocollo.} Stessa validazione, stesso insieme di feature, stesso modello: unica variabile lo stimatore di posa.
+\paragraph{Il confronto a parità di protocollo.} Le due catene sono state infine confrontate variando soltanto lo stimatore di posa: stessa validazione, stesso insieme di grandezze, stesso modello, stessa soglia. È l'unico confronto del capitolo in cui il divario supera nettamente la dispersione, e per questo è quello su cui la decisione si regge.
 
 \paragraph{Provenienza dei valori di $F_2$.} I confronti di
 prestazione riportati in questa sezione provengono dall'impianto a
@@ -173,7 +185,7 @@ Il divario è di \textbf{0,227}, molto fuori dalle deviazioni: è una delle poch
 \subsection{La catena che va in esercizio}
 \label{sec:decisione}
 
-Il capitolo non si chiude dichiarando che il sistema gira sull'acceleratore a 26,5~fps. Si chiude con una scelta motivata da numeri, e la scelta è \textbf{contraria alla direzione seguita per ottenerli}.
+La prima parte del capitolo non si conclude dichiarando che il sistema gira sull'acceleratore a 26,5~fps. Si conclude con una scelta motivata dai numeri, e la scelta è \textbf{contraria alla direzione seguita per ottenerli}.
 
 Il confronto onesto non è a parità di dati ma a \textbf{parità di condizioni operative}: ciascuna catena valutata al frame rate che raggiunge davvero sul dispositivo.
 
@@ -252,9 +264,15 @@ riporta il costo per fotogramma perché è quello che concorre al bilancio dei
 
 Il dato che merita una discussione è l'ultima riga prima del totale. \textbf{Il classificatore — l'oggetto su cui si concentra la letteratura, e su cui si è concentrato il Capitolo~\ref{cap:risultati} — è il 5,8\% del costo.} Tutto il resto è percezione.
 
-È coerente con quanto il Capitolo~\ref{cap:risultati} ha misurato sull'accuratezza: fra la migliore e la peggiore architettura corrono $0{,}042$, mentre fra due punti di vista ne corrono $0{,}438$. \textbf{Il classificatore è marginale due volte}: nel costo di calcolo e nella determinazione del risultato.
+È coerente con quanto il Capitolo~\ref{cap:risultati} ha misurato sull'accuratezza: fra la migliore e la peggiore architettura corrono $0{,}066$, dentro la dispersione fra soggetti, mentre fra due punti di vista ne corrono $0{,}438$. \textbf{Il classificatore è marginale due volte}: nel costo di calcolo e nella determinazione del risultato.
 
 \subsection{Comportamento termico e limiti operativi}
+
+Un dispositivo che regge per un minuto non regge necessariamente per cinque
+ore. Vanno verificate separatamente due proprietà distinte: che non si
+rallenti al salire della temperatura, e che nell'esercizio prolungato non
+incontri difetti che una misura breve non può produrre. La seconda ha dato
+tre risultati, e nessuno dei tre era prevedibile a tavolino.
 
 \paragraph{La temperatura a regime.}
 
@@ -303,6 +321,15 @@ cade.
 
 \section{Motivazione e protocollo delle sessioni in ambiente domestico}
 
+Questa sezione contiene quattro cose, e vanno lette nell'ordine in cui sono
+scritte: la ragione per cui una prova domestica era necessaria, la previsione
+formulata prima di eseguirla, il protocollo con cui è stata eseguita, e ciò
+che la prima ora ha mostrato.
+
+L'ordine non è espositivo ma cronologico, ed è l'unica forma in cui la
+previsione conserva valore: una previsione registrata dopo i fatti non è una
+previsione.
+
 \paragraph{Perché il laboratorio non basta.}
 \label{sec:perche-non-basta}
 
@@ -312,7 +339,7 @@ Il fenomeno è stato riconfermato di recente e su scala molto maggiore. Il bench
 
 Ci sono due ragioni per cui un dataset di laboratorio non può misurare ciò che serve, e sono di natura diversa.
 
-La prima è la \textbf{frequenza di base}, ed è quantificabile a priori: è la sezione~\ref{sec:frequenza-base}.
+La prima è la \textbf{frequenza di base}, ed è quantificabile a priori: la tratta il paragrafo seguente.
 
 La seconda è più insidiosa perché non si vede finché non si va a misurare: il dataset \textbf{non contiene le situazioni difficili} dell'ambiente di destinazione. UP-Fall non ha divani, non ha più persone in scena, e --- come si vedrà --- le sue persone orizzontali che non sono cadute stanno a terra invece che rialzate. Ogni intervento progettato per una condizione che il dataset non rappresenta viene giudicato da quel dataset come un peggioramento.
 
@@ -321,7 +348,7 @@ La seconda è più insidiosa perché non si vede finché non si va a misurare: i
 
 Questa sezione è stata scritta \emph{prima} della prima sessione, ed è importante che si legga in quest'ordine: contiene una previsione, e una previsione registrata dopo i fatti non è una previsione.
 
-Il modello migliore del Capitolo~\ref{cap:risultati} produce circa 46 falsi positivi su 4.767 finestre negative, cioè lo \textbf{0,96\% per finestra}. In laboratorio, dove le finestre positive sono il 4,5\% del totale, quello 0,96\% corrisponde a una precision di 0,819 --- un numero che si presenta bene.
+Il modello di riferimento produce, nella configurazione allora in uso, circa 46 falsi positivi su 4.767 finestre negative, cioè lo \textbf{0,96\% per finestra}. È un tasso per finestra, e va tenuto distinto dai conteggi cumulati del Capitolo~\ref{cap:risultati}, che sommano i dieci fold e riguardano configurazioni diverse. In laboratorio, dove le finestre positive sono il 4,5\% del totale, quello 0,96\% corrisponde a una precision di 0,819 --- un numero che si presenta bene.
 
 In un soggiorno la quota di finestre positive è circa lo zero per cento. Proiettando lo stesso tasso per finestra sul funzionamento continuo:
 
@@ -387,7 +414,7 @@ Minuti & Pose valide & Allarmi \\
 \label{sec:falsi-allarmi}
 \label{sec:finestre-eventi}
 
-Nella sessione da cinque ore, dopo aver alzato la soglia, il tasso scende a 41,7 finestre sopra soglia all'ora, che diventano \textbf{3,41 allarmi all'ora contando gli eventi} invece delle singole finestre. È un miglioramento di quasi tre ordini di grandezza rispetto alla prima ora, ed è ancora un ordine di grandezza sopra gli 0,4 all'ora delle installazioni funzionanti documentate, e due o tre sopra il criterio clinico.
+Nella sessione da cinque ore, dopo aver alzato la soglia, il tasso scende a 41,7 finestre sopra soglia all'ora, che diventano \textbf{3,41 allarmi all'ora contando gli eventi} invece delle singole finestre. È un miglioramento di quasi tre ordini di grandezza rispetto alla prima ora, ed è ancora \textbf{settanta volte} sopra gli $0{,}049$ eventi all'ora misurati da Kangas et al. su 15.500 ore di funzionamento reale~\cite{kangas}, e tre ordini di grandezza sopra il criterio clinico di uno o due allarmi alla settimana.
 
 La terza sessione, a casa dei nonni, ha dato \textbf{1.635 allarmi all'ora}: \textbf{trentanove volte} la casa precedente, a parità di configurazione, di soglia e di stimatore. La causa è stata osservata direttamente sui fotogrammi conservati attorno agli allarmi: \textbf{due persone anziane distese su due divani, immobili, nel pomeriggio}. Non è un caso limite costruito per mettere in difficoltà il sistema; è la loro vita normale, ed è esattamente la popolazione a cui il sistema sarebbe destinato.
 
@@ -551,6 +578,12 @@ persone $0{,}780$ e $0{,}917$ non lo erano.
 
 \subsection{Ampiezza dello scarto, non ordine}
 
+Stabilito che le due graduatorie concordano, resta da spiegare perché il
+dataset di riferimento non basti comunque. La risposta non sta nell'ordine ma
+nell'\emph{ampiezza}: lo scarto che in un'abitazione vale un fattore
+cinquantadue, in laboratorio si comprime dentro la dispersione fra soggetti,
+e diventa quindi una differenza che non si può dichiarare.
+
 \paragraph{Sul dataset di riferimento i due errori migliorano insieme.} Prima
 di leggere lo scambio conviene guardare i due tipi di errore separatamente,
 invece di comprimerli in $F_2$. Sulle stesse dieci persone e con lo stesso
@@ -669,6 +702,11 @@ sopravviva alla terza.
 
 \section{Effetto della finestra di accumulazione nei due domini}
 \label{sec:finestra-k}
+
+Le sezioni precedenti hanno mostrato la discordanza su un intervento
+progettuale. Questa la ripete su un \emph{iperparametro}, che è il caso in cui
+è meno attesa e più facile da ignorare: la finestra su cui le grandezze
+integrali si accumulano.
 
 \paragraph{Provenienza di questa scansione.} I valori di laboratorio della
 tabella provengono dall'impianto a \textbf{cinque} soggetti: la scansione non
