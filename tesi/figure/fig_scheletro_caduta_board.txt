@@ -1,0 +1,28 @@
+FIGURA — fig_scheletro_caduta_board.png
+=======================================
+
+CHE COSA MOSTRA
+---------------
+Solo lo scheletro della persona a terra nel fotogramma di picco della prima
+caduta della sessione del 9 settembre 2026 (punteggio 0,760). Nessun volto,
+nessun ambiente, nessuna silhouette: i landmark del volto (indici 0-10 di
+MediaPipe Pose) non sono disegnati. Versione per le slide.
+
+PERSONE E RISERVATEZZA
+-----------------------
+Il fotogramma sorgente ritrae la candidata. Nell'immagine finale non resta
+nessun elemento riconoscibile come persona o luogo. Il sorgente non viene
+copiato in tesi/figure/ né pubblicato.
+
+PROVENIENZA
+-----------
+deploy_board/sessioni/20260909_v5/clip/f00856.0.jpg
+Stima della posa: MediaPipe Pose Landmarker (lite), 33 landmark, 33/33 visibili.
+Disegno: 24 connessioni standard, tronco in cremisi, arti in teal.
+
+PRODOTTA DA
+-----------
+Script di scratch (non committato): scheletro_caduta.py, eseguito con
+fall_processing (MediaPipe 0.10.11). Ritaglio e ingrandimento 2,5x con PIL.
+Verificato con: esecuzione riuscita, 33/33 landmark visibili, controllo
+visivo dell'immagine finale (nessun volto).

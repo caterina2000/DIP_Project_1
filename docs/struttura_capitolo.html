@@ -1,0 +1,704 @@
+<title>Dal protocollo alla casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#F6F8F9; --surface:#FFFFFF; --ink:#161D21; --ink-2:#43525A;
+  --muted:#75858E; --rule:#DCE4E8; --teal:#0E6E7E; --teal-soft:#E4F0F2;
+  --rosso:#A0303C; --rosso-soft:#F7E9EB; --verde:#2E6B4F;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --ground:#10161A; --surface:#161E23; --ink:#E8EEF1; --ink-2:#AEBEC6;
+    --muted:#7E909A; --rule:#26333A; --teal:#5FBACB; --teal-soft:#12313A;
+    --rosso:#E08A94; --rosso-soft:#33191E; --verde:#7DBE9C;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#10161A; --surface:#161E23; --ink:#E8EEF1; --ink-2:#AEBEC6;
+  --muted:#7E909A; --rule:#26333A; --teal:#5FBACB; --teal-soft:#12313A;
+  --rosso:#E08A94; --rosso-soft:#33191E; --verde:#7DBE9C;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3",system-ui,sans-serif; font-size:16.5px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:64px 28px 96px}
+
+/* ---------- intestazione ---------- */
+.occhiello{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--teal); margin:0 0 14px;
+}
+h1{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:clamp(34px,5vw,50px);
+  line-height:1.1; margin:0 0 18px; text-wrap:balance; letter-spacing:-.01em;
+}
+.sommario{
+  font-family:Spectral,Georgia,serif; font-size:19px; line-height:1.65;
+  color:var(--ink-2); max-width:64ch; margin:0 0 10px;
+}
+.sommario em{color:var(--ink); font-style:italic}
+.meta{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
+  margin-top:26px; padding-top:18px; border-top:1px solid var(--rule);
+  display:flex; flex-wrap:wrap; gap:22px;
+}
+
+/* ---------- l'arco ---------- */
+.arco{
+  margin:52px 0 60px; padding:26px 28px; background:var(--surface);
+  border:1px solid var(--rule); border-radius:3px;
+}
+.arco h2{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 16px; font-weight:500;
+}
+.catena{
+  font-family:Spectral,Georgia,serif; font-size:17.5px; line-height:2; margin:0;
+  color:var(--ink-2);
+}
+.catena b{color:var(--ink); font-weight:600}
+.catena span{color:var(--teal); padding:0 5px; font-family:"Source Sans 3",sans-serif}
+
+/* ---------- parti ---------- */
+.parte{
+  display:grid; grid-template-columns:74px 1fr; gap:0 26px;
+  padding:38px 0; border-top:1px solid var(--rule);
+}
+.numero{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--teal);
+  letter-spacing:.1em; padding-top:6px;
+}
+.numero i{
+  display:block; font-style:normal; font-size:10.5px; color:var(--muted);
+  margin-top:5px; letter-spacing:.08em;
+}
+.parte h2{
+  font-family:Spectral,Georgia,serif; font-weight:600; font-size:25px;
+  margin:0 0 6px; line-height:1.25; text-wrap:balance;
+}
+.tesi{
+  font-size:16px; color:var(--ink-2); margin:0 0 22px; max-width:62ch;
+}
+
+/* ---------- sezioni ---------- */
+.sez{
+  padding:16px 0 16px 18px; border-left:2px solid var(--rule); margin-bottom:14px;
+}
+.sez:last-child{margin-bottom:0}
+.sez h3{
+  font-size:16px; font-weight:600; margin:0 0 5px; color:var(--ink);
+  font-family:"Source Sans 3",sans-serif;
+}
+.sez h3 code{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
+  font-weight:400; margin-right:9px;
+}
+.sez p{margin:0 0 8px; font-size:15.3px; color:var(--ink-2); max-width:62ch}
+.sez p:last-child{margin-bottom:0}
+.dato{
+  font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--ink);
+  background:var(--teal-soft); padding:1px 7px; border-radius:2px;
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.conclusione{
+  font-family:Spectral,Georgia,serif; font-style:italic; font-size:15.5px;
+  color:var(--ink); border-top:1px dotted var(--rule); padding-top:9px; margin-top:11px;
+}
+.conclusione::before{
+  content:"il lettore conclude"; display:block; font-family:"IBM Plex Mono",monospace;
+  font-style:normal; font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:5px;
+}
+
+/* ---------- avvisi ---------- */
+.nota{
+  margin:22px 0 4px; padding:16px 20px; border-radius:3px;
+  border-left:3px solid var(--rosso); background:var(--rosso-soft);
+}
+.nota.ok{border-left-color:var(--verde); background:var(--teal-soft)}
+.nota h4{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; margin:0 0 7px; color:var(--rosso); font-weight:500;
+}
+.nota.ok h4{color:var(--verde)}
+.nota p{margin:0 0 7px; font-size:15px; color:var(--ink-2); max-width:62ch}
+.nota p:last-child{margin-bottom:0}
+.nota strong{color:var(--ink)}
+
+/* ---------- tabelle ---------- */
+.tab{overflow-x:auto; margin:14px 0 4px}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:420px}
+th{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  text-align:left; padding:0 14px 8px 0; border-bottom:1px solid var(--rule);
+}
+td{
+  padding:8px 14px 8px 0; border-bottom:1px solid var(--rule); color:var(--ink-2);
+  vertical-align:top;
+}
+td.n{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; text-align:right; color:var(--ink)}
+tr:last-child td{border-bottom:none}
+.evid td{color:var(--ink); font-weight:600}
+
+
+/* ---------- indice ---------- */
+.idx{margin-top:26px}
+.cap{
+  display:grid; grid-template-columns:52px 1fr; gap:0 20px;
+  padding:26px 0; border-top:1px solid var(--rule);
+}
+.capn{
+  font-family:"IBM Plex Mono",monospace; font-size:26px; color:var(--teal);
+  line-height:1; padding-top:4px; font-variant-numeric:tabular-nums;
+}
+.cap h3{
+  font-family:Spectral,Georgia,serif; font-size:21px; font-weight:600;
+  margin:0 0 4px; line-height:1.25;
+}
+.dom{
+  font-size:14.5px; color:var(--muted); margin:0 0 14px; max-width:62ch;
+  font-style:italic;
+}
+.cap ol{margin:0; padding-left:20px}
+.cap ol li{
+  font-size:15.3px; color:var(--ink); margin-bottom:9px; padding-left:4px;
+}
+.cap ol li span{
+  display:block; font-size:13.6px; color:var(--muted); margin-top:2px;
+  line-height:1.55;
+}
+.cap ol li span b, .cap ol li b{color:var(--ink-2); font-weight:600}
+@media (max-width:640px){ .cap{grid-template-columns:1fr; gap:6px} }
+
+
+/* ---------- confronto strutture ---------- */
+.conf{
+  display:grid; grid-template-columns:1fr 1.35fr; gap:0 44px; margin:26px 0 6px;
+}
+.col h4{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 14px; font-weight:500;
+}
+.lista{margin:0; padding-left:19px}
+.lista li{font-size:15px; color:var(--ink-2); margin-bottom:8px; max-width:60ch}
+.lista li b{color:var(--ink); font-weight:600}
+.micro{font-size:13.4px; color:var(--muted); margin:14px 0 0; max-width:58ch; line-height:1.6}
+.micro b{color:var(--ink-2)}
+.fulcro{
+  margin:34px 0 0; padding:24px 26px; background:var(--teal-soft);
+  border-left:3px solid var(--teal); border-radius:2px;
+}
+.cit{
+  font-family:Spectral,Georgia,serif; font-size:18.5px; font-style:italic;
+  line-height:1.6; color:var(--ink); margin:0 0 14px; max-width:64ch;
+}
+/* ---------- intestazioni di parte ---------- */
+.pt{
+  margin:38px 0 0; padding:14px 0 4px; border-top:2px solid var(--ink);
+  font-family:Spectral,Georgia,serif; font-size:19px; font-weight:600; color:var(--ink);
+}
+.pt span{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--teal); display:block;
+  margin-bottom:5px; font-weight:500;
+}
+.pt i{
+  display:block; font-family:"Source Sans 3",sans-serif; font-style:normal;
+  font-size:14.2px; font-weight:400; color:var(--muted); margin-top:5px;
+  max-width:66ch; line-height:1.55;
+}
+.regole{margin-top:40px; padding-top:22px; border-top:1px solid var(--rule)}
+.regole h4{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 14px; font-weight:500;
+}
+.regole p{font-size:14.8px; color:var(--ink-2); max-width:68ch; margin:0 0 12px}
+.regole p b{color:var(--ink); font-weight:600}
+@media (max-width:760px){ .conf{grid-template-columns:1fr; gap:30px} }
+
+/* ---------- coda ---------- */
+.coda{margin-top:56px; padding-top:34px; border-top:2px solid var(--ink)}
+.coda h2{font-family:Spectral,Georgia,serif; font-size:24px; margin:0 0 8px; font-weight:600}
+.aperti{list-style:none; padding:0; margin:18px 0 0}
+.aperti li{
+  padding:11px 0 11px 26px; border-bottom:1px solid var(--rule); position:relative;
+  font-size:15.3px; color:var(--ink-2); max-width:70ch;
+}
+.aperti li::before{
+  content:"→"; position:absolute; left:0; color:var(--teal);
+  font-family:"IBM Plex Mono",monospace;
+}
+.aperti strong{color:var(--ink)}
+@media (max-width:640px){
+  .parte{grid-template-columns:1fr; gap:10px}
+  .numero{padding-top:0}
+  .numero i{display:inline; margin-left:10px}
+}
+</style>
+
+<div class="wrap">
+
+<p class="occhiello">Tesi &middot; struttura e indice</p>
+<h1>Dal protocollo alla casa</h1>
+<p class="sommario">
+  L'ordine in cui gli esperimenti si <em>capiscono</em>, non quello in cui sono
+  successi. Ogni sezione dichiara cosa mostra, con quale evidenza, e a quale
+  conclusione il lettore deve arrivare da solo.
+</p>
+<div class="meta">
+  <span>22 agosto 2026</span>
+  <span>14 esperimenti &middot; 14 difetti tracciati &middot; 12 figure</span>
+  <span>UP-Fall 10 soggetti &middot; UR-Fall &middot; OmniFall &middot; 10,6 h in due abitazioni</span>
+</div>
+
+<div class="arco">
+  <h2>L'arco in una riga</h2>
+  <p class="catena">
+    <b>prestazioni apparenti</b><span>→</span>verifica del protocollo<span>→</span><b>ridimensionamento</b><span>→</span>cosa determina davvero il comportamento<span>→</span>dispositivo edge<span>→</span><b>prova domestica</b><span>→</span>il benchmark non prevedeva il campo<span>→</span>tre diagnosi<span>→</span><b>il compito era definito male</b><span>→</span>nuovo equilibrio
+  </p>
+</div>
+
+<!-- ============ I ============ -->
+<div class="parte">
+  <div class="numero">PARTE I<i>protocollo</i></div>
+  <div>
+    <h2>Perché i numeri di partenza non significavano nulla</h2>
+    <p class="tesi">
+      Apre con la promessa e la smonta. Serve a stabilire il metro con cui
+      tutto il resto verrà misurato: senza questa sezione, ogni numero
+      successivo è confrontabile con quelli della letteratura e non lo è.
+    </p>
+
+    <div class="sez">
+      <h3><code>1.1</code>Le prestazioni dichiarate</h3>
+      <p>Recall 95%, F1 0,93 su UR-Fall. I lavori pubblicati su UP-Fall dichiarano <span class="dato">98–99,58%</span>.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>1.2</code>Tre difetti che li rendono non interpretabili</h3>
+      <p>Divisione casuale di finestre sovrapposte, con gli stessi soggetti da entrambe le parti. Scale delle grandezze con rapporto <span class="dato">646×</span>. Soglia scelta sullo stesso insieme su cui si misura.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>1.3</code>La ricostruzione</h3>
+      <p>Applicando le tre correzioni alla stessa configurazione e agli stessi dati, l'F1 passa da <span class="dato">0,0000</span> a <span class="dato">0,234</span>. Il primo numero interpretabile del progetto.</p>
+      <p class="conclusione">Il protocollo di validazione pesa più del modello, e nulla di ciò che è stato misurato prima è utilizzabile.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ II ============ -->
+<div class="parte">
+  <div class="numero">PARTE II<i>le variabili</i></div>
+  <div>
+    <h2>Cosa determina davvero il comportamento del sistema</h2>
+    <p class="tesi">
+      L'ipotesi iniziale attribuiva all'architettura un'importanza che gli
+      esperimenti non confermano. Questa parte la ridimensiona con una misura,
+      non con un'impressione, e mostra quali sono invece le variabili che contano.
+    </p>
+
+    <div class="sez">
+      <h3><code>2.1</code>L'architettura non è la variabile</h3>
+      <p>Cinque architetture a parità di protocollo, confronto appaiato su dieci fold: <b>nessuna è distinguibile dalla GRU</b>, tutti i <span class="dato">|t| &lt; 2,26</span>.</p>
+      <div class="tab"><table>
+        <tr><th>confronto</th><th>differenza</th><th>t</th><th>soggetti necessari</th></tr>
+        <tr><td>GRU contro LSTM</td><td class="n">+0,011</td><td class="n">0,84</td><td class="n">113</td></tr>
+        <tr><td>GRU contro Transformer</td><td class="n">−0,002</td><td class="n">0,08</td><td class="n">&gt;250</td></tr>
+        <tr class="evid"><td>modo di etichettatura</td><td class="n">−0,309</td><td class="n">6,85</td><td class="n">2</td></tr>
+      </table></div>
+      <p class="conclusione">Distinguere due architetture richiederebbe 113 soggetti; distinguere due definizioni del problema ne richiede 2. Un fattore 56 fra le due domande.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>2.2</code>La geometria della ripresa sì</h3>
+      <p>Stesso soggetto, stessa caduta, stesso istante, due telecamere: F2 da <span class="dato">0,872</span> a <span class="dato">0,434</span>. L'angolo del tronco nel piano immagine ha 84° di escursione di profilo e 3° dall'alto.</p>
+      <p>Addestrando su entrambe le viste se ne recupera il 56%, e i falsi allarmi calano insieme al recall: il modello ha imparato qualcosa di più generale, non ha spostato una soglia.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>2.3</code>La rappresentazione temporale sì</h3>
+      <p>Le derivate istantanee hanno autocorrelazione fra <span class="dato">0,14</span> e <span class="dato">0,44</span>; le grandezze integrate <span class="dato">0,91–0,94</span>. L'autocorrelazione <b>spiega</b> il fenomeno; la prova è discriminativa: a parità di dati gli integrali dividono i falsi allarmi domestici per <span class="dato">14</span> migliorando anche il recall.</p>
+      <p class="conclusione">Il classificatore non «ignorava» la dinamica: riceveva come dinamica qualcosa che era in gran parte rumore.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ III ============ -->
+<div class="parte">
+  <div class="numero">PARTE III<i>dispositivo</i></div>
+  <div>
+    <h2>Dal laboratorio al dispositivo</h2>
+    <p class="tesi">
+      Mostra che il vincolo di costo non è un'aggiunta alla fine ma una
+      variabile del progetto, e che agisce in un punto diverso da quello atteso.
+    </p>
+
+    <div class="sez">
+      <h3><code>3.1</code>Dove va il tempo</h3>
+      <p>Catena completa a <span class="dato">26,5 fps</span> su una board da cento euro, telecamera USB compresa. La stima della posa è l'<span class="dato">88,4%</span> del tempo, il classificatore il <span class="dato">5,8%</span>.</p>
+      <p class="conclusione">Il collo di bottiglia è la percezione, non la classificazione: cambiare classificatore non può modificare sostanzialmente il frame rate.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>3.2</code>Occlusioni</h3>
+      <p>Una occlusione reale e dipendente dalla posa: la confidenza del naso passa da <span class="dato">0,938</span> in piedi a <span class="dato">0,240</span> a terra. Correggendo il criterio di qualità, i fotogrammi utilizzabili passano dal 48% al 95%.</p>
+      <p>Verifica controllata: mascherando gruppi di landmark la perdita massima è <span class="dato">0,020</span> di F2, un quarto della dispersione fra soggetti. Le gambe coperte da mobilio costano zero.</p>
+      <p class="conclusione">Non «robusto alle occlusioni» in generale: individuata e corretta una specifica modalità di guasto, e verificato che la ridondanza fra le tre rappresentazioni regge alla perdita di punti.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>3.3</code>La scelta del classificatore</h3>
+      <p>Quando l'accuratezza non decide, decide il costo: trenta secondi di addestramento contro tredici minuti, scikit-learn su CPU invece di TensorFlow su ARM.</p>
+      <p class="conclusione">La foresta non è «il più accurato»: è sulla regione migliore del compromesso fra accuratezza, complessità e implementabilità.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ IV ============ -->
+<div class="parte">
+  <div class="numero">PARTE IV<i>il campo</i></div>
+  <div>
+    <h2>La prova domestica, e cosa ha cambiato</h2>
+    <p class="tesi">
+      Non una validazione finale: <b>lo strumento con cui il problema è stato
+      scoperto</b>. È guardando il funzionamento reale che è emerso che la
+      rappresentazione e il dataset non contenevano l'informazione necessaria.
+    </p>
+
+    <div class="sez">
+      <h3><code>4.1</code>Il primo blocco</h3>
+      <p>Trentanove minuti, ventidue volte i falsi allarmi previsti dalle metriche di laboratorio. È il momento in cui il lavoro cambia direzione.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>4.2</code>Perché il benchmark non lo prevedeva</h3>
+      <p>Le persone orizzontali che non sono cadute esistono in entrambi gli insiemi, ma sono di tipo opposto. In UP-Fall stanno <b>a terra</b> (altezza mediana del bacino <span class="dato">+0,02</span> lunghezze di torso); in casa stanno su un <b>divano</b> (<span class="dato">+1,47</span>).</p>
+      <p class="conclusione">Il benchmark non misura completamente il problema che il sistema incontrerà dopo l'installazione.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>4.3</code>Contare eventi, non finestre</h3>
+      <p>Una falsa attivazione produce decine di finestre consecutive che un sistema installato aggrega in un evento solo: fattore di sovrastima <span class="dato">47,8</span>. E il conteggio degli eventi dipende da due parametri di aggregazione che vanno dichiarati — sugli stessi dati il totale va da 3,1 a 44,7 eventi/ora.</p>
+      <p>Una terza misura non dipende da nessun parametro: la <b>quota di tempo in allarme</b>, che nel blocco peggiore vale <span class="dato">70,1%</span>. È l'unica onesta per un falso positivo che è uno stato e non un evento.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>4.4</code>Un ambiente mai visto</h3>
+      <p>Su UR-Fall il guadagno di PR-AUC sulla prevalenza è <span class="dato">1,8×</span>: il trasferimento fallisce, e non per calibrazione. Il valore ottenibile ritarando sul dominio di arrivo è una <b>soglia oracolo</b>, non una prestazione: richiede le etichette del dominio target.</p>
+      <p>Ma il modo in cui fallisce è specifico: <span class="dato">11,6%</span> di falsi allarmi sulle persone distese volontariamente, <span class="dato">0,0%</span> su tutti gli altri negativi.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ V ============ -->
+<div class="parte">
+  <div class="numero">PARTE V<i>la diagnosi</i></div>
+  <div>
+    <h2>Tre diagnosi, e quale era quella giusta</h2>
+    <p class="tesi">
+      Tre interventi successivi, ciascuno nato dal fallimento del precedente.
+      L'ordine è quello in cui sono stati pensati, e va raccontato così perché
+      il terzo si capisce solo dopo aver visto perché i primi due non bastavano.
+    </p>
+
+    <div class="sez">
+      <h3><code>5.1</code>Manca l'informazione di contesto</h3>
+      <p>A3 normalizza tutto rispetto al corpo e cancella per costruzione dove si trovi la persona nella stanza. L'altezza del bacino dal pavimento la restituisce, stimando il piano da sola.</p>
+      <p>Riscontro indipendente arrivato per caso: mascherando le anche nel test di occlusione, A3 smette di essere riferito al corpo e <b>migliora</b> di 0,012.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>5.2</code>La dinamica era rumore</h3>
+      <p>Il modello assegnava punteggio alto anche a corpi immobili; la correlazione fra punteggio e movimento era <span class="dato">+0,139</span>. Non era il modello: erano le grandezze. Sostituite con integrali su mezzo secondo.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>5.3</code>Il compito era definito male</h3>
+      <p>Con una tassonomia che separa l'atto del cadere dallo stato successivo e dallo sdraiarsi volontario, si definiscono tre compiti diversi. Non sono gradazioni: hanno positivi, prevalenze e difficoltà diverse.</p>
+      <div class="tab"><table>
+        <tr><th>compito</th><th>positivo</th><th>F2</th><th>falsi allarmi sui distesi</th><th>eventi/ora dai nonni</th></tr>
+        <tr class="evid"><td>evento</td><td>l'atto di cadere</td><td class="n">0,831</td><td class="n">0,0%</td><td class="n">5,3</td></tr>
+        <tr><td>stato</td><td>essere a terra</td><td class="n">0,704</td><td class="n">12,5%</td><td class="n">104,2</td></tr>
+        <tr><td>allarme</td><td>l'uno o l'altro</td><td class="n">0,810</td><td class="n">13,1%</td><td class="n">105,1</td></tr>
+      </table></div>
+      <p>La ragione è fisica ed è misurata: fra caduta e sdraiarsi volontario il rapporto delle mediane è <span class="dato">30×</span> sulla velocità del bacino e <span class="dato">139×</span> sulla discesa. Fra <i>essere a terra dopo una caduta</i> ed <i>essere disteso per scelta</i> è <span class="dato">1,3×</span>.</p>
+      <p class="conclusione">Il divano non era un problema del sistema: era un problema del compito. La transizione discrimina, la posa no.</p>
+
+      <div class="nota ok">
+        <h4>riscontro esterno</h4>
+        <p>Un benchmark pubblicato nel 2025 che unifica otto dataset riporta lo stesso divario con un modello video da <strong>87 milioni di parametri</strong>: F1 65,6% sull'evento contro <strong>41,0% sullo stato</strong>, e i modelli multimodali da 8 miliardi di parametri confondono sistematicamente «caduto» con «disteso».</p>
+        <p>Il divario evento–stato non è un limite di questo lavoro: <strong>è il problema aperto del campo</strong>, e ha lo stesso segno.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VI ============ -->
+<div class="parte">
+  <div class="numero">PARTE VI<i>equilibrio</i></div>
+  <div>
+    <h2>Il nuovo equilibrio, e cosa costa</h2>
+
+    <div class="sez">
+      <h3><code>6.1</code>La configurazione risultante</h3>
+      <p>Classificatore sulla transizione, con grandezze integrali; conferma temporale dopo l'allarme; una via lenta separata — altezza dal pavimento, immobilità, durata — per le cadute non osservate. Tre condizioni congiunte, quindi pochi falsi allarmi.</p>
+      <p class="conclusione">Il classificatore deve rispondere a una domanda sola, e quella la risolve. Tutto il resto è logica temporale sopra, non un problema di classificazione.</p>
+    </div>
+
+    <div class="sez">
+      <h3><code>6.2</code>Il costo, dichiarato</h3>
+      <p>Il compito «evento» perde una caduta su cinque rispetto ad «allarme». Con cinque cadute reali l'intervallo di confidenza sul recall va da 0,28 a 0,99: <b>la differenza non è interpretabile</b>, e va riportata come tale.</p>
+      <p>E <span class="dato">1,6 eventi/ora</span> restano trentatré volte lo <span class="dato">0,049/ora</span> dello studio longitudinale su 15.500 ore. Il traguardo non è raggiunto.</p>
+    </div>
+
+    <div class="nota">
+      <h4>cambia rispetto alla lettera di agosto</h4>
+      <p>Riallineando tutti i feature set a dieci soggetti, la configurazione «altezza + controesempi» passa da <strong>F2 0,780 a 0,942</strong> in laboratorio. Non è più la peggiore: è la seconda migliore.</p>
+      <p>Il rovesciamento laboratorio–casa era in buona parte un effetto di pochi dati. L'affermazione va riformulata: non «il benchmark la giudica peggiore», ma <strong>«il benchmark non distingue configurazioni che in casa differiscono di due ordini di grandezza»</strong>. Più debole su un punto, più forte su un altro.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ indice ============ -->
+<div class="coda" style="border-top-width:1px">
+  <h2>Come sono strutturate le tesi su questo argomento</h2>
+  <p class="tesi">La struttura ricorrente nei lavori comparabili &egrave; sempre
+  la stessa, e ha una logica: prima il problema, poi il metodo, poi la prova,
+  poi il bilancio.</p>
+
+  <div class="conf">
+    <div class="col">
+      <h4>lo schema abituale</h4>
+      <ol class="lista">
+        <li>Introduzione e obiettivi</li>
+        <li>Stato dell'arte</li>
+        <li>Materiali e metodi</li>
+        <li>Implementazione del sistema</li>
+        <li>Risultati sperimentali</li>
+        <li>Conclusioni</li>
+      </ol>
+      <p class="micro">&Egrave; lo schema dei lavori su rilevamento di cadute da
+      posa con elaborazione a bordo, e dei lavori su modelli leggeri per
+      dispositivi a risorse limitate.</p>
+    </div>
+    <div class="col">
+      <h4>dove questo lavoro se ne discosta, e perch&eacute;</h4>
+      <ul class="lista">
+        <li><b>Il capitolo dei risultati non &egrave; ordinato per esperimento.</b>
+        &Egrave; ordinato per conclusione: ci&ograve; che non determina il
+        comportamento, e ci&ograve; che lo determina. Ordinato per esperimento,
+        il risultato principale resterebbe da ricavare al lettore.</li>
+        <li><b>Il metodo comprende la definizione del compito.</b> Nei lavori
+        citati &laquo;caduta&raquo; &egrave; data per scontata; qui &egrave; una
+        scelta con un effetto misurato pi&ugrave; grande di quello
+        dell'architettura.</li>
+        <li><b>La prova in campo non &egrave; una validazione finale.</b> &Egrave;
+        lo strumento con cui il problema &egrave; stato scoperto, e precede una
+        parte delle scelte di metodo. Deve avere un capitolo proprio.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="fulcro">
+    <p class="occhiello" style="margin-bottom:10px">il fulcro, come indicato dal relatore</p>
+    <p class="cit">L'ipotesi iniziale attribuiva alla scelta dell'architettura
+    un'importanza che gli esperimenti non confermano. Una volta costruita una
+    rappresentazione adeguata, l'effetto dell'architettura diventa piccolo
+    rispetto ad altri fattori del problema.</p>
+    <p class="micro">Tutto l'indice &egrave; costruito su questa frase.
+    La <b>Parte&nbsp;II</b> costruisce la rappresentazione e la definizione del
+    compito; la <b>Parte&nbsp;III</b> misura che l'architettura non conta e che
+    quelle due s&igrave;; la <b>Parte&nbsp;I</b> esiste per rendere leggibile
+    perch&eacute; ci si aspettasse il contrario.</p>
+  </div>
+</div>
+
+<div class="coda" style="border-top-width:1px">
+  <h2>L'indice</h2>
+  <p class="tesi">Quattro parti, sette capitoli. Ogni capitolo risponde a una
+  domanda che nessun altro capitolo affronta. In grassetto ci&ograve; che &egrave;
+  nuovo o riscritto rispetto alla versione consegnata al relatore.</p>
+
+  <div class="idx">
+
+    <div class="pt"><span>Parte I</span> Il quadro generale
+      <i>Perch&eacute; questo problema non &egrave; una classificazione qualunque, e che cosa non hanno risolto gli altri.</i></div>
+
+    <div class="cap">
+      <div class="capn">1</div>
+      <div>
+        <h3>Cadute, contesto domestico, vincoli</h3>
+        <p class="dom">Che cosa si sta rilevando, per chi, e sotto quali condizioni.</p>
+        <ol>
+          <li>Il fenomeno clinico
+            <span>frequenza e conseguenze &middot; il tempo trascorso a terra come variabile prognostica &middot; <b>l'evento si compone di due fasi con propriet&agrave; diverse</b></span></li>
+          <li>Perch&eacute; una casa non &egrave; un laboratorio
+            <span>sensori indossabili e aderenza dell'utente &middot; <b>la prevalenza: dodici per cento delle finestre in laboratorio, due eventi l'anno in una casa</b> &middot; che cosa comporta per la precisione richiesta</span></li>
+          <li>I tre vincoli non negoziabili
+            <span>riservatezza: perch&eacute; la posa e non i pixel &middot; costo: un dispositivo da cento euro &middot; latenza: la decisione resta locale</span></li>
+          <li>Obiettivo, domande, contributi
+            <span><b>basta un'architettura compatta? &middot; quale fase va riconosciuta? &middot; quanti falsi allarmi rendono un sistema inutile?</b></span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="cap">
+      <div class="capn">2</div>
+      <div>
+        <h3>Stato dell'arte, e che cosa non misura</h3>
+        <p class="dom">Perch&eacute; prestazioni dichiarate del 98&ndash;99% convivono con l'assenza di sistemi domestici funzionanti.</p>
+        <ol>
+          <li>Le tre famiglie di approcci
+            <span>indossabili &middot; ambientali &middot; visione &middot; con quali dati ciascuna &egrave; stata validata</span></li>
+          <li>La visione: dai pixel alla posa
+            <span>metodi diretti sull'immagine &middot; metodi basati su posa &middot; perch&eacute; la posa &egrave; la scelta obbligata sotto il vincolo di riservatezza</span></li>
+          <li><b>Che cosa i banchi di prova non contengono</b>
+            <span>archivi recitati e prevalenza artificiale &middot; il negativo difficile assente &middot; <b>metriche per finestra e non per evento</b> &middot; la lacuna che questo lavoro colma</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="pt"><span>Parte II</span> La metodologia
+      <i>Come un video diventa una decisione, e a quali condizioni un numero su quella decisione significa qualcosa.</i></div>
+
+    <div class="cap">
+      <div class="capn">3</div>
+      <div>
+        <h3>Dalla posa alla rappresentazione</h3>
+        <p class="dom">Che cosa si d&agrave; in pasto al classificatore. &Egrave; la met&agrave; del fulcro.</p>
+        <ol>
+          <li>Lo stimatore di posa e le sue debolezze
+            <span>la caduta come analisi del movimento &middot; <b>il rumore dei punti, e perch&eacute; filtrarlo non basta</b> &middot; il fotogramma senza persona</span></li>
+          <li>Tre rappresentazioni geometriche
+            <span>ellisse nel piano immagine &middot; geometria tridimensionale &middot; geometria riferita al corpo &middot; <b>due grandezze degeneri rimosse, e come sono state trovate</b></span></li>
+          <li><b>Dalla derivata all'integrale</b>
+            <span>il modello non usava la dinamica: l'autocorrelazione delle derivate &middot; accumulare invece di derivare &middot; <b>fin dove regge &mdash; rumore indipendente e ambiguit&agrave; di posa</b> &middot; il vincolo di causalit&agrave; &middot; l'altezza dal pavimento</span></li>
+          <li>Selezione delle grandezze
+            <span>separabilit&agrave; per allineamento temporale &middot; il punteggio per telecamera e il criterio del minimo &middot; filtro di ridondanza</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="cap">
+      <div class="capn">4</div>
+      <div>
+        <h3>Definire il compito, e misurarlo</h3>
+        <p class="dom">L'altra met&agrave; del fulcro, e il metro con cui tutto il resto viene giudicato.</p>
+        <ol>
+          <li><b>Che cosa chiamiamo caduta</b>
+            <span>tre fasi, tre compiti possibili: evento, stato, allarme &middot; <b>il negativo che rende la scelta non ovvia: una persona che si sdraia</b> &middot; dall'etichetta per fotogramma a quella della finestra &middot; un vocabolario di riferimento</span></li>
+          <li>Come si divide il dato
+            <span>per finestra, per video, per soggetto &middot; perch&eacute; le prime due misurano il soggetto e non il metodo &middot; la normalizzazione come parte del modello</span></li>
+          <li><b>Come si decide, e come si misura</b>
+            <span>la soglia: sei regole a confronto &middot; <b>metriche del classificatore e metriche del sistema</b> &middot; finestre contro eventi &middot; la quota di tempo in allarme</span></li>
+          <li><b>Quanto vale un numero</b>
+            <span>perch&eacute; $F_2$ &middot; dispersione fra soggetti &middot; <b>quanti soggetti servirebbero per rendere significativo ciascun confronto</b></span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="pt"><span>Parte III</span> Il sistema e gli esperimenti
+      <i>Che cosa determina il comportamento in condizioni controllate, e che cosa succede quando il sistema esce dal laboratorio.</i></div>
+
+    <div class="cap">
+      <div class="capn">5</div>
+      <div>
+        <h3>Che cosa determina il comportamento</h3>
+        <p class="dom">Il capitolo del risultato principale. Ordinato per conclusione, non per esperimento.</p>
+        <ol>
+          <li>La prima misura difendibile
+            <span>le tre correzioni di protocollo applicate insieme &middot; dal valore nullo al primo numero interpretabile</span></li>
+          <li><b>Ci&ograve; che non determina il comportamento</b>
+            <span>l'architettura &mdash; cinque a confronto appaiato, nessuna distinguibile &middot; la dimensione del modello &middot; la lunghezza della finestra &middot; la frequenza dei fotogrammi &middot; <b>il rumore indipendente sui punti</b> &middot; <b>nessun gruppo di punti &egrave; critico</b></span></li>
+          <li><b>Ci&ograve; che lo determina</b>
+            <span>la geometria della ripresa &middot; la rappresentazione temporale &middot; <b>la definizione del compito &mdash; l'effetto pi&ugrave; grande misurato</b></span></li>
+          <li>Robustezza e trasferimento
+            <span>occlusione dipendente dalla posa &middot; mascheramento controllato &middot; <b>trasferimento a un archivio esterno: il crollo, e il modo in cui fallisce</b></span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="cap">
+      <div class="capn">6</div>
+      <div>
+        <h3>Il sistema fuori dal laboratorio</h3>
+        <p class="dom">Che cosa cambia quando il sistema smette di essere un esperimento: prima sul dispositivo, poi in una casa vera.</p>
+        <ol>
+          <li>Il dispositivo: piattaforma e bilancio computazionale
+            <span>la board da cento euro &middot; dove va il tempo &mdash; il collo di bottiglia non &egrave; la classificazione &middot; stabilit&agrave; termica e limiti operativi</span></li>
+          <li><b>Che cosa si trasferisce e che cosa no</b>
+            <span>parit&agrave; esatta del classificatore &middot; <b>lo stimatore di posa &egrave; un tracciatore e diverge fra architetture</b> &middot; <b>56 clip sulle due macchine: 55 decisioni identiche, una diversa &mdash; ed &egrave; una caduta vera</b> &middot; la verifica deve partire dai fotogrammi, non dalle grandezze gi&agrave; calcolate</span></li>
+          <li>Le sessioni domestiche: protocollo e prima ora
+            <span>due abitazioni, dieci ore e mezza &middot; consenso e trattamento delle immagini &middot; <b>ci&ograve; che il registratore salva, e perch&eacute;</b> &middot; ventidue volte la previsione di laboratorio, e <b>perch&eacute; il laboratorio non poteva prevederlo</b></span></li>
+          <li><b>Gli interventi e il loro effetto reale</b>
+            <span>informazione di contesto &middot; controesempi domestici, e perch&eacute; sono adattamento e non generalizzazione &middot; <b>la definizione del compito, rimisurata in casa: da 105 a 5 eventi l'ora</b> &middot; <b>il recall va rimisurato a bordo, non sul calcolatore</b></span></li>
+          <li>Dimostrazione
+            <span>persona presente che non cade &middot; caduta registrata e allarme &middot; ci&ograve; che viene mostrato e ci&ograve; che non lascia il dispositivo</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="pt"><span>Parte IV</span> Conclusioni
+      <i>Che cosa si &egrave; stabilito, entro quali limiti, e che cosa viene dopo.</i></div>
+
+    <div class="cap">
+      <div class="capn">7</div>
+      <div>
+        <h3>Che cosa se ne conclude</h3>
+        <p class="dom"></p>
+        <ol>
+          <li>Risposta alle domande del Capitolo&nbsp;1
+            <span>una per una, con il numero che la sostiene</span></li>
+          <li>Contributi
+            <span>metodologici &middot; sperimentali &middot; di sistema</span></li>
+          <li>Limiti dichiarati
+            <span>cinque cadute reali sono poche &middot; due abitazioni non sono una dimostrazione &middot; il multi-persona non &egrave; valutabile su alcun archivio pubblico</span></li>
+          <li>Sviluppi</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="regole">
+    <h4>le tre regole che tengono insieme l'indice</h4>
+    <p><b>Ogni capitolo risponde a una domanda sua.</b> La prevalenza dell'evento
+    compariva sia nel primo capitolo sia in quello domestico: resta nel primo,
+    dove spiega la difficolt&agrave; del problema, e il sesto vi rimanda. La
+    verifica di parit&agrave; compariva sia nel protocollo sia nel dispositivo:
+    resta nella Parte&nbsp;III, dove &egrave; una scoperta e non una regola.</p>
+    <p><b>Il metodo precede la prova, anche quando la cronologia dice il
+    contrario.</b> Gli integrali e la definizione del compito sono nati dal
+    fallimento domestico, ma stanno nella Parte&nbsp;II: la tesi si legge
+    nell'ordine in cui si capisce. Il Capitolo&nbsp;6 dichiara esplicitamente di
+    essere anche la causa della Parte&nbsp;II.</p>
+    <p><b>Il fulcro non si annuncia, si costruisce.</b> Il Capitolo&nbsp;1 pone
+    la domanda sull'architettura come domanda aperta e ragionevole. Solo il
+    Capitolo&nbsp;5 la chiude, e con una misura di quanti soggetti servirebbero
+    invece che con un confronto di tabelle.</p>
+  </div>
+</div>
+
+<!-- ============ coda ============ -->
+<div class="coda">
+  <h2>Quello che resta aperto</h2>
+  <p class="tesi">Dichiarato nel capitolo, non nascosto.</p>
+  <ul class="aperti">
+    <li><strong>Cinque cadute reali sono poche.</strong> Servono venti eventi perché un recall cominci a dire qualcosa.</li>
+    <li><strong>Il multi-persona è implementato ma non valutabile:</strong> nessun archivio pubblico contiene più persone insieme, ed è proprio la capacità che serve in una casa. È un limite dei dataset, non una scelta.</li>
+    <li><strong>Prova di durata sul dispositivo.</strong> La regola di decisione &egrave; ora implementata a bordo e verificata sulle 56 clip (55 decisioni su 56 identiche al calcolatore); manca la prova continuativa di alcune ore.</li>
+    <li><strong>Il recall va rimisurato sulla board.</strong> Lo stimatore di posa &egrave; un tracciatore e diverge fra architetture: su una caduta reale il calcolatore emette l'allarme e il dispositivo no. I numeri di prestazione del calcolatore non sono automaticamente i numeri del dispositivo.</li>
+    <li><strong>La configurazione schierata non è quella scelta:</strong> sulla board gira ancora la rappresentazione senza integrali, addestrata su un compito diverso da quello che il capitolo conclude.</li>
+    <li><strong>I controesempi domestici sono adattamento all'ambiente, non generalizzazione.</strong> Trasferiscono fra due abitazioni (~2×), ma due case non sono una dimostrazione.</li>
+  </ul>
+</div>
+
+</div>

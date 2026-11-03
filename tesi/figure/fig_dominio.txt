@@ -1,0 +1,32 @@
+FIGURA — fig_dominio.png
+========================
+
+CHE COSA MOSTRA
+---------------
+Il divario fra la prestazione nell'archivio di addestramento e quella su un
+archivio mai visto, diviso nelle due parti di cui e' fatto: quella che si
+recupererebbe ritarando la soglia, e quella che nessuna soglia recupera.
+
+COME SI LEGGE
+-------------
+Il segmento blu e' cio' che il sistema ottiene davvero sull'archivio nuovo,
+con la soglia con cui e' stato schierato. Il segmento sabbia e' quanto si
+guadagnerebbe scegliendo la soglia migliore CONOSCENDO le risposte: e' la
+soglia oracolo, e chi installa il sistema non la possiede. Il segmento rosso
+e' cio' che resta, cioe' capacita' di separare che si e' persa e che nessuna
+taratura restituisce.
+
+I NUMERI
+--------
+Le due parti sono quasi uguali. E' la lettura coerente con la PR-AUC: 1,79
+volte il caso sull'archivio nuovo contro 18,7 in dominio.
+
+PROVENIENZA
+-----------
+Dieci soggetti su UP-Fall, verifica su UR-Fall rietichettato. Prodotta da
+campo/pr_auc_allineato.json.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su campo/pr_auc_allineato.json

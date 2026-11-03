@@ -46,6 +46,7 @@ import argparse
 import os
 import re
 import sys
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -72,6 +73,64 @@ VOLONTARIO = {5, 6}  # lie_down, lying
 _P_OMNI = re.compile(r'Subject(\d+)/Activity(\d+)/Trial(\d+)/.*Camera(\d+)',
                      re.IGNORECASE)
 _P_NOSTRO = re.compile(r'sub(\d+)_act(\d+)_trial(\d+)_cam(\d+)', re.IGNORECASE)
+
+
+_STAMP_FILE = re.compile(r'^(\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2})\.(\d+)')
+
+
+def tempi_veri(radice):
+    """
+    Per ogni ripresa, l'istante di ciascun fotogramma in secondi dal primo.
+
+    ISS-150. OmniFall annota IN SECONDI; questo script convertiva
+    moltiplicando per 18 fps. Ma la cadenza vera va da 14,43 a 19,63 fps
+    (ISS-149), e l'errore che ne deriva **non e' costante: cresce lungo la
+    ripresa**, perche' e' proporzionale al tempo trascorso dall'inizio. Su
+    `sub06_act08_trial01` la deriva a fine ripresa vale 214 fotogrammi, cioe'
+    14,8 secondi --- piu' lunga dell'evento che l'etichetta descrive.
+
+    I timestamp ci sono, e sono al microsecondo: stanno nei nomi dei file.
+    Non e' una stima ne' una correzione approssimata, e' il dato.
+
+    Una ripresa entra nella mappa solo se TUTTI i suoi nomi portano un
+    timestamp leggibile e sono ordinati per tempo. Altrimenti resta fuori e
+    per essa vale il ripiego dichiarato --- meglio il valore vecchio,
+    dichiarato come tale, che un tempo inventato su meta' dei fotogrammi.
+    """
+    fuori = {}
+    for cat in ('adl', 'fall'):
+        base = os.path.join(radice, cat)
+        if not os.path.isdir(base):
+            continue
+        for sog in sorted(os.listdir(base)):
+            d1 = os.path.join(base, sog)
+            if not os.path.isdir(d1):
+                continue
+            for rip in sorted(os.listdir(d1)):
+                d2 = os.path.join(d1, rip)
+                if not os.path.isdir(d2):
+                    continue
+                files = sorted(f for f in os.listdir(d2)
+                               if f.lower().endswith(('.png', '.jpg', '.jpeg')))
+                ts, ok = [], True
+                for nome in files:
+                    m = _STAMP_FILE.match(nome)
+                    if not m:
+                        ok = False
+                        break
+                    frazione = (m.group(2) + '000000')[:6]
+                    try:
+                        ts.append(datetime.strptime(
+                            m.group(1) + '.' + frazione,
+                            '%Y-%m-%dT%H_%M_%S.%f'))
+                    except ValueError:
+                        ok = False
+                        break
+                if not ok or len(ts) < 30 or ts != sorted(ts):
+                    continue
+                t0 = ts[0]
+                fuori[rip] = [(x - t0).total_seconds() for x in ts]
+    return fuori
 
 
 def chiave_omni(p: str):
@@ -111,7 +170,27 @@ def main():
     c_rip = a.col_ripresa or ('ripresa' if 'ripresa' in d.columns else 'video_id')
     c_fot = a.col_fotogramma or ('fotogramma' if 'fotogramma' in d.columns else 'frame')
     d['chiave'] = d[c_rip].map(chiave_nostra)
+    # Il tempo di ciascun fotogramma. Prima era `indice / 18`; ora e'
+    # l'istante misurato, e il valore dichiarato resta solo per le riprese di
+    # cui non si trovano i file (ISS-150).
+    tempi = tempi_veri(config.RAW_DIR) if os.path.isdir(config.RAW_DIR) else {}
     d['t'] = d[c_fot] / a.fps
+    t_dichiarato = d['t'].to_numpy(float).copy()
+    n_vere, n_righe_vere = 0, 0
+    for rip, idx in d.groupby(c_rip).groups.items():
+        tv = tempi.get(rip)
+        if not tv:
+            continue
+        j = d.loc[idx, c_fot].to_numpy()
+        if j.min() < 0 or j.max() >= len(tv):
+            # il CSV e la cartella non hanno lo stesso numero di fotogrammi:
+            # allineare a indovinare sarebbe peggio che lasciare il ripiego
+            continue
+        d.loc[idx, 't'] = np.asarray(tv, float)[j]
+        n_vere += 1
+        n_righe_vere += len(j)
+
+    scarto = np.abs(d['t'].to_numpy(float) - t_dichiarato)
 
     print('=' * 78)
     print('ETICHETTE OMNIFALL APPLICATE A UP-FALL')
@@ -120,6 +199,19 @@ def main():
     print(f'annotazioni    {len(ann):,} segmenti')
     print(f'chiavi in comune: '
           f'{len(set(d.chiave.dropna()) & set(ann.chiave)):,} riprese')
+    print()
+    print('TEMPI (ISS-150)')
+    print(f'   riprese con timestamp veri   {n_vere} '
+          f'({n_righe_vere:,} righe, {100*n_righe_vere/max(len(d),1):.1f}%)')
+    print(f'   riprese col ripiego a {a.fps:g} fps  '
+          f'{d[c_rip].nunique() - n_vere}')
+    if n_righe_vere:
+        print(f'   spostamento dell etichetta   mediano '
+              f'{np.median(scarto):.3f} s, massimo {scarto.max():.3f} s')
+        print(f'   righe spostate di oltre 1 s  {int((scarto > 1).sum()):,} '
+              f'({100*(scarto > 1).mean():.1f}%)')
+        print(f'   righe spostate di oltre 3,11 s (durata mediana di una '
+              f'caduta)  {int((scarto > 3.11).sum()):,}')
 
     # Per ogni ripresa si scorrono i suoi segmenti e si marcano i fotogrammi
     # che ci cadono dentro. E' un intervallo per volta: i segmenti OmniFall

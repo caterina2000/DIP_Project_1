@@ -1,0 +1,22 @@
+{
+ "csv": "feature_v5.csv",
+ "positiva": "transizione e stato",
+ "viste": [
+  {
+   "camera": 1,
+   "vista": "Camera 1, laterale",
+   "mediana_caduta": 0.08231003905825529,
+   "mediana_non_caduta": 1.5924913988185485,
+   "separazione": 1.5101813597602933,
+   "n_fotogrammi": 53859
+  },
+  {
+   "camera": 2,
+   "vista": "Camera 2, frontale rialzata",
+   "mediana_caduta": 1.3660426950578284,
+   "mediana_non_caduta": 1.4258435992399057,
+   "separazione": 0.059800904182077286,
+   "n_fotogrammi": 57711
+  }
+ ]
+}

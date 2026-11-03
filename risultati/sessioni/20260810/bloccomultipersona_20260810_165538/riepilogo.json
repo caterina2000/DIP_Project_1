@@ -1,0 +1,19 @@
+{
+  "blocco": "multipersona",
+  "inizio": "2026-08-10T16:55:38",
+  "fine": "2026-08-10T16:55:46",
+  "durata_h": 0.0,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.45,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 9,
+  "pose_valide": 0,
+  "quota_pose": 0.0,
+  "fps_medio": 8.2,
+  "allarmi": 0,
+  "allarmi_per_ora": 0.0,
+  "clip_salvate": 0,
+  "cambi_di_persona_sospetti": 0,
+  "interrotta_da_utente": false
+}

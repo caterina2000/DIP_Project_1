@@ -1,0 +1,32 @@
+FIGURA — fig_occlusioni.png
+===========================
+
+CHE COSA MOSTRA
+---------------
+Di quanto cambia l'F2 se si «congela» un gruppo di landmark, cioe' se ne si
+tiene ferma la posizione all'ultima nota, come accade quando un mobile ne
+nasconde una parte. Un gruppo per barra.
+
+COME SI LEGGE
+-------------
+Lo zero e' la prestazione senza occlusione. A sinistra dello zero il sistema
+peggiora, a destra migliora. La banda grigia e' la dispersione fra soggetti:
+una barra che non la raggiunge segnala un effetto piu' piccolo della
+differenza fra due persone.
+
+I NUMERI
+--------
+La perdita massima e' sulle spalle e vale 0,020 di F2, contro una
+dispersione fra soggetti di 0,078: nessun gruppo di punti e' critico. Non e'
+il risultato che ci si aspettava.
+
+PROVENIENZA
+-----------
+Dieci soggetti. L'occlusione e' SIMULATA con il punto congelato: le
+occlusioni da mobilio reale non sono annotate ne' in UP-Fall ne' in UR-Fall,
+e non sono misurate.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su occlusioni/foresta_DTW.json

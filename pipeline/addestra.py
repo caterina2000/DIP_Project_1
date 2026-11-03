@@ -56,25 +56,13 @@ for _f in (sys.stdout, sys.stderr):
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
 import config
-from src.dati import FEATURE, carica, conteggio, costruisci_finestre, feature_dtw, fold_loso
+from src.provenienza import scrivi_json
+from src.dati import (FEATURE, carica, colonne_di, conteggio,
+                      costruisci_finestre, feature_dtw, fold_loso)
 from src.etichettatura import MODI
 from src.modelli import ARCHITETTURE, costruisci
 from src.valutazione import (aggrega, metriche, probabilita_allarme,
                              scegli_soglia, tabella_fold)
-
-
-def colonne_di(nome: str):
-    """'DTW' legge il file dell'analisi; gli altri sono i bacini."""
-    if nome.upper() == 'DTW':
-        return feature_dtw()
-    # Prima il nome esatto, poi maiuscolo: i bacini si chiamano A1/A2/A3 ma le
-    # varianti senza integrali A1base/A2base/A3base, e un .upper() secco le
-    # renderebbe irraggiungibili.
-    for chiave in (nome, nome.upper()):
-        if chiave in FEATURE:
-            return FEATURE[chiave]
-    raise ValueError(f'insieme di feature sconosciuto: {nome!r} '
-                     f'(attesi: DTW, {", ".join(FEATURE)})')
 
 
 def una_run(df, colonne, modo, architettura, camera, verboso=False,
@@ -166,8 +154,7 @@ def una_run(df, colonne, modo, architettura, camera, verboso=False,
 def salva(meta, punteggi, out_dir, etichetta):
     os.makedirs(out_dir, exist_ok=True)
     p = os.path.join(out_dir, f'run_{etichetta}.json')
-    with open(p, 'w', encoding='utf-8') as f:
-        json.dump(meta, f, indent=2, ensure_ascii=False)
+    scrivi_json(p, meta)
 
     # Un .npz con le probabilita' di ogni fold, appiattite con un indice di
     # fold accanto: cosi' resta un file solo e si ricostruisce con una
@@ -189,7 +176,7 @@ def main():
     ap.add_argument('--modello', default='gru', choices=list(ARCHITETTURE))
     ap.add_argument('--modo', default='tre_classi', choices=list(MODI))
     ap.add_argument('--feature', default='DTW',
-                    help='DTW | A1 | A2 | A3 | TUTTE')
+                    help='DTW | DTWH (DTW + altezza dal pavimento) | A1 | A2 | A3 | TUTTE')
     ap.add_argument('--camera', type=int, default=1)
     ap.add_argument('--tutti', action='store_true',
                     help='tutte le architetture per tutti i modi')

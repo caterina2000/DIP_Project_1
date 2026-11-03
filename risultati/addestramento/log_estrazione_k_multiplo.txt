@@ -1,0 +1,29 @@
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+==========================================================================
+ESTRAZIONE MULTI-K — 110 sequenze, camera 1, K = [5, 15, 22, 31, 45]
+==========================================================================
+Lo stimatore gira una volta per fotogramma; i motori geometrici
+sono 5, uno per K, e ricevono gli stessi landmark.
+
+    10/110     1,792 fotogrammi    2.4 min  (stima totale 26 min)
+    20/110     3,651 fotogrammi    4.8 min  (stima totale 27 min)
+    30/110     5,356 fotogrammi    7.0 min  (stima totale 26 min)
+    40/110     7,228 fotogrammi    9.5 min  (stima totale 26 min)
+    50/110     9,008 fotogrammi   11.8 min  (stima totale 26 min)
+    60/110    17,428 fotogrammi   21.4 min  (stima totale 39 min)
+    70/110    26,127 fotogrammi   30.6 min  (stima totale 48 min)
+    80/110    34,082 fotogrammi   38.8 min  (stima totale 53 min)
+    90/110    41,668 fotogrammi   47.7 min  (stima totale 58 min)
+   100/110    50,504 fotogrammi   57.3 min  (stima totale 63 min)
+   110/110    58,359 fotogrammi   65.8 min  (stima totale 66 min)
+
+  Camera1: y = +0.0507*x +455.5 (37,189 fotogrammi eretti)
+
+==========================================================================
+58,359 fotogrammi, 110 riprese, 10 soggetti
+pose valide: 92.3%
+nessuna divergenza sulle colonne non integrali
+salvato in dataset\processed\features\feature_k_multiplo.csv
+
+Prossimo passo: il controllo di riproduzione contro feature_v5.csv
+  python pipeline/k_per_fold.py --controlla

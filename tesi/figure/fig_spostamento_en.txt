@@ -1,0 +1,49 @@
+spostamento per landmark fra fotogrammi consecutivi,
+RISPETTO AL BACINO, in lunghezze di tronco, mediana [q25-q75]
+
+riprese: 20 ADL, 20 caduta, camera 1, max 400 fotogrammi
+
+idx  punto            ADL                    caduta                 usato
+0    nose             0.0069 [0.0015-0.0227]  0.0068 [0.0025-0.0205]  si
+1    left eye inner   0.0066 [0.0014-0.0228]  0.0059 [0.0021-0.0195]  
+2    left eye         0.0066 [0.0014-0.0228]  0.0058 [0.0020-0.0190]  
+3    left eye outer   0.0065 [0.0014-0.0228]  0.0059 [0.0020-0.0190]  
+4    right eye inner  0.0065 [0.0014-0.0225]  0.0059 [0.0021-0.0188]  
+5    right eye        0.0065 [0.0014-0.0222]  0.0057 [0.0021-0.0188]  
+6    right eye outer  0.0063 [0.0014-0.0221]  0.0058 [0.0021-0.0190]  
+7    left ear         0.0057 [0.0012-0.0208]  0.0047 [0.0017-0.0173]  
+8    right ear        0.0052 [0.0012-0.0205]  0.0051 [0.0018-0.0172]  
+9    mouth left       0.0064 [0.0014-0.0216]  0.0064 [0.0023-0.0192]  
+10   mouth right      0.0062 [0.0014-0.0211]  0.0065 [0.0023-0.0200]  
+11   left shoulder    0.0045 [0.0010-0.0210]  0.0071 [0.0022-0.0226]  si
+12   right shoulder   0.0045 [0.0011-0.0221]  0.0044 [0.0016-0.0160]  si
+13   left elbow       0.0067 [0.0013-0.0284]  0.0135 [0.0053-0.0357]  
+14   right elbow      0.0077 [0.0014-0.0329]  0.0115 [0.0038-0.0308]  
+15   left wrist       0.0095 [0.0015-0.0387]  0.0159 [0.0057-0.0464]  
+16   right wrist      0.0111 [0.0015-0.0486]  0.0159 [0.0056-0.0475]  
+17   left pinky       0.0112 [0.0015-0.0443]  0.0183 [0.0069-0.0528]  
+18   right pinky      0.0135 [0.0019-0.0556]  0.0191 [0.0071-0.0533]  
+19   left index       0.0113 [0.0016-0.0452]  0.0176 [0.0068-0.0510]  
+20   right index      0.0138 [0.0019-0.0549]  0.0191 [0.0070-0.0541]  
+21   left thumb       0.0108 [0.0016-0.0424]  0.0166 [0.0063-0.0481]  
+22   right thumb      0.0127 [0.0018-0.0523]  0.0178 [0.0066-0.0505]  
+23   left hip         0.0014 [0.0003-0.0095]  0.0021 [0.0007-0.0070]  si
+24   right hip        0.0014 [0.0003-0.0095]  0.0021 [0.0007-0.0070]  si
+25   left knee        0.0044 [0.0010-0.0359]  0.0058 [0.0020-0.0173]  si
+26   right knee       0.0044 [0.0010-0.0356]  0.0045 [0.0015-0.0177]  si
+27   left ankle       0.0064 [0.0014-0.0652]  0.0090 [0.0028-0.0392]  si
+28   right ankle      0.0059 [0.0012-0.0647]  0.0067 [0.0021-0.0360]  si
+29   left heel        0.0076 [0.0016-0.0734]  0.0118 [0.0039-0.0491]  
+30   right heel       0.0070 [0.0014-0.0714]  0.0077 [0.0024-0.0391]  
+31   left foot index  0.0090 [0.0016-0.0753]  0.0126 [0.0039-0.0540]  
+32   right foot index 0.0079 [0.0015-0.0714]  0.0104 [0.0036-0.0445]  
+
+coppie contate: 6943 per landmark sulle ADL, 3544 sulle cadute
+
+riassunto (mediana delle mediane)
+  ADL     punti impiegati (senza le anche) 0.0045
+          polsi e dita                  0.0113   2.5 volte tanto
+  caduta  punti impiegati (senza le anche) 0.0067
+          polsi e dita                  0.0177   2.6 volte tanto
+  le anche (23, 24) valgono 0.0014 su ADL, ma sono il punto da
+  cui si sottrae: il loro valore non e comparabile.

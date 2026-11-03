@@ -1,0 +1,42 @@
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+==========================================================================
+ESTRAZIONE — 220 sequenze, K integrali = 31
+==========================================================================
+    10/220     1,844 fotogrammi    1.6 min  (stima totale 35 min)
+    20/220     3,584 fotogrammi    3.1 min  (stima totale 34 min)
+    30/220     5,470 fotogrammi    4.7 min  (stima totale 35 min)
+    40/220     7,178 fotogrammi    6.2 min  (stima totale 34 min)
+    50/220     9,090 fotogrammi    7.9 min  (stima totale 35 min)
+    60/220    10,588 fotogrammi    9.2 min  (stima totale 34 min)
+    70/220    12,468 fotogrammi   10.9 min  (stima totale 34 min)
+    80/220    14,332 fotogrammi   12.5 min  (stima totale 34 min)
+    90/220    16,106 fotogrammi   14.2 min  (stima totale 35 min)
+   100/220    17,892 fotogrammi   15.8 min  (stima totale 35 min)
+   110/220    25,980 fotogrammi   22.7 min  (stima totale 45 min)
+   120/220    34,732 fotogrammi   30.1 min  (stima totale 55 min)
+   130/220    44,006 fotogrammi   38.1 min  (stima totale 64 min)
+   140/220    51,898 fotogrammi   44.8 min  (stima totale 70 min)
+   150/220    59,784 fotogrammi   52.2 min  (stima totale 77 min)
+   160/220    67,808 fotogrammi   59.2 min  (stima totale 81 min)
+   170/220    74,260 fotogrammi   64.8 min  (stima totale 84 min)
+   180/220    82,980 fotogrammi   72.4 min  (stima totale 88 min)
+   190/220    92,736 fotogrammi   80.8 min  (stima totale 94 min)
+   200/220   100,652 fotogrammi   87.8 min  (stima totale 97 min)
+   210/220   108,716 fotogrammi   95.0 min  (stima totale 100 min)
+   220/220   116,362 fotogrammi  101.9 min  (stima totale 102 min)
+
+  Camera1: y = +0.0507*x +455.5  (37,189 fotogrammi eretti)   altezza mediana +1.53 torsi, 5-95% [+0.00, +2.13]
+  Camera2: y = -0.0550*x +400.3  (31,287 fotogrammi eretti)   altezza mediana +1.42 torsi, 5-95% [+0.39, +2.67]
+
+==========================================================================
+116,362 fotogrammi, 220 riprese, 10 soggetti
+pose valide: 95.9%
+etichette dal suffisso: 58.3%  (dalla categoria: 48,554)
+
+distribuzione delle etichette:
+  0:  100,296   86.2%
+  1:    5,542    4.8%
+  2:   10,524    9.0%
+
+colonne di feature: 33/33
+salvato in dataset\processed\features\feature_v4.csv

@@ -15,6 +15,8 @@ Numerazione da 100 per non confondersi con le DEC-0xx del progetto storico.
 | [DEC-105](#dec-105) | Soglia fissa, dichiarata a priori | MOTIVATA |
 | [DEC-106](#dec-106) | Tre dataset, tre ruoli distinti | MOTIVATA |
 | [DEC-107](#dec-107) | Il classificatore risponde a «sta cadendo?» | MOTIVATA |
+| [DEC-108](#dec-108) | La regola di allarme schierata resta «cinque consecutive» | MOTIVATA |
+| [DEC-109](#dec-109) | Due configurazioni distinte: quella schierata e quella rivista sul campo | MOTIVATA |
 
 ---
 
@@ -263,3 +265,80 @@ La ragione è fisica ed è misurata sui fotogrammi: fra caduta e sdraiarsi volon
 **Conferma esterna.** OmniFall 2025, VideoMAE da 87 milioni di parametri: F1 65,6% sull'evento contro 41,0% sullo stato. Il divario evento-stato è il problema aperto del campo, e ha lo stesso segno del nostro.
 
 **Il seguito.** Il confronto fra le tre modalità di [DEC-104](#dec-104) va riletto alla luce di questa scelta: `scarta` era stata misurata a recall 0,495 contro un metro che contava lo stato come positivo, cioè su una domanda diversa da quella che ora è la nostra.
+
+---
+
+<a id="dec-108"></a>
+## DEC-108 — La regola di allarme schierata resta «cinque finestre consecutive»
+
+**Scelta.** La configurazione dichiarata come schierata mantiene la regola
+**cinque finestre consecutive sopra soglia, poi trenta secondi di
+sospensione**. Le regole alternative --- cumulativa, e isteresi «K su M» ---
+si riportano come **analisi di sensibilita' fuori linea**, non come nuova
+configurazione validata.
+
+**Perche', ed e' un argomento di metodo, non di prestazione.** La sessione del
+9 settembre ([EXP-036](EXPERIMENTS.md#exp-036)) mostra che la regola schierata
+non rileva nessuna delle tre cadute messe in scena, mentre `0,40 con due
+consecutive` ne prenderebbe due. La tentazione e' evidente: cambiare la regola.
+
+Ma quei punteggi sono **gli stessi dati su cui la nuova regola verrebbe
+scelta**. Sceglierla li' e poi usarli per dimostrare che funziona meglio e'
+adattamento ai dati, e produrrebbe un numero che non regge fuori. E' il rilievo
+del relatore del 2026-09-09, ed e' corretto: *«il rischio sarebbe quello di
+osservare gli stessi dati domestici, scegliere la regola che funziona meglio su
+quei dati e poi usare quegli stessi dati per dimostrare che la nuova regola
+funziona meglio»*.
+
+**Cosa si puo' dire, e va detto.** Che la regola schierata ha mancato tre
+cadute su tre; che il classificatore le aveva viste (picchi 0,540 e 0,720
+contro una soglia di 0,50); che la causa e' la richiesta di **consecutivita'**,
+fragile a un avvallamento di quattro centesimi; e che l'isteresi appare la
+direzione piu' promettente. Tutto questo e' descrizione di cio' che e' stato
+osservato. **Quello che non si puo' dire e' che l'isteresi sia migliore**:
+servirebbero cadute registrate in una sessione diversa da quella su cui la
+regola e' stata scelta.
+
+**Conseguenza pratica.** Il pacchetto sulla board **non e' stato modificato**
+nella regola. La prossima sessione di cadute e' anche il modo per ottenere i
+dati indipendenti che mancano.
+
+**Collegamenti:** [EXP-036](EXPERIMENTS.md#exp-036),
+[EXP-029](EXPERIMENTS.md#exp-029), [DEC-105](#dec-105)
+
+---
+
+<a id="dec-109"></a>
+## DEC-109 — Due configurazioni distinte, e la differenza va narrata
+
+**Scelta.** Il testo distingue esplicitamente:
+
+| | colonne | quando | come e' nata |
+|---|---:|---|---|
+| **configurazione schierata** | 12 (DTW) | agosto → 8 settembre | scelta a priori dal criterio DTW |
+| **configurazione rivista** | 13 (DTWH) | dal 9 settembre | `A3_h_pavimento` **reintrodotta dopo** aver osservato gli errori domestici |
+
+**Perche'.** `A3_h_pavimento` e' fisicamente motivata --- e' la sola grandezza
+che distingue il pavimento dal divano --- e il guadagno e' misurato su tutte e
+sei le architetture ([EXP-025](EXPERIMENTS.md#exp-025), media +0,056, sei segni
+concordi su sei). Ma **non e' stata scelta a priori**: il criterio DTW la
+esclude, perche' misura ogni grandezza da sola e questa e' 19esima su 33. E'
+rientrata perche' l'analisi degli errori in casa ha mostrato che il sistema
+confondeva «sdraiarsi sul divano» con una caduta.
+
+Presentarla come scelta iniziale sarebbe **riscrivere la storia in modo
+favorevole**. E' il rilievo del relatore: *«distingui fra configurazione
+inizialmente deployata e configurazione rivista a seguito della validazione sul
+campo. Non farei apparire come scelta a priori qualcosa che e' nato
+dall'analisi degli errori»*.
+
+**Che cosa comporta nel testo.** Il Capitolo 4 confronta DTW e DTWH come due
+insiemi; il Capitolo 5 racconta **perche'** il secondo esiste, e in quale
+ordine sono avvenute le cose: prima l'errore osservato in casa, poi la
+grandezza, poi la misura. Il limite del criterio DTW --- valuta ogni grandezza
+isolata, quindi non poteva sceglierla --- va detto dove il criterio viene
+presentato, nel Capitolo 3.
+
+**Collegamenti:** [ISS-139](ISSUES.md#iss-139),
+[EXP-023](EXPERIMENTS.md#exp-023), [EXP-025](EXPERIMENTS.md#exp-025),
+[ISS-156](ISSUES.md#iss-156)

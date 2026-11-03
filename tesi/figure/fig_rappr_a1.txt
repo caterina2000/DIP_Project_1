@@ -1,0 +1,36 @@
+FIGURA A1 — LA SAGOMA COME ELLISSE
+File: fig_rappr_a1.png
+Prodotta da: pipeline/figura_rappresentazioni.py  (ambiente fall_processing)
+Fotogramma: UP-Fall, Subject_06, caduta laterale, Camera 1, fotogramma 21
+
+CHE COSA SI VEDE
+  - la posa stimata da MediaPipe, disegnata dalla libreria stessa
+  - in giallo i sette landmark che A1 impiega: naso, spalle, anche, caviglie
+  - l'ellisse definita dagli autovettori della covarianza di quei sette punti
+  - i due assi: in blu il maggiore, in verde il minore
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.52\textwidth]{figure/fig_rappr_a1.png}
+\caption{A1 sui sette \emph{landmark} impiegati --- naso, spalle, anche e
+caviglie, evidenziati in giallo. L'ellisse e' quella definita dagli autovettori
+della matrice di covarianza dei sette punti: l'asse maggiore ne da'
+l'orientamento dominante, l'asse minore la dispersione ortogonale. Nessuna
+delle relazioni anatomiche che collegano i punti viene utilizzata.}
+\label{fig:rappr-a1}
+\end{figure}
+
+DOVE
+  Dopo il paragrafo che finisce con «...quanto la configurazione appaia
+  allungata o compressa», prima dell'elenco delle grandezze estratte.
+
+FRASE DA AGGIUNGERE NEL TESTO
+  La Figura~\ref{fig:rappr-a1} mostra la costruzione su una caduta in corso:
+  i sette punti si dispongono lungo una direzione dominante, e l'ellisse che
+  li riassume risulta inclinata e allungata.
+
+VALORI DI QUESTO FOTOGRAMMA, se servono nel testo
+  inclinazione dell'asse maggiore   55,6 gradi
+  allungamento (rapporto fra assi)  3,43

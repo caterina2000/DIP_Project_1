@@ -1,0 +1,298 @@
+{
+ "run": "foresta_tre_classi_DTWH_cam1_L22",
+ "csv": "feature_v3.csv",
+ "camera": 1,
+ "soglia": 0.5,
+ "sospensione_s": 30.0,
+ "n_cadute_laboratorio": 50,
+ "n_sessioni_casa": 13,
+ "riferimento": "consecutive 5",
+ "regole": [
+  {
+   "regola": "consecutive 1",
+   "riprese": 50,
+   "con_allarme": 50,
+   "richiamo": 1.0,
+   "latenza_mediana_s": 1.4444444444444444,
+   "latenza_p90_s": 3.3944444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 237,
+    "eventi_ora": 15.824608144573833
+   }
+  },
+  {
+   "regola": "consecutive 3",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.044444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 179,
+    "eventi_ora": 11.951919231555763
+   }
+  },
+  {
+   "regola": "consecutive 5",
+   "riprese": 50,
+   "con_allarme": 45,
+   "richiamo": 0.9,
+   "latenza_mediana_s": 2.4444444444444446,
+   "latenza_p90_s": 4.511111111111111,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 161,
+    "eventi_ora": 10.750050258550157
+   }
+  },
+  {
+   "regola": "consecutive 7",
+   "riprese": 50,
+   "con_allarme": 45,
+   "richiamo": 0.9,
+   "latenza_mediana_s": 2.888888888888889,
+   "latenza_p90_s": 4.955555555555556,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 144,
+    "eventi_ora": 9.61495178404486
+   }
+  },
+  {
+   "regola": "consecutive 10",
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 3.5555555555555554,
+   "latenza_p90_s": 5.522222222222222,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 128,
+    "eventi_ora": 8.546623808039875
+   }
+  },
+  {
+   "regola": "3 su 5",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.044444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 183,
+    "eventi_ora": 12.21900122555701
+   }
+  },
+  {
+   "regola": "3 su 6",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.044444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 185,
+    "eventi_ora": 12.352542222557632
+   }
+  },
+  {
+   "regola": "4 su 6",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.2222222222222223,
+   "latenza_p90_s": 4.355555555555555,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 174,
+    "eventi_ora": 11.618066739054207
+   }
+  },
+  {
+   "regola": "4 su 8",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.2222222222222223,
+   "latenza_p90_s": 4.355555555555555,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 175,
+    "eventi_ora": 11.684837237554518
+   }
+  },
+  {
+   "regola": "5 su 8",
+   "riprese": 50,
+   "con_allarme": 46,
+   "richiamo": 0.92,
+   "latenza_mediana_s": 2.4722222222222223,
+   "latenza_p90_s": 4.583333333333333,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 168,
+    "eventi_ora": 11.217443748052338
+   }
+  },
+  {
+   "regola": "5 su 10",
+   "riprese": 50,
+   "con_allarme": 46,
+   "richiamo": 0.92,
+   "latenza_mediana_s": 2.4722222222222223,
+   "latenza_p90_s": 4.583333333333333,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 170,
+    "eventi_ora": 11.35098474505296
+   }
+  },
+  {
+   "regola": "6 su 10",
+   "riprese": 50,
+   "con_allarme": 46,
+   "richiamo": 0.92,
+   "latenza_mediana_s": 2.6944444444444446,
+   "latenza_p90_s": 4.805555555555555,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 160,
+    "eventi_ora": 10.683279760049844
+   }
+  },
+  {
+   "regola": "cumulata 0,5",
+   "riprese": 50,
+   "con_allarme": 49,
+   "richiamo": 0.98,
+   "latenza_mediana_s": 1.6111111111111112,
+   "latenza_p90_s": 3.688888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 140,
+    "eventi_ora": 9.347869790043614
+   }
+  },
+  {
+   "regola": "cumulata 1,0",
+   "riprese": 50,
+   "con_allarme": 46,
+   "richiamo": 0.92,
+   "latenza_mediana_s": 1.8333333333333333,
+   "latenza_p90_s": 3.9722222222222223,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 127,
+    "eventi_ora": 8.479853309539564
+   }
+  },
+  {
+   "regola": "cumulata 1,5",
+   "riprese": 50,
+   "con_allarme": 45,
+   "richiamo": 0.9,
+   "latenza_mediana_s": 2.0555555555555554,
+   "latenza_p90_s": 4.366666666666667,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 113,
+    "eventi_ora": 7.545066330535203
+   }
+  },
+  {
+   "regola": "cumulata 2,0",
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.2777777777777777,
+   "latenza_p90_s": 4.727777777777778,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 107,
+    "eventi_ora": 7.144443339533334
+   }
+  },
+  {
+   "regola": "cumulata 2,5",
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.6111111111111107,
+   "latenza_p90_s": 5.055555555555555,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 94,
+    "eventi_ora": 6.276426859029284
+   }
+  },
+  {
+   "regola": "isteresi 0,70/0,40/3",
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 1.9444444444444444,
+   "latenza_p90_s": 3.911111111111111,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 115,
+    "eventi_ora": 7.678607327535826
+   }
+  },
+  {
+   "regola": "isteresi 0,70/0,40/5",
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.4444444444444446,
+   "latenza_p90_s": 4.372222222222223,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 109,
+    "eventi_ora": 7.277984336533957
+   }
+  },
+  {
+   "regola": "isteresi 0,80/0,45/3",
+   "riprese": 50,
+   "con_allarme": 46,
+   "richiamo": 0.92,
+   "latenza_mediana_s": 1.9722222222222223,
+   "latenza_p90_s": 4.083333333333333,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 77,
+    "eventi_ora": 5.141328384523987
+   }
+  },
+  {
+   "regola": "isteresi 0,90/0,50/3",
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.594444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 45,
+    "eventi_ora": 3.004672432514019
+   }
+  }
+ ],
+ "_provenienza": {
+  "commit": "34ece3b9266b15c9ee08a8e1a970f55bdf699e7a",
+  "commit_breve": "34ece3b9",
+  "albero_pulito": false,
+  "data": "2026-09-07T17:21:28",
+  "comando": "pipeline/regole_allarme.py",
+  "python": "3.12.10",
+  "macchina": "LAPTOP-OO4676OI",
+  "sistema": "Windows",
+  "numpy": "2.2.6",
+  "pandas": "2.2.2",
+  "sklearn": "1.6.0"
+ }
+}

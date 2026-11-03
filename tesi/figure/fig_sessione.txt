@@ -1,0 +1,36 @@
+FIGURA — fig_sessione.png
+=========================
+
+CHE COSA MOSTRA
+---------------
+Cinque ore di esercizio continuo in casa: il punteggio di ogni finestra nel
+tempo, la soglia, le finestre che la superano, e i pochi allarmi che ne
+escono dopo l'antirimbalzo.
+
+COME SI LEGGE
+-------------
+Le finestre sopra soglia sono visibilmente RAGGRUPPATE: quando il sistema si
+insospettisce lo fa per qualche secondo di fila, non una volta sola. La
+regola di decisione chiede cinque finestre consecutive e poi tace per trenta
+secondi, e cosi' una raffica intera diventa UN allarme. E' la differenza fra
+i due conteggi in legenda.
+
+I NUMERI
+--------
+Su QUESTA sessione il rapporto fra finestre sopra soglia ed eventi vale
+14,9: 208 finestre sopra soglia diventano 14 allarmi. Sull'insieme delle
+sessioni il fattore vale 44,8, ed e' quello riportato nel capitolo; qui se
+ne vede una sola, e una singola sessione non e' l'insieme. E' il fattore che
+distingue un dato riportabile da uno che sovrastima di quasi due ordini di
+grandezza, ed e' la ragione per cui i numeri di campo di questo lavoro sono
+sempre eventi e mai finestre.
+
+PROVENIENZA
+-----------
+Una sessione domestica vera. Gli allarmi sono RICALCOLATI qui dai punteggi,
+non letti da eventi.csv, che contiene finestre sopra soglia e non eventi.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su punteggi.csv

@@ -1,0 +1,85 @@
+NOTE SLIDE PER LA PRESENTAZIONE (circa 14,5 minuti, circa 130 parole al minuto)
+Testo da dire a voce. Le cose tra [parentesi quadre] non vanno lette.
+Il dettaglio completo, per le domande, è in DISCORSO_TESTO_PIANO.txt.
+
+============================================================
+PARTE 1 - IL PROBLEMA (1,5 min)
+============================================================
+
+--- Slide: titolo (10 s) ---
+Buongiorno a tutti. Presento il mio lavoro di tesi sulla rilevazione automatica delle cadute a partire dalla stima della posa, valutata non solo in laboratorio ma fino all'esecuzione su un dispositivo edge.
+
+--- Slide: perché rilevare le cadute (25 s) ---
+Un anziano su cinque riferisce almeno una caduta nell'anno. Il punto non è solo la caduta, ma il tempo di soccorso: restare a terra a lungo è ciò che aggrava le conseguenze.
+
+--- Slide: tre famiglie di soluzioni (25 s) ---
+Le soluzioni esistenti hanno tre limiti diversi. Gli indossabili richiedono che la persona li porti sempre. I sensori ambientali coprono poco. La visione non ha questi due limiti, e con l'elaborazione locale risolve in parte anche il problema della privacy, perché le immagini non escono di casa.
+
+--- Slide: obiettivo e domande (30 s) ---
+L'obiettivo è verificare che un sistema basato sulla posa riconosca le cadute, contenga i falsi allarmi e funzioni in continuo con risorse limitate. Lo studio ruota attorno a tre domande. Quanto conta il classificatore, a parità di tutto il resto. Che cosa resta quando cambiano soggetto, punto di vista, dataset e ambiente. E se la pipeline può girare in locale su un dispositivo a basso costo.
+
+============================================================
+PARTE 2 - COME È STATO FATTO (7 min)
+============================================================
+
+--- Slide: pipeline, dal video all'allarme (30 s) ---
+Questa è l'intera pipeline, e la seguo da sinistra a destra. Dal video, MediaPipe stima la posa e restituisce 33 landmark per fotogramma. Da lì costruisco le feature, le seleziono, le preparo, le do al classificatore, e dal punteggio del classificatore ricavo l'allarme.
+
+--- Slide: tre modi di descrivere la posa (30 s) ---
+Dai landmark ho costruito tre rappresentazioni della stessa posa. A1 usa coordinate assolute nel piano dell'immagine. A2 usa le coordinate tridimensionali stimate da MediaPipe, relative al baricentro. A3 è centrata sul bacino e normalizzata sulla lunghezza del tronco, quindi dipende meno da dove sta la persona e da quanto appare grande. Averne tre serve a capire quali informazioni distinguono meglio una caduta dalle attività quotidiane.
+
+--- Slide: dalle derivate alle grandezze integrali (60 s) ---
+Una caduta non è una posa, è un evento nel tempo. Per questo alle feature istantanee ho aggiunto tre grandezze integrali, calcolate su una finestra mobile di circa un secondo e mezzo: l'escursione, cioè quanto cambia l'orientamento del tronco; il percorso, cioè quanta strada compie un punto di riferimento; e la discesa, cioè quanto quel punto si abbassa rispetto alla posizione più alta. Non sono filtri: sintetizzano come il movimento si è sviluppato nella finestra.
+
+--- Slide: altezza del bacino dal pavimento (90 s) ---
+Poi ho aggiunto un'informazione che la posa da sola non dà: l'altezza del bacino rispetto al pavimento. Serve a distinguere una persona caduta da una seduta o sdraiata su un divano, che in immagine può avere una posa molto simile. Il pavimento viene stimato osservando la persona in piedi, e l'altezza è normalizzata sulla lunghezza del tronco, quindi non è una misura in metri. Mettendo insieme tutto, le feature candidate sono 33.
+Un punto onesto: questa feature, nella selezione fatta sul benchmark, era stata scartata. L'ho reintrodotta dopo aver visto i falsi positivi nelle prove in casa. Lo dico perché è un esempio di come il benchmark da solo non basta.
+
+--- Slide: selezione e preparazione dei dati (60 s) ---
+Dalle 33 candidate ne ho selezionate 12 con il Dynamic Time Warping, che confronta le traiettorie nel tempo anche se il movimento ha velocità diverse. Il punteggio è calcolato su entrambe le telecamere e tengo il minimo, così non scelgo una feature che funziona solo da una vista. Poi tolgo le ridondanze guardando la correlazione.
+Prima del classificatore, tre scelte di preparazione. Se la posa manca in un fotogramma, lo segnalo e non lo ricostruisco: non so cosa sia successo lì, e potrebbe essere proprio la caduta. La standardizzazione è calcolata solo sui dati di addestramento, così il test non influenza la preparazione. Infine i dati sono tagliati in finestre di 22 campioni con passo 2, quindi molto sovrapposte.
+
+--- Slide: dati e protocollo (90 s) ---
+Uso UP-Fall: dieci soggetti, 220 registrazioni, due telecamere sincronizzate. Il protocollo è leave-one-subject-out: in ogni giro un soggetto fa il test, uno la validazione, otto l'addestramento. Una divisione casuale metterebbe lo stesso soggetto in training e in test e darebbe numeri troppo ottimistici.
+Ogni fotogramma ha una di tre fasi: attività normale, transizione di caduta, stato a terra. Una finestra può contenerne più di una, quindi la fase è assegnata con un criterio K su M: la fase conta se K fotogrammi cadono dentro M campioni. La metrica principale è l'F2, che pesa di più la recall: perdere una caduta costa più di un falso allarme, ma i falsi allarmi non si possono ignorare.
+
+--- Slide: lunghezza della finestra (60 s) ---
+Ho confrontato finestre di 22 e di 44 campioni. Con 44 il benchmark migliora, l'F2 va da 0,825 a 0,915. Ma il ritardo dall'inizio della caduta all'allarme sale da circa 2,4 a circa 4,9 secondi, misurato in laboratorio. In un sistema di allarme la tempestività conta, quindi ho tenuto 22 campioni. È un compromesso, non un ottimo.
+
+============================================================
+PARTE 3 - RISULTATI (4,5 min)
+============================================================
+
+--- Slide: RQ1, il classificatore (30 s) ---
+Prima domanda: sei architetture a parità di dati e protocollo. La GRU arriva a 0,857, la Random Forest a 0,825. Ma la variabilità fra soggetti, circa 0,09, è più grande della differenza fra i modelli, e dopo il confronto appaiato con correzione per confronti multipli non emerge un vincitore netto. Nelle condizioni provate, il classificatore da solo non spiega le differenze principali.
+
+--- Slide: fuori dalle condizioni di riferimento (75 s) ---
+Seconda domanda. Il punto di vista pesa molto più del modello. Con vista laterale in training e in test l'F2 è 0,822. Lo stesso modello sulla vista frontale rialzata scende a 0,488. Mettendo entrambe le viste in training risale a 0,731: aiuta, ma non chiude il divario.
+Sul dataset esterno UR-Fall, con la soglia fissata su UP-Fall, il miglior sottoinsieme arriva a circa 0,63. Il sistema conserva una capacità discriminativa, ma le prestazioni non si trasferiscono da sole.
+
+--- Slide: ambiente domestico (75 s) ---
+In casa il problema cambia: sono i falsi allarmi sulle attività quotidiane. Ho confrontato cinque configurazioni costruite su A3, cambiando una scelta alla volta, per isolare l'effetto di altezza, integrali e controesempi. Non sono le dodici feature del DTW: è un esperimento controllato.
+Le finestre positive all'ora scendono da circa 140 a circa 2,7. Ma sulle cinque cadute simulate il riconoscimento passa da quattro a tre: ridurre i falsi allarmi costa sensibilità. E altezza e controesempi li ho scelti guardando gli stessi errori delle stesse due case, quindi non è una verifica indipendente.
+
+--- Slide: esecuzione sul dispositivo (50 s) ---
+Terza domanda. Sulla Radxa ROCK 4D, con MediaPipe e Random Forest, la pipeline gira a circa 7,3 fotogrammi al secondo. L'85% del tempo è la stima della posa, solo il 14% è il classificatore: il collo di bottiglia è la posa, non il modello.
+YOLOv8-pose sulla NPU era più veloce, ma da sdraiati conservava la posa nel 43,6% dei fotogrammi contro il 79,1% di MediaPipe. Ho preferito la disponibilità della posa nelle posture critiche alla sola velocità.
+
+--- Slide: dalla finestra all'allarme (60 s) ---
+Una finestra sopra soglia non è un allarme. La soglia è 0,50 e servono cinque finestre consecutive; dopo un allarme, 30 secondi di pausa. Nella sessione del 9 settembre ho simulato quattro cadute: il classificatore ne ha riconosciute tre ed è scattato l'allarme due volte. La seconda caduta, avvenuta 6 secondi dopo la prima, è stata soppressa dalla pausa, e una non è stata vista dal modello. Una persona sul divano ha prodotto quattro finestre consecutive, ma nessun allarme. Classificazione e logica di allarme sono due livelli distinti.
+
+============================================================
+PARTE 4 - LIMITI E CONCLUSIONI (1,5 min)
+============================================================
+
+--- Slide: conclusioni, limiti e sviluppi (90 s) ---
+In sintesi. Le differenze fra architetture sono piccole rispetto alla variabilità fra soggetti, mentre punto di vista e condizioni domestiche pesano molto. La pipeline gira in locale sulla scheda, e il costo è soprattutto nella stima della posa.
+I limiti. Soglia, selezione DTW e parametro K sono stati scelti guardando i dati, quindi la valutazione non è del tutto indipendente. Le cadute simulate sono cinque e le case poche: non è una validazione clinica. E il carico di falsi allarmi è ancora alto, 11,1 eventi all'ora nei test domestici contro 0,049 riportati in letteratura, anche se i due numeri non hanno la stessa base di conteggio. Il consumo elettrico non è stato misurato.
+Il messaggio è che un sistema reale non si valuta con l'accuratezza di un classificatore su un benchmark, ma guardando insieme rappresentazione, generalizzazione, posa, classificazione, costo e logica di allarme. Il passo successivo sono acquisizioni indipendenti, più case, più soggetti, sessioni più lunghe. Grazie.
+
+===================================================================================================================
+DA VERIFICARE PRIMA DI USARLO
+============================================================
+- "Circa un secondo e mezzo" per la finestra degli integrali: sulla scheda è 1,72 s; la tesi dice K = 31 campioni, a 18 fps coincide. Controlla come lo scrive la tesi.
+- Riconoscimento da 4 a 3 su 5: viene dalla tabella delle configurazioni (A3i contro A3i + controesempi).
+- 85% del tempo nella posa e 14% nel classificatore: dalla misura in operazione (85,2 e 14,3).

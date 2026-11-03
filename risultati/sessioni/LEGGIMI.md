@@ -31,7 +31,7 @@ dimostrazione, descritte in fondo.
 ## Attenzione al nome `eventi.csv`
 
 Il file contiene **finestre sopra soglia**, non eventi di allarme. Le due
-grandezze differiscono di un fattore misurato in **47,8**: una singola caduta
+grandezze differiscono di un fattore misurato in **44,8**: una singola caduta
 produce una raffica di finestre consecutive, e su una delle sessioni ne ha
 prodotte centoventinove.
 

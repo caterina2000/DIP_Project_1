@@ -1,0 +1,66 @@
+{
+  "soglia": 0.5,
+  "persistenza": 5,
+  "sospensione_s": 30.0,
+  "k_integrali": 31,
+  "feature": "A3 (le sessioni non hanno gli integrali)",
+  "compiti": [
+    {
+      "compito": "evento  (fall)",
+      "positivi_train": 569,
+      "finestre_train": 12139,
+      "sessioni": {
+        "casa studente 11/08": {
+          "ore": 5.855595833328035,
+          "eventi_ora": 0.8538840695837855,
+          "quota_tempo": 0.001339599437807449
+        },
+        "casa nonni 12/08": {
+          "ore": 1.1232250000370874,
+          "eventi_ora": 5.341761445660387,
+          "quota_tempo": 0.0058191278154309575
+        }
+      },
+      "cadute_rilevate": 3,
+      "eventi_ora_totale": 1.5761975070931722
+    },
+    {
+      "compito": "stato   (fallen)",
+      "positivi_train": 1076,
+      "finestre_train": 12139,
+      "sessioni": {
+        "casa studente 11/08": {
+          "ore": 5.855595833328035,
+          "eventi_ora": 15.199136438591381,
+          "quota_tempo": 0.20146697118763177
+        },
+        "casa nonni 12/08": {
+          "ore": 1.1232250000370874,
+          "eventi_ora": 104.16434819037755,
+          "quota_tempo": 0.8434312316012871
+        }
+      },
+      "cadute_rilevate": 0,
+      "eventi_ora_totale": 29.517880587381224
+    },
+    {
+      "compito": "allarme (fall O fallen)",
+      "positivi_train": 1398,
+      "finestre_train": 12139,
+      "sessioni": {
+        "casa studente 11/08": {
+          "ore": 5.855595833328035,
+          "eventi_ora": 23.225646692678964,
+          "quota_tempo": 0.26082659873506675
+        },
+        "casa nonni 12/08": {
+          "ore": 1.1232250000370874,
+          "eventi_ora": 105.05464176465428,
+          "quota_tempo": 0.8243308003012254
+        }
+      },
+      "cadute_rilevate": 4,
+      "eventi_ora_totale": 36.39583334560597
+    }
+  ]
+}

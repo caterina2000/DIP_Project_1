@@ -1,0 +1,37 @@
+{
+  "modello": "A3",
+  "soglia_upfall": 0.5,
+  "fall_min_frames": 5,
+  "domini": [
+    {
+      "dominio": "UP-Fall  (dominio di addestramento)",
+      "finestre": 11268,
+      "negativi_difficili": 0,
+      "allarme_su_difficili": NaN,
+      "allarme_su_facili": 0.000843328335832084,
+      "prevalenza": 0.05289314873979411,
+      "pr_auc": 0.990332499117577,
+      "guadagno_su_prevalenza": 18.72326610747795,
+      "roc_auc": 0.9989340480766328,
+      "f2_soglia_upfall": 0.9713804713804715,
+      "soglia_oracolo": 0.4078179277775808,
+      "f2_soglia_oracolo": 0.9738955823293172,
+      "frame_step": 2
+    },
+    {
+      "dominio": "UR-Fall  (dominio mai visto)",
+      "finestre": 1075,
+      "negativi_difficili": 242,
+      "allarme_su_difficili": 0.11570247933884298,
+      "allarme_su_facili": 0.0,
+      "prevalenza": 0.09395348837209302,
+      "pr_auc": 0.16852283989098588,
+      "guadagno_su_prevalenza": 1.793683691909008,
+      "roc_auc": 0.7503659503527355,
+      "f2_soglia_upfall": 0.034482758620689655,
+      "soglia_oracolo": 0.11835001597832942,
+      "f2_soglia_oracolo": 0.4915254237288136,
+      "frame_step": 3
+    }
+  ]
+}

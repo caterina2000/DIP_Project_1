@@ -1,0 +1,12 @@
+# Verita' di riferimento della sessione del 9 settembre 2026, sera.
+# Dichiarata dalla candidata sui fotogrammi annotati in clip/, e trascritta
+# qui da LEGGIMI.md perche' una figura non debba portarla scritta dentro.
+# Il campo `esito_atteso` NON viene usato per disegnare: serve solo a
+# verificare che la regola applicata ai punteggi ritrovi cio' che il LEGGIMI
+# dichiara. Se un giorno non coincidessero, la figura lo direbbe.
+tipo,inizio_s,fine_s,etichetta,esito_atteso
+caduta,742.0,746.5,1,allarme
+caduta,748.0,751.5,2,soppressa
+caduta,803.0,807.5,3,non vista dal modello
+caduta,855.0,857.5,4,allarme
+falso_positivo,880.5,883.5,divano,nessun allarme

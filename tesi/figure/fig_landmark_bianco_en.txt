@@ -1,0 +1,27 @@
+figure dei landmark impiegati, una per rappresentazione
+
+ripresa     sub09_act07_trial01_cam01
+fotogramma  405 (2018-07-09T12_12_23.913017.png)
+
+A1  fig_landmark_a1_bianco_en.png
+    indici [0, 11, 12, 23, 24, 27, 28]  (7 punti)
+    A1_asse_mag        87.7505
+    A1_asse_min        18.4001
+    A1_allungamento    4.7690
+    A1_inclinazione    88.3166
+A2  fig_landmark_a2_bianco_en.png
+    indici [0, 11, 12, 23, 24]  (5 punti)
+    A2_angolo_tronco   2.1638
+A3  fig_landmark_a3_bianco_en.png
+    indici [0, 11, 12, 23, 24, 25, 26, 27, 28]  (9 punti)
+    A3_h_pavimento     1.7164
+
+indici importati da src/geometry.py
+ellisse A1: disegnata a 2 deviazioni standard per avvolgere la persona;
+            la freccia resta a 1 sigma: la sua semilunghezza e A1_asse_mag.
+            Allungamento e inclinazione non dipendono dal fattore di scala.
+pavimento : y = 0.028278 x + 433.655, stimato da
+            MotoreGeometrico._pavimento su 394 osservazioni
+            raccolte in 500 fotogrammi di sub09_act06_trial01_cam01, sub09_act07_trial01_cam01.
+            Nel dataset la retta viene stimata su TUTTE le riprese
+            della telecamera: stessa procedura, coefficienti diversi.

@@ -1,0 +1,22 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787846542.482558   34588 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787846547.138514   34588 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+WARNING:tensorflow:From C:\Users\39366\anaconda3\envs\fall_training\lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+==============================================================================
+COSTO PER FINESTRA — finestra 22x12, batch 1, 300 ripetizioni
+==============================================================================
+architettura     parametri  mediana ms   media ms     dev  x foresta
+------------------------------------------------------------------------------
+gru                 24,483        3.51       3.55    0.38       0.7x
+lstm                32,227        3.45       3.51    0.40       0.7x
+cnn                 46,147        1.32       1.38    0.18       0.3x
+transformer         34,499        1.61       1.66    0.17       0.3x
+grafo               12,323        1.80       1.88    0.22       0.4x
+foresta              6,928        4.85       5.22    0.89       1.0x
+------------------------------------------------------------------------------
+I tempi sono di questo calcolatore, non della board. Il rapporto fra
+le architetture e' cio' che si legge; il valore assoluto no.
+salvato: risultati\laboratorio\costo_classificatori.json

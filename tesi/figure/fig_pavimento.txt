@@ -1,0 +1,50 @@
+FIGURA — LA STIMA DELLA RETTA DEL PAVIMENTO
+File: fig_pavimento.png
+Prodotta da: pipeline/figura_pavimento.py  (ambiente fall_processing)
+Comando:     python pipeline/figura_pavimento.py --lingua it --sfondo bianco
+
+CHE COSA SI VEDE
+  Un diagramma, non una fotografia annotata: il fondo e' pulito e restano i
+  soli oggetti della costruzione.
+   - lo scheletro, alle coordinate vere dei landmark su quel fotogramma;
+   - l'ingombro dei 33 landmark (tratteggio scuro) e il suo bordo inferiore
+     (magenta), che e' l'osservazione che il motore raccoglie;
+   - le 423 osservazioni (x_bacino, y_bordo) raccolte su altri fotogrammi
+     della stessa telecamera (arancio);
+   - la retta adattata su di esse;
+   - h_pav quotata di lato, e L che la normalizza.
+  Ogni oggetto ha la sua voce in legenda, L compreso.
+
+NUMERI DI QUESTA ESECUZIONE
+  osservazioni       423 su 600 fotogrammi esaminati
+  retta              y = +0.0400*x +425.3
+  fotogramma         indice 405
+  L                  78.6 pixel
+  h_pav              +1.645 lunghezze di tronco
+  riprese usate      sub09_act06_trial01_cam01, sub09_act07_trial01_cam01
+
+DA DICHIARARE NELLA DIDASCALIA
+  Nel dataset le osservazioni vengono da TUTTE le riprese di una telecamera;
+  qui da due sole. Il tipo di stima e' lo stesso, i coefficienti no.
+  Il problema dei landmark stimati sotto il bordo dell'immagine NON e'
+  disegnato: e' dichiarato nel testo e servirebbe un secondo pannello.
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figure/fig_pavimento.png}
+\caption{La stima della retta del pavimento, su una ripresa di UP-Fall.
+Quando la persona e' eretta il bordo inferiore dell'ingombro dei
+\emph{landmark} e' un'osservazione della posizione del pavimento all'ascissa
+del bacino; raccogliendone molte --- qui 423, da altre riprese della stessa
+telecamera --- si adatta la retta $y_{\mathrm{pav}}(x)=ax+c$. L'altezza del
+bacino $h_{\mathrm{pav}}$ e' il segmento verticale fra il bacino e quella
+retta, diviso per la lunghezza del tronco $L$, e vale 1,65 in questo
+istante. Le coordinate sono quelle vere dei \emph{landmark}, e la retta e'
+quella adattata dal motore geometrico: cambia il fondo rispetto al fotogramma,
+non i numeri. Nel dataset le osservazioni provengono da \emph{tutte} le
+riprese di una telecamera: il tipo di stima e' lo stesso, i coefficienti no.
+Prodotta da \texttt{pipeline/figura\_pavimento.py}.}
+\label{fig:pavimento}
+\end{figure}

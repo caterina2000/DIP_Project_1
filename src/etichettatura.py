@@ -36,12 +36,30 @@ Le due decisioni indipendenti
 
      'scarta'      la finestra con troppa fase 2 viene esclusa.
                    E' il comportamento storico; toglie il 40% dei positivi.
-     'caduta'      la fase 2 conta come caduta: il sistema rileva lo STATO
-                   invece dell'EVENTO, e recupera i positivi scartati.
+                   Nella tesi e' il compito chiamato "evento".
+     'caduta'      la fase 2 conta positiva QUANTO la fase 1, non al posto
+                   suo: il commento precedente diceva "il sistema rileva lo
+                   STATO invece dell'EVENTO", ma il codice due righe sotto
+                   fa `1 if (terra or caduta) else 0` -- riconosce l'uno O
+                   l'altro, non sostituisce l'uno con l'altro. Nella tesi e'
+                   il compito chiamato "allarme".
      'tre_classi'  la finestra puo' valere 0, 1 o 2: il modello impara a
                    distinguerle, e in esercizio si allarma su 1 oppure 2.
                    E' l'unico modo che permette di distinguere "a terra" da
                    "disteso sul divano", che sono due stati e non due eventi.
+
+3. CHE FARE DEL CONFINE. Una finestra puo' contenere fotogrammi di classe 1 o
+   2 e non averne abbastanza da superare il criterio K-su-M. Oggi vale 0: un
+   negativo pulito. Ma quella finestra sta a cavallo di una transizione, e
+   chiamarla negativa non e' una misura, e' un'ipotesi sul confine --- e
+   l'ipotesi contamina proprio la classe che deve restare pulita, perche' i
+   negativi sono il denominatore di ogni falso allarme.
+
+   Con `escludi_incerte` quelle finestre sono escluse invece che indovinate,
+   come gia' avviene per le finestre della modalita' 'scarta'. Il valore
+   predefinito sta in `config.ESCLUDI_FINESTRE_INCERTE` ed e' False: accenderlo
+   cambia l'insieme di addestramento, quindi va fatto insieme a un
+   riaddestramento e non da solo.
 """
 
 from typing import Optional
@@ -78,7 +96,8 @@ def etichetta_finestra(etichette,
                        k_caduta: int = None,
                        m_blocco: int = None,
                        k_terra: int = None,
-                       m_terra: int = None) -> Optional[int]:
+                       m_terra: int = None,
+                       escludi_incerte: bool = None) -> Optional[int]:
     """
     Etichetta di una finestra a partire dalle etichette dei suoi fotogrammi.
 
@@ -106,6 +125,8 @@ def etichetta_finestra(etichette,
     m_blocco = config.M_BLOCCO if m_blocco is None else m_blocco
     k_terra = config.K_TERRA if k_terra is None else k_terra
     m_terra = config.M_TERRA if m_terra is None else m_terra
+    escludi_incerte = (config.ESCLUDI_FINESTRE_INCERTE
+                       if escludi_incerte is None else escludi_incerte)
 
     e = np.asarray(etichette).astype(np.int8)
     if e.size == 0:
@@ -113,6 +134,11 @@ def etichetta_finestra(etichette,
 
     terra = _blocco_k_su_m(e == 2, k_terra, m_terra)
     caduta = _blocco_k_su_m(e == 1, k_caduta, m_blocco)
+
+    # Il confine: c'e' traccia dell'evento, ma sotto la soglia che lo dichiara.
+    # Non e' un negativo, e' una finestra su cui non si sa.
+    if escludi_incerte and not terra and not caduta and bool((e != 0).any()):
+        return None
 
     if modo == 'scarta':
         if terra:

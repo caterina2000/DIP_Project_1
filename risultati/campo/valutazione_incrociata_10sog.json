@@ -1,0 +1,77 @@
+{
+  "k_integrali": 31,
+  "soglia": 0.5,
+  "persistenza": 5,
+  "sospensione_s": 30.0,
+  "protocollo": "controesempi di una casa, verifica sull'altra; recall sulla sessione 13/08",
+  "config": [
+    {
+      "etichetta": "A3i  senza controesempi",
+      "controesempi_da": null,
+      "finestre_train": 12234,
+      "finestre_positive": 628,
+      "verifica_su": [
+        "casa studente 11/08",
+        "casa nonni 12/08"
+      ],
+      "sessioni": {
+        "casa studente 11/08": {
+          "ore": 5.855595833328035,
+          "finestre": 45536,
+          "finestre_ora": 6.147965301003255,
+          "eventi_ora": 0.3415536278335142,
+          "quota_tempo": 0.0007905832747716093
+        },
+        "casa nonni 12/08": {
+          "ore": 1.1232250000370874,
+          "finestre": 14607,
+          "finestre_ora": 30.26998152540886,
+          "eventi_ora": 1.7805871485534623,
+          "quota_tempo": 0.002327651126172383
+        }
+      },
+      "cadute_rilevate": 4,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3i  + contro. STUDENTE",
+      "controesempi_da": "casa_studente",
+      "finestre_train": 18234,
+      "finestre_positive": 628,
+      "verifica_su": [
+        "casa nonni 12/08"
+      ],
+      "sessioni": {
+        "casa nonni 12/08": {
+          "ore": 1.1232250000370874,
+          "finestre": 14607,
+          "finestre_ora": 16.025284336981162,
+          "eventi_ora": 0.8902935742767312,
+          "quota_tempo": 0.0012322858903265558
+        }
+      },
+      "cadute_rilevate": 2,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3i  + contro. NONNI",
+      "controesempi_da": "casa_nonni",
+      "finestre_train": 18234,
+      "finestre_positive": 628,
+      "verifica_su": [
+        "casa studente 11/08"
+      ],
+      "sessioni": {
+        "casa studente 11/08": {
+          "ore": 5.855595833328035,
+          "finestre": 45536,
+          "finestre_ora": 1.878544953084328,
+          "eventi_ora": 0.1707768139167571,
+          "quota_tempo": 0.0002415671117357695
+        }
+      },
+      "cadute_rilevate": 2,
+      "cadute_totali": 5
+    }
+  ]
+}

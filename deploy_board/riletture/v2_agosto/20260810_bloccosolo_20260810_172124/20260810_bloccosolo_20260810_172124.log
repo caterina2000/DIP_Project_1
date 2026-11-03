@@ -1,0 +1,22 @@
+sessione   : 20260810/bloccosolo_20260810_172124
+clip       : 8
+pacchetto  : deploy_board/pacchetto_v2  (DTW 12 colonne, feature_v2_omnifall.csv,
+             selezione scelte_prima_di_v5.txt, 12.140 finestre / 569 positive)
+ambiente   : fall_processing, MediaPipe 0.10.9
+cadenza    : 10 fps dichiarata (le clip furono salvate a 10 fps)
+avvio      : 2026-09-10 14:07:05
+----------------------------------------------------------------------
+  evt_0001_172812           42%   0.780      10      10   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0016_172824           98%   0.100       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0018_172939           90%   0.680       7       8   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0025_172950           97%   0.180       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0029_173110           97%   0.680      13      19   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0045_173121           98%   0.380       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0053_173310           99%   0.740       8       8   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0069_173322           98%   0.920       8       8   installata=1  0,50=1  0,40=1  0,30=1
+    installata 0,50 5cons    5 allarmi
+    0,50 5su7                5 allarmi
+    0,40 2cons               5 allarmi
+    0,30 3su5                5 allarmi
+fine       : 2026-09-10 14:07:53
+csv scritti: 8 su 8

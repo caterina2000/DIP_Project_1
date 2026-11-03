@@ -1,0 +1,44 @@
+FIGURA — UNA CADUTA, QUATTRO ISTANTI, DUE GRANDEZZE
+File: fig_striscia.png
+Prodotta da: pipeline/figura_striscia.py  (ambiente fall_processing)
+
+CHE COSA SI VEDE
+  In alto quattro istanti della stessa caduta con la posa stimata, tutti con lo
+  STESSO ritaglio, cosi' che si veda la persona scendere: (a) prima della
+  caduta, (b) durante la transizione, (c) all'arrivo a terra, (d) ferma a terra.
+  In basso due grandezze sullo stesso asse dei tempi, ciascuna normalizzata al
+  proprio massimo, con i quattro istanti segnati.
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figure/fig_striscia.png}
+\caption{Una caduta di UP-Fall seguita nel tempo. In alto quattro istanti con
+la posa stimata, tutti con lo stesso ritaglio: (a) prima della caduta, (b)
+durante la transizione, (c) all'arrivo a terra, (d) a terra e ferma. In basso
+l'andamento di due grandezze sullo stesso asse dei tempi, ciascuna normalizzata
+al proprio massimo: la velocita' del bacino, che e' una derivata istantanea, e
+la discesa del bacino, che e' un integrale su finestra mobile.}
+\label{fig:striscia}
+\end{figure}
+
+DOVE
+  Nella sezione sulle grandezze integrali, dove si sostiene che le derivate
+  istantanee sono dominate dal rumore.
+
+FRASE DA AGGIUNGERE NEL TESTO
+  La Figura~\ref{fig:striscia} mostra il contrasto su una caduta singola. La
+  derivata istantanea produce un picco isolato a 1,45~s, mentre la persona sta
+  ancora camminando, e torna a zero appena il corpo si ferma: e' alta quando il
+  corpo si muove, non quando sta cadendo. La grandezza integrale sale con
+  continuita' fino alla transizione e vi \emph{resta} per tutto il tempo in cui
+  la persona e' a terra, decadendo solo quando la finestra di accumulazione
+  esce dall'evento.
+
+LA COSA CHE NON E' ANCORA NEL TESTO E CHE LA FIGURA MOSTRA
+  L'argomento per gli integrali, nel capitolo, e' che sono meno rumorosi. La
+  figura mostra che hanno anche MEMORIA: restano alti mentre lo stato dura. E'
+  la ragione per cui il compito «stato» e il compito «evento» si comportano in
+  modo diverso, e per cui gli integrali aiutano sul campo, dove il positivo
+  dura minuti.

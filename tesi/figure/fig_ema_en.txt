@@ -1,0 +1,21 @@
+media mobile esponenziale applicata alle COORDINATE dei
+landmark, con le grandezze ricalcolate dal motore geometrico
+ATTENZIONE: il filtro NON e stato applicato ai dati di
+questo lavoro. Ricostruzione a posteriori.
+
+grandezza osservata  A3_angolo_tronco
+ferma   sub04_act11_trial01_cam01
+caduta  sub10_act04_trial01_cam01
+
+nearly still person
+  oscillazione grezza 0.0826 gradi
+  alpha=0.30  oscillazione 0.0382 (-54%)  ampiezza -5%  ritardo -778 ms
+  alpha=0.10  oscillazione 0.0200 (-76%)  ampiezza -19%  ritardo +111 ms
+  alpha=0.05  oscillazione 0.0128 (-85%)  ampiezza -29%  ritardo +222 ms
+
+fall
+  oscillazione grezza 3.0320 gradi
+  alpha=0.30  oscillazione 1.9149 (-37%)  ampiezza -2%  ritardo +111 ms
+  alpha=0.10  oscillazione 1.4764 (-51%)  ampiezza -6%  ritardo +167 ms
+  alpha=0.05  oscillazione 1.0839 (-64%)  ampiezza -8%  ritardo +167 ms
+

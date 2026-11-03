@@ -43,7 +43,8 @@ QUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QUI)
 
 
-def estrai(cartella, colonne, k_integrali, fps, limite=None):
+def estrai(cartella, colonne, k_integrali, fps, limite=None,
+           durata_integrali=None):
     import cv2
     import mediapipe as mp
     from geometry import MotoreGeometrico
@@ -56,7 +57,12 @@ def estrai(cartella, colonne, k_integrali, fps, limite=None):
     pose = mp.solutions.pose.Pose(static_image_mode=False, model_complexity=1,
                                   min_detection_confidence=0.5,
                                   min_tracking_confidence=0.5)
-    motore = MotoreGeometrico(k_integrali=k_integrali)
+    # La durata quando c'e', il conteggio quando il pacchetto e'
+    # vecchio: le due coincidono a 18 fps e divergono a ogni altra
+    # cadenza (ISS-148).
+    motore = (MotoreGeometrico(durata_integrali=float(durata_integrali))
+              if durata_integrali
+              else MotoreGeometrico(k_integrali=k_integrali))
 
     V, P, LM = [], [], []
     for nome in files:
@@ -152,10 +158,24 @@ def main():
     meta = json.load(open(os.path.join(QUI, 'metadata.json'), encoding='utf-8'))
     V, P, LM, files, mpv, cvv = estrai(
         a.video, meta['colonne'], meta['k_integrali'], meta['fps_assunti'],
-        a.limite)
+        a.limite, meta.get('durata_integrali_s'))
+    # Un riferimento in cui NESSUN fotogramma ha posa non verifica nulla:
+    # le grandezze sono tutte zero per costruzione, e il confronto fra due
+    # macchine passerebbe sempre --- anche se i due motori geometrici
+    # calcolassero cose diverse. E' successo il 2026-09-09 su
+    # `clip_demo/evt_0001_092019`, dove i primi sessanta fotogrammi non
+    # contengono nessuno: due delle sei clip di prova sono cosi'.
+    if int(P.sum()) == 0:
+        sys.exit(f'{a.video}: nessuno dei {len(V)} fotogrammi ha una posa. '
+                 f'Un riferimento di soli zeri farebbe passare qualunque '
+                 f'divergenza: scegliere un altra clip.')
+
     np.savez_compressed(a.out, valori=V, posa=P, landmark=LM, nomi=files,
                         colonne=np.array(meta['colonne'], dtype=object),
-                        mediapipe=mpv, opencv=cvv)
+                        mediapipe=mpv, opencv=cvv,
+                        # La clip su cui vale questo riferimento. Cosi' chi
+                        # esporta non deve ricordarsela: la legge da qui.
+                        clip=os.path.basename(os.path.normpath(a.video)))
     print(f'{len(V)} fotogrammi, {int(P.sum())} con posa  ->  {a.out}')
     print(f'mediapipe {mpv}   opencv {cvv}')
 

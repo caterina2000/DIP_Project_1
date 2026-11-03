@@ -1,0 +1,3 @@
+FIGURA: fig_luogo_cadute.png
+Dati: Cap. 1, citazione PA (54% casa, 21% giardino, 20% strada, 5% altrove).
+Per la slide 1: sostituisce "1 in 5", il dato 1 su 5 non e nella tesi.

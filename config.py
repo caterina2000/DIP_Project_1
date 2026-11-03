@@ -84,6 +84,15 @@ M_TERRA = 15     # ampiezza del blocco per la classe 2
 
 # Raccolte in un dizionario perche' vanno passate insieme e registrate
 # insieme: e' l'unico modo perche' il metadato non possa divergere.
+# Le finestre di confine: quelle che contengono fotogrammi di classe 1 o 2
+# ma non abbastanza da superare il criterio K-su-M. Con False valgono 0, cioe'
+# negativi puliti, ed e' un'ipotesi sul confine invece che un dato. Con True
+# sono escluse dall'addestramento come qualunque altra finestra ambigua.
+#
+# Sta a False perche' cambiarlo cambia ogni numero della tesi: va acceso
+# insieme a un riaddestramento completo, non da solo.
+ESCLUDI_FINESTRE_INCERTE = False
+
 SOGLIE_ETICHETTATURA = {'k_caduta': K_CADUTA, 'm_blocco': M_BLOCCO,
                         'k_terra': K_TERRA, 'm_terra': M_TERRA}
 
@@ -97,3 +106,15 @@ BATCH = 16
 LEARNING_RATE = 0.001
 N_ALBERI = 50                    # foresta casuale
 K_INTEGRALI = 31   # fotogrammi, ~1,7 s a 18 fps. Misurato in EXP-053.
+
+# La stessa finestra espressa come DURATA, ed e' questa la forma che va
+# trasmessa al dispositivo (ISS-148). Il conteggio dipende da chi produce i
+# fotogrammi: 31 sono 1,72 s a 18 fps, ma 4,27 s alla cadenza di 7,26 fps
+# misurata sulla board. Il modello ha imparato su 1,72 s di storia, e sono
+# 1,72 s che deve ricevere in esercizio, non 31 fotogrammi.
+#
+# A 18 fps costanti le due formulazioni sono la stessa cosa: verificato, il
+# motore geometrico produce valori identici bit per bit (scarto 0,000e+00 su
+# tutte e 33 le grandezze). Quindi feature_v3.csv, e ogni numero della tesi
+# che ne discende, non cambiano.
+DURATA_INTEGRALI_S = K_INTEGRALI / FPS_DATASET       # 1,7222 s

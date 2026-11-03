@@ -1,0 +1,33 @@
+FIGURA — fig_errori_en.png
+==========================
+
+CHE COSA MOSTRA
+---------------
+I due tipi di errore separati, invece di un solo numero riassuntivo: per
+ogni configurazione, quante finestre di caduta sono state perse (falsi
+negativi) e quante finestre normali sono state scambiate per cadute (falsi
+positivi).
+
+COME SI LEGGE
+-------------
+Un F2 solo nasconde COME il modello sbaglia, e i due errori costano cose
+diverse: un falso negativo e' una caduta non soccorsa, un falso positivo e'
+un allarme di troppo. Guardare se passando da una configurazione all'altra i
+due scendono INSIEME, oppure se uno scende perche' l'altro sale: nel secondo
+caso non e' un miglioramento, e' uno scambio.
+
+I NUMERI
+--------
+Da A3 alla configurazione finale i falsi negativi passano da 45 a 14 e i
+falsi positivi da 172 a 124: in laboratorio scendono entrambi, quindi non
+c'e' scambio. Lo scambio compare solo in casa, ed e' la tesi del capitolo
+sull'ambiente reale.
+
+PROVENIENZA
+-----------
+Dieci soggetti, leave-one-subject-out.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/run_10soggetti.json

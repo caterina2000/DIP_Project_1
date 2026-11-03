@@ -1,0 +1,212 @@
+{
+ "csv": "feature_k_multiplo.csv",
+ "modo": "tre_classi",
+ "architettura": "foresta",
+ "k_adottato": 31,
+ "k_provati": [
+  5,
+  15,
+  22,
+  31,
+  45
+ ],
+ "soglia": 0.5,
+ "colonne": [
+  "A2_testa_rel_y",
+  "A2_discesa",
+  "A2_percorso",
+  "A1_discesa",
+  "A3_discesa",
+  "A3_escursione",
+  "A3_caviglie_rel_y",
+  "A3_percorso",
+  "A3_hip_vel",
+  "A3_testa_vel_rel",
+  "A1_percorso",
+  "A1_escursione"
+ ],
+ "fold_conformi": 1,
+ "n_fold": 10,
+ "k_scelti": {
+  "5": 0,
+  "15": 0,
+  "22": 0,
+  "31": 1,
+  "45": 9
+ },
+ "fbeta_medio_k_scelto": 0.8509104996302277,
+ "fbeta_medio_k_adottato": 0.8246952450356971,
+ "differenza": -0.026215254594530557,
+ "fold": [
+  {
+   "soggetto": "Subject_01",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.8076211397099249,
+    "15": 0.820706978670156,
+    "22": 0.8396060053698248,
+    "31": 0.8359474667070362,
+    "45": 0.8758508117047201
+   },
+   "fbeta_k_scelto": 0.8641975308641975,
+   "fbeta_k_adottato": 0.8627717391304348,
+   "fn_k_scelto": 3,
+   "fn_k_adottato": 2,
+   "fp_k_scelto": 87,
+   "fp_k_adottato": 93
+  },
+  {
+   "soggetto": "Subject_02",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7822763314612671,
+    "15": 0.8001980585635082,
+    "22": 0.8263034431881895,
+    "31": 0.8306121077763605,
+    "45": 0.8589752965424804
+   },
+   "fbeta_k_scelto": 0.7389937106918241,
+   "fbeta_k_adottato": 0.7505285412262157,
+   "fn_k_scelto": 16,
+   "fn_k_adottato": 15,
+   "fp_k_scelto": 185,
+   "fp_k_adottato": 176
+  },
+  {
+   "soggetto": "Subject_03",
+   "k_scelto": 31,
+   "interno": {
+    "5": 0.7919946316561036,
+    "15": 0.8319367128105103,
+    "22": 0.8269724188320774,
+    "31": 0.8527014857517713,
+    "45": 0.8491605506773721
+   },
+   "fbeta_k_scelto": 0.6758448060075094,
+   "fbeta_k_adottato": 0.6758448060075094,
+   "fn_k_scelto": 57,
+   "fn_k_adottato": 57,
+   "fp_k_scelto": 31,
+   "fp_k_adottato": 31
+  },
+  {
+   "soggetto": "Subject_04",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7846663841432905,
+    "15": 0.8066861792616151,
+    "22": 0.807546349764512,
+    "31": 0.8235418561370093,
+    "45": 0.8555395665573539
+   },
+   "fbeta_k_scelto": 0.8974358974358975,
+   "fbeta_k_adottato": 0.8730158730158731,
+   "fn_k_scelto": 13,
+   "fn_k_adottato": 16,
+   "fp_k_scelto": 0,
+   "fp_k_adottato": 0
+  },
+  {
+   "soggetto": "Subject_05",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7866471496996215,
+    "15": 0.7994392413082884,
+    "22": 0.789239695062954,
+    "31": 0.8259216360019767,
+    "45": 0.8440085939051227
+   },
+   "fbeta_k_scelto": 0.8974358974358975,
+   "fbeta_k_adottato": 0.8739255014326647,
+   "fn_k_scelto": 18,
+   "fn_k_adottato": 22,
+   "fp_k_scelto": 0,
+   "fp_k_adottato": 0
+  },
+  {
+   "soggetto": "Subject_06",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7496108905743674,
+    "15": 0.7872683984421647,
+    "22": 0.777800617478473,
+    "31": 0.7938621795364678,
+    "45": 0.8373497701123267
+   },
+   "fbeta_k_scelto": 0.9612518628912072,
+   "fbeta_k_adottato": 0.9520239880059971,
+   "fn_k_scelto": 6,
+   "fn_k_adottato": 8,
+   "fp_k_scelto": 2,
+   "fp_k_adottato": 0
+  },
+  {
+   "soggetto": "Subject_07",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7787935524292258,
+    "15": 0.7957115184939896,
+    "22": 0.7986871943952486,
+    "31": 0.810749884379112,
+    "45": 0.8333143540624861
+   },
+   "fbeta_k_scelto": 0.844845908607864,
+   "fbeta_k_adottato": 0.8193277310924368,
+   "fn_k_scelto": 9,
+   "fn_k_adottato": 12,
+   "fp_k_scelto": 110,
+   "fp_k_adottato": 124
+  },
+  {
+   "soggetto": "Subject_08",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7810070796309247,
+    "15": 0.8019575975767538,
+    "22": 0.7958735198898383,
+    "31": 0.8320084804128469,
+    "45": 0.8474761863542117
+   },
+   "fbeta_k_scelto": 0.9265944645006017,
+   "fbeta_k_adottato": 0.8819951338199514,
+   "fn_k_scelto": 14,
+   "fn_k_adottato": 23,
+   "fp_k_scelto": 5,
+   "fp_k_adottato": 5
+  },
+  {
+   "soggetto": "Subject_09",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7949839059344943,
+    "15": 0.8218829735562052,
+    "22": 0.806412263289663,
+    "31": 0.8316681980468622,
+    "45": 0.8573767486202282
+   },
+   "fbeta_k_scelto": 0.894357743097239,
+   "fbeta_k_adottato": 0.7725587144622991,
+   "fn_k_scelto": 22,
+   "fn_k_adottato": 46,
+   "fp_k_scelto": 0,
+   "fp_k_adottato": 0
+  },
+  {
+   "soggetto": "Subject_10",
+   "k_scelto": 45,
+   "interno": {
+    "5": 0.7761041281163973,
+    "15": 0.792611537174222,
+    "22": 0.8024654646777132,
+    "31": 0.8219413591099535,
+    "45": 0.860690106603011
+   },
+   "fbeta_k_scelto": 0.8081471747700394,
+   "fbeta_k_adottato": 0.7849604221635884,
+   "fn_k_scelto": 27,
+   "fn_k_adottato": 31,
+   "fp_k_scelto": 38,
+   "fp_k_adottato": 39
+  }
+ ]
+}

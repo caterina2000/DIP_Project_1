@@ -1,0 +1,60 @@
+{
+ "parziale": true,
+ "avvio": "2026-09-06T15:23:15",
+ "aggiornato": "2026-09-06T19:58:24",
+ "durata_orologio_s": 16508.35700416565,
+ "durata_cronometro_s": 16508.357000733,
+ "sospensione_stimata_s": 3.4326476452406496e-06,
+ "sospesa": false,
+ "interruzioni_camera": 2,
+ "secondi_persi_camera": 5.1,
+ "fotogrammi": 119928,
+ "fps_medio": 7.2646841835729,
+ "pose_valide": 42094,
+ "quota_pose": 0.350993929691148,
+ "punteggio_massimo": 1.0,
+ "finestre_sopra_soglia": 168,
+ "allarmi": 14,
+ "decisioni": 59954,
+ "costo_per_fotogramma_ms": {
+  "pre": 0.2495611147193978,
+  "percezione": 116.38120994386892,
+  "post": 0.5001106058053248,
+  "classificatore": 19.514540983828336
+ },
+ "costo_totale_per_fotogramma_ms": 136.645422648222,
+ "costo_classificatore_per_finestra_ms": 39.03559180552698,
+ "verifiche_avvio": {
+  "geometria": {
+   "sha256_qui": "1df79ebe674df979874f8fbcb51d6cce744c1de35d242bb5e5abd76459d7d40d",
+   "sha256_atteso": "1df79ebe674df979874f8fbcb51d6cce744c1de35d242bb5e5abd76459d7d40d",
+   "dichiarato": true,
+   "coincide": true
+  },
+  "parita_finestre": {
+   "eseguita": true,
+   "finestre": 200,
+   "scarto_massimo": 0.0,
+   "tolleranza": 1e-06,
+   "superata": true,
+   "sklearn": "1.9.0"
+  },
+  "parita_fotogrammi": {
+   "eseguita": false,
+   "motivo": "cartella dei fotogrammi non trovata: clip_demo/evt_0067_155044"
+  }
+ },
+ "configurazione": {
+  "compito": "evento",
+  "feature_set": "DTW",
+  "n_colonne": 12,
+  "lunghezza_finestra": 22,
+  "passo_finestra": 2,
+  "k_integrali": 31,
+  "soglia": 0.5,
+  "persistenza_finestre": 5,
+  "sospensione_s": 30,
+  "stimatore_posa": "mediapipe 0.10.11, solutions, una persona"
+ },
+ "nota_costo": "I tempi sono misurati con perf_counter attorno alle quattro fasi della catena in esercizio, non da un banco separato: sono i tempi della stessa esecuzione che ha prodotto gli allarmi. La strumentazione stessa costa quattro letture di orologio per fotogramma."
+}

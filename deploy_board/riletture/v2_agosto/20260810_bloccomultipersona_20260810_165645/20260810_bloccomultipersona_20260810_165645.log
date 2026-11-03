@@ -1,0 +1,23 @@
+sessione   : 20260810/bloccomultipersona_20260810_165645
+clip       : 9
+pacchetto  : deploy_board/pacchetto_v2  (DTW 12 colonne, feature_v2_omnifall.csv,
+             selezione scelte_prima_di_v5.txt, 12.140 finestre / 569 positive)
+ambiente   : fall_processing, MediaPipe 0.10.9
+cadenza    : 10 fps dichiarata (le clip furono salvate a 10 fps)
+avvio      : 2026-09-10 14:06:04
+----------------------------------------------------------------------
+  evt_0001_170618           88%   0.680       6       8   installata=0  0,50=0  0,40=1  0,30=1
+  evt_0011_170633          100%   0.920       9      11   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0014_170732           81%   0.280       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0020_170801           79%   0.080       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0021_170824           99%   0.100       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0025_171010           60%   0.860      10      10   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0039_171021           96%   0.240       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0042_171032           96%   0.240       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0055_171055           99%   0.860      10      10   installata=1  0,50=1  0,40=1  0,30=1
+    installata 0,50 5cons    3 allarmi
+    0,50 5su7                3 allarmi
+    0,40 2cons               4 allarmi
+    0,30 3su5                4 allarmi
+fine       : 2026-09-10 14:07:04
+csv scritti: 9 su 9

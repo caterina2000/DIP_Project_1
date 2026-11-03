@@ -23,7 +23,8 @@ configurazione e non dipendono dall'annotazione:
 
     latenza  =  calcolo  +  riempimento della finestra  +  persistenza
 
-    calcolo         37,7 ms per fotogramma, misurato sul dispositivo
+    calcolo         1/fps della sessione, cioe' la cadenza fra due
+                    fotogrammi: sul dispositivo il ciclo e' seriale
     finestra        L campioni / fps  --- il classificatore non puo' decidere
                     prima che l'evento occupi la finestra
     persistenza     (P-1) x cadenza delle decisioni
@@ -42,11 +43,18 @@ import argparse
 import datetime as dt
 import json
 import os
+import sys
 
 import numpy as np
 import pandas as pd
 
 QUI = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Questo script gira anche da solo, senza config: la radice va aggiunta a mano
+# perche' `src.provenienza` sia importabile quando lo si lancia da `pipeline/`.
+if QUI not in sys.path:
+    sys.path.insert(0, QUI)
+from src.provenienza import scrivi_json
 SESSIONE = os.path.join(QUI, 'risultati', 'sessioni', '20260813',
                         'bloccocadute_sola_20260813_091641')
 
@@ -55,8 +63,20 @@ SESSIONE = os.path.join(QUI, 'risultati', 'sessioni', '20260813',
 ORARI = ['09:20', '09:22', '09:25', '09:29', '09:31']
 RISOLUZIONE_ANNOTAZIONE_S = 60.0
 
-# Costo per fotogramma misurato sul dispositivo, Capitolo sull'edge.
-CALCOLO_MS = 37.7
+# Costo per fotogramma. NON e' una costante scritta a mano: si ricava dalla
+# cadenza della sessione stessa, 1/fps.
+#
+# Fino al 2026-09-08 qui c'era `CALCOLO_MS = 37.7`, il valore trascritto da una
+# sessione di terminale che ISS-137 ha ritirato il 6 settembre. Restava anche
+# dopo, e faceva dichiarare alla scomposizione un addendo di calcolo pari
+# all'1,0% del totale invece del 3,2%: la conclusione --- la latenza e'
+# dominata dalla finestra --- non cambia, il fattore si'.
+#
+# Perche' 1/fps e non il valore strumentato: sulla board il ciclo e' seriale,
+# quindi la cadenza fra due fotogrammi E' il costo di un fotogramma. La
+# sessione del 6 settembre lo conferma sui propri dati --- 136,65 ms sommando
+# le quattro fasi contro 137,65 ms di cadenza, cioe' uno scarto dello 0,7% ---
+# e usare 1/fps evita di mescolare due sessioni diverse in una somma sola.
 
 
 def corse(sopra):
@@ -92,7 +112,8 @@ def main():
     fps = float(rie['fps_medio'])
     riempimento = a.finestra / fps
     persistenza_s = (a.persistenza - 1) * cadenza
-    minima = CALCOLO_MS / 1000.0 + riempimento + persistenza_s
+    calcolo_s = 1.0 / fps
+    minima = calcolo_s + riempimento + persistenza_s
 
     print('sessione   ', os.path.basename(a.sessione))
     print('finestre   ', len(d))
@@ -100,17 +121,17 @@ def main():
     print()
     print('SCOMPOSIZIONE, dalla sola configurazione')
     print('  calcolo per fotogramma        {:>7.3f} s'
-          .format(CALCOLO_MS / 1000.0).replace('.', ','))
+          .format(calcolo_s).replace('.', ','))
     print('  riempimento della finestra    {:>7.3f} s   ({} campioni a {:.2f} fps)'
           .format(riempimento, a.finestra, fps).replace('.', ','))
     print('  persistenza                   {:>7.3f} s   ({} finestre, una ogni {:.3f} s)'
           .format(persistenza_s, a.persistenza, cadenza).replace('.', ','))
     print('  ------------------------------------------')
-    print('  LIMITE INFERIORE              {:>7.3f} s'
+    print('  CASO CONSERVATIVO             {:>7.3f} s'
           .format(minima).replace('.', ','))
     print()
     print('  Il calcolo e\' il {:.1f}% del totale: la latenza e\' dominata dalla'
-          .format(100 * (CALCOLO_MS / 1000.0) / minima).replace('.', ','))
+          .format(100 * calcolo_s / minima).replace('.', ','))
     print('  finestra di decisione, non dall\'hardware.')
 
     giorno = dt.datetime.fromtimestamp(t[0]).date()
@@ -167,7 +188,7 @@ def main():
                            'finestra': a.finestra, 'fps_medio': fps,
                            'cadenza_decisioni_s': cadenza},
         'risoluzione_annotazione_s': RISOLUZIONE_ANNOTAZIONE_S,
-        'scomposizione_s': {'calcolo': CALCOLO_MS / 1000.0,
+        'scomposizione_s': {'calcolo': calcolo_s,
                             'riempimento_finestra': riempimento,
                             'persistenza': persistenza_s,
                             'limite_inferiore': minima},
@@ -178,8 +199,7 @@ def main():
                  'misurare e\' di pochi secondi.'),
     }
     dest = os.path.join(QUI, 'risultati', 'campo', 'latenza.json')
-    with open(dest, 'w', encoding='utf-8') as f:
-        json.dump(fuori, f, ensure_ascii=False, indent=1)
+    scrivi_json(dest, fuori)
     print()
     print('scritto', os.path.relpath(dest, QUI))
 

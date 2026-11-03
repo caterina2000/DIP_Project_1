@@ -175,9 +175,28 @@ pandas e scikit-learn; `addestra.py` richiede anche TensorFlow.
 
 ### La board
 
-Radxa ROCK 4D, `rock@192.168.1.13`, chiave SSH gia' configurata. Dopo ogni
+Radxa ROCK 4D, utente `rock`, chiave SSH gia' configurata. Dopo ogni
 riavvio: `sudo iw dev wlan0 set power_save off`, altrimenti l'SSH cade.
 Spegnere con `sudo poweroff` e attendere il LED.
+
+**L'indirizzo non e' fisso, e il 2026-09-06 questo ha fatto danno.** La board
+prende un indirizzo dal DHCP. Quel giorno era `192.168.1.13`, ma con la board
+spenta il router ha dato **lo stesso indirizzo al calcolatore**: `ping` ha
+risposto in 0 ms (rispondeva a se stesso) e `ssh rock@192.168.1.13` ha
+prodotto `REMOTE HOST IDENTIFICATION HAS CHANGED`, che sembra un attacco e
+invece era il PC che parlava con se stesso. **Non cancellare la voce da
+`known_hosts` per far passare quell'errore**: e' l'unica cosa che identifica
+la board, ed e' cio' che ha permesso di capire l'equivoco in due minuti.
+
+Per trovarla, si cerca la sua chiave invece del suo indirizzo:
+
+```bash
+grep "^192.168.1.13 ssh-ed25519" ~/.ssh/known_hosts   # la chiave attesa
+for i in $(seq 2 60); do ssh-keyscan -t ed25519 192.168.1.$i; done 2>/dev/null
+```
+
+L'indirizzo su cui compare quella chiave e' la board. Se non compare, la
+board e' spenta: nessuna scansione la fa apparire.
 
 ---
 
@@ -185,7 +204,7 @@ Spegnere con `sudo poweroff` e attendere il LED.
 
 1. **`eventi.csv` nelle sessioni contiene finestre sopra soglia, non
    eventi.** Le due grandezze differiscono di un fattore misurato in
-   **47,8**. Gli eventi si ricalcolano con `pipeline/eventi_sessioni.py`, ed
+   **44,8**. Gli eventi si ricalcolano con `pipeline/eventi_sessioni.py`, ed
    e' l'unica forma in cui i numeri di campo vanno riportati.
 
 2. **I numeri misurati sul calcolatore non sono i numeri della board.** Lo
@@ -203,31 +222,76 @@ Spegnere con `sudo poweroff` e attendere il LED.
 
 ## 6. Lavoro aperto
 
-In ordine di quanto blocca il resto.
+Aggiornato al **7 settembre 2026**. In ordine di quanto blocca il resto.
 
-1. **La prova di durata sulla board.** E' l'ultima richiesta esplicita del
-   relatore ancora aperta. `deploy_board/rileva.py` ha ora il doppio orologio
-   e dichiara la sospensione della macchina, quindi il difetto che aveva
-   invalidato silenziosamente il primo tentativo e' rilevabile. Nella stessa
-   sessione si chiude anche [ISS-113](docs/ISSUES.md): il bilancio del costo
-   per fotogramma esce dal `riepilogo.json` della prova stessa.
-2. **Le sedici voci di bibliografia mai verificate.** Sette portano il marchio
+**Lo stato degli strumenti:** `python prove/esegui.py` passa **31 prove su 31**
+(il file d'oro della geometria e' stato rigenerato il 7 settembre per la
+grandezza in piu', dopo aver verificato che le altre 32 non cambiano di un
+bit); `python tesi/controlla.py` dice «Nessun problema. Restano 0 figure da
+produrre».
+
+1. **Il riaddestramento su `feature_v3.csv` e' in corso**
+   ([EXP-025](docs/EXPERIMENTS.md#exp-025)), avviato il 7 settembre alle 09:22:
+   cinque architetture su DTW e poi le stesse su DTWH. Finche' non finisce, **le
+   tabelle del Capitolo 4 confrontano architetture addestrate su v2 con una
+   foresta addestrata su v3**, e non sono confrontabili fra loro. Il registro
+   dell'esecuzione e' `risultati/addestramento/log_riaddestramento_v3.txt`; le
+   run su v2 sono conservate in `risultati/addestramento/v2/`.
+
+2. **Decidere che cosa gira sulla board**
+   ([ISS-139](docs/ISSUES.md#iss-139)), e ora la scelta e' informata: sullo
+   stesso v3, aggiungere `A3_h_pavimento` alle dodici colonne porta l'F2 da
+   0,807 a **0,866** e i falsi negativi da 249 a **163**, cioe' il 35% in meno
+   ([EXP-023](docs/EXPERIMENTS.md#exp-023)). Installarla significa rifare
+   l'export, la prova di parita' e una sessione di controllo; non installarla
+   significa correggere il Capitolo 3, che dichiara installata una
+   configurazione che sul dispositivo non c'e'.
+
+   Da scrivere comunque nel Capitolo 3: **la selezione DTW non avrebbe scelto
+   quella grandezza** --- e' 19esima su 33 --- perche' il criterio misura ogni
+   grandezza **da sola**. E' un limite del criterio, e va detto dove il criterio
+   viene presentato.
+
+3. **Le sedici voci di bibliografia mai verificate.** Sette portano il marchio
    `% VERIFICATO`, tre erano inventate e sono state ritirate
-   ([ISS-114](docs/ISSUES.md)), cinque non sono citate. Le restanti sostengono
-   numeri che compaiono nell'Introduzione e non sono mai state controllate
-   sulla fonte. Quando le sette furono verificate, due affermazioni su sette
-   non ressero.
-3. **[ISS-111](docs/ISSUES.md)** --- il rapporto fra le due viste vale 1,99
-   nel file e 1,90 nel testo. Finche' non e' risolto, `fig_viewpoint_dist.png`
-   non va inserita.
-4. **Tre figure mancanti** nel Capitolo 4. Due sono generate ma bloccate dal
-   punto precedente e dal fatto che vengono da cinque soggetti; la terza va
-   composta dai fotogrammi delle due telecamere, scegliendo l'istante.
-5. **Piu' cadute reali.** Con cinque, l'intervallo di confidenza sul recall va
+   ([ISS-114](docs/ISSUES.md#iss-114)), cinque non sono citate --- `gru`,
+   `lstm`, `noury`, `randomforest`, `rougier` --- e con `thebibliography`
+   scritto a mano **vengono stampate lo stesso**. Delle dodici verificate
+   finora, quattro affermazioni non hanno retto.
+
+4. **Piu' cadute reali.** Con cinque, l'intervallo di confidenza sul recall va
    da 0,28 a 0,99. E' il limite piu' serio del lavoro. La sessione da cui
    vengono tutte e cinque ha il 25,9% di pose valide, peggio di sessioni che
    sono state scartate: rifarla con l'inquadratura giusta e' l'intervento a
-   costo piu' basso.
-6. **`docs/INDICE_E_STRUTTURA.txt` da riscrivere** prima di mandarlo al
-   relatore: contiene ancora l'indice a otto capitoli e una domanda su una
-   fusione che non si fa piu'. Il relatore rientra il **2 settembre**.
+   costo piu' basso. **La prova di durata del 6 settembre non aiuta su questo**:
+   e' una misura di durata e di costo, con il 35% di pose e nessuna caduta
+   messa in scena.
+
+5. **`tesi/Cap1_riordinato.tex`**, del 5 settembre: una proposta di riordino del
+   Capitolo 1 che **non e' inclusa in `tesi.tex`**. Contiene blocchi marcati
+   `[NUOVO]` e `[VERIFICA]`, e la figura `fig_popolazione.png`, che oggi non
+   compare nel PDF perche' sta solo li'. Va adottata o archiviata:
+   `controlla.py` la elenca fra i «non inclusi» a ogni esecuzione.
+
+6. **Cinque figure generate e mai inserite**: `fig_striscia.png`,
+   `fig_dtw.png`, `fig_rappr_a1/a2/a3.png`. Le schede `.txt` accanto a ciascuna
+   contengono gia' il blocco LaTeX e la frase da aggiungere.
+
+7. **Il residuo di [ISS-137](docs/ISSUES.md#iss-137):** i **4,47 ms per
+   finestra** che il Capitolo 4 attribuisce alla board. La board misurata ne fa
+   39,04, e [EXP-019](docs/EXPERIMENTS.md#exp-019) misura 4,85 ms **sul
+   calcolatore**. Va ritirato o dichiarato come misura sul calcolatore.
+
+**Fatte, e non piu' da fare:** la **prova di durata sulla board** --- 4,59 ore,
+nessuna sospensione, 3,1 eventi/ora, 136,65 ms per fotogramma
+([EXP-024](docs/EXPERIMENTS.md#exp-024)) --- che chiude
+[ISS-113](docs/ISSUES.md#iss-113); la **riestrazione completa** del dataset,
+che chiude [ISS-138](docs/ISSUES.md#iss-138); i numeri dell'escursione fra le
+due viste, **gia' riscritti nel Capitolo 4** (74,0° contro 33,2°, rapporto
+2,23×, 30 su 39 contro 8 su 39) --- il valore 2,44× che questa sezione citava
+era quello a cinque soggetti, e non e' quello da usare;
+`docs/INDICE_E_STRUTTURA.txt` riscritto sulla struttura a cinque capitoli il 31
+agosto; [ISS-111](docs/ISSUES.md#iss-111) risolta e `fig_viewpoint_dist.png`
+inserita; la scomposizione della latenza entrata nel Capitolo 5
+([ISS-115](docs/ISSUES.md#iss-115)); `fig:due_camere`, l'ultima figura mancante,
+composta il 6 settembre.

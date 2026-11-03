@@ -1,0 +1,71 @@
+{
+ "sessione": "bloccocadute_sola_20260813_091641",
+ "configurazione": {
+  "soglia": 0.5,
+  "persistenza": 5,
+  "finestra": 22,
+  "fps_medio": 8.02,
+  "cadenza_decisioni_s": 0.2493560047693967
+ },
+ "risoluzione_annotazione_s": 60.0,
+ "scomposizione_s": {
+  "calcolo": 0.12468827930174564,
+  "riempimento_finestra": 2.743142144638404,
+  "persistenza": 0.9974240190775868,
+  "limite_inferiore": 3.8652544430177365
+ },
+ "per_caduta": [
+  {
+   "ora": "09:20",
+   "finestre_sopra": 5,
+   "corsa_massima": 2,
+   "prima_sopra_s": 19.430000066757202
+  },
+  {
+   "ora": "09:22",
+   "finestre_sopra": 9,
+   "corsa_massima": 7,
+   "prima_sopra_s": 11.785000085830688,
+   "allarme_s": 13.483999967575073,
+   "ritardo_regola_s": 1.6989998817443848
+  },
+  {
+   "ora": "09:25",
+   "finestre_sopra": 12,
+   "corsa_massima": 7,
+   "prima_sopra_s": 27.71499991416931,
+   "allarme_s": 28.996000051498413,
+   "ritardo_regola_s": 1.2810001373291016
+  },
+  {
+   "ora": "09:29",
+   "finestre_sopra": 0,
+   "corsa_massima": 0
+  },
+  {
+   "ora": "09:31",
+   "finestre_sopra": 5,
+   "corsa_massima": 3,
+   "prima_sopra_s": 32.29800009727478
+  }
+ ],
+ "ritardo_regola_misurato_s": [
+  1.6989998817443848,
+  1.2810001373291016
+ ],
+ "nota": "Il ritardo fra caduta e allarme non e' misurabile: l'annotazione ha risoluzione di un minuto, la grandezza da misurare e' di pochi secondi.",
+ "_provenienza": {
+  "commit": "34ece3b9266b15c9ee08a8e1a970f55bdf699e7a",
+  "commit_breve": "34ece3b9",
+  "albero_pulito": false,
+  "data": "2026-09-25T11:06:13",
+  "comando": "pipeline/latenza.py",
+  "python": "3.10.20",
+  "macchina": "LAPTOP-OO4676OI",
+  "sistema": "Windows",
+  "numpy": "2.2.6",
+  "pandas": "2.3.3",
+  "sklearn": "1.7.2",
+  "tensorflow": "2.21.0"
+ }
+}

@@ -1,0 +1,86 @@
+{
+  "soglia": 0.5,
+  "sessioni_senza_cadute": [
+    {
+      "nome": "casa studente 11/08",
+      "percorso": "sessioni_reali/20260811/bloccodurata5h_20260811_130411",
+      "fotogrammi": 91093,
+      "ore": 5.997177777820164
+    },
+    {
+      "nome": "casa nonni 12/08",
+      "percorso": "sessioni_reali/20260812/bloccononni_20260812_142519",
+      "fotogrammi": 29234,
+      "ore": 1.1240333333280352
+    }
+  ],
+  "config": [
+    {
+      "etichetta": "A3   (riferimento)",
+      "feature_set": "A3",
+      "controesempi": false,
+      "finestre_train": 12234,
+      "finestre_positive": 628,
+      "finestre_sopra_soglia": 996,
+      "ore": 7.121211111148199,
+      "falsi_allarmi_ora": 139.86384962534953,
+      "cadute_rilevate": 3,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3h  (+ altezza)",
+      "feature_set": "A3h",
+      "controesempi": false,
+      "finestre_train": 12234,
+      "finestre_positive": 628,
+      "finestre_sopra_soglia": 501,
+      "ore": 7.121211111148199,
+      "falsi_allarmi_ora": 70.35320146817281,
+      "cadute_rilevate": 2,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3h + controesempi",
+      "feature_set": "A3h",
+      "controesempi": true,
+      "finestre_train": 18234,
+      "finestre_positive": 628,
+      "finestre_sopra_soglia": 15,
+      "ore": 7.121211111148199,
+      "falsi_allarmi_ora": 2.106383277490204,
+      "cadute_rilevate": 2,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3i  (integrali)",
+      "feature_set": "A3i",
+      "controesempi": false,
+      "finestre_train": 12234,
+      "finestre_positive": 628,
+      "finestre_sopra_soglia": 70,
+      "ore": 7.121211111148199,
+      "falsi_allarmi_ora": 9.829788628287618,
+      "cadute_rilevate": 4,
+      "cadute_totali": 5
+    },
+    {
+      "etichetta": "A3i + controesempi",
+      "feature_set": "A3i",
+      "controesempi": true,
+      "finestre_train": 18234,
+      "finestre_positive": 628,
+      "finestre_sopra_soglia": 19,
+      "ore": 7.121211111148199,
+      "falsi_allarmi_ora": 2.668085484820925,
+      "cadute_rilevate": 3,
+      "cadute_totali": 5
+    }
+  ],
+  "sessione_cadute": {
+    "nome": "cadute sola 13/08",
+    "percorso": "sessioni_reali/20260813/bloccocadute_sola_20260813_091641",
+    "fotogrammi": 4370,
+    "cadute_annotate": 5
+  },
+  "k_integrali": 31
+}

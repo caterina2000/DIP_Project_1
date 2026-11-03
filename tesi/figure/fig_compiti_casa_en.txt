@@ -1,0 +1,31 @@
+FIGURA — fig_compiti_casa_en.png
+================================
+
+CHE COSA MOSTRA
+---------------
+Gli stessi tre compiti della figura precedente, misurati pero' in due
+abitazioni vere invece che sull'archivio: eventi di allarme per ora, e
+quante cadute su cinque ciascuno rileva.
+
+COME SI LEGGE
+-------------
+L'unita' e' l'EVENTO e non la finestra sopra soglia: sulle stesse
+registrazioni le due grandezze differiscono di un fattore 44.8. La regola
+applicata e' quella del sistema installato, cinque finestre consecutive
+sopra soglia e poi trenta secondi di silenzio.
+
+I NUMERI
+--------
+Il confronto con il laboratorio e' il punto: la classifica dei tre compiti
+in casa non e' quella che l'archivio prevedeva. Il riferimento di
+letteratura per un sistema installato e' 0,049 eventi/ora.
+
+PROVENIENZA
+-----------
+Due abitazioni, dodici sessioni. Due case non sono un campione: indicano una
+direzione, non la misurano.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su campo/compiti_in_casa.json

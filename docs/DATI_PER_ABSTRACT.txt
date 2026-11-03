@@ -1,0 +1,158 @@
+==============================================================================
+   DATI PER L ABSTRACT
+   Solo i numeri solidi, quelli comunicati al relatore e da lui accettati.
+   Compilato il 2026-09-12.
+==============================================================================
+
+------------------------------------------------------------------------------
+CHE COSA E STATO COSTRUITO
+------------------------------------------------------------------------------
+  Sistema di rilevamento cadute da video RGB, interamente eseguito su un
+  dispositivo edge da circa 100 euro (Radxa ROCK 4D, SoC ARM RK3576).
+
+  Catena:  telecamera -> MediaPipe Pose (33 landmark) -> grandezze geometriche
+           -> finestre di 2,44 s -> classificatore -> logica di allarme
+
+  Nessuna immagine lascia il dispositivo: verso l esterno escono solo gli
+  allarmi.
+
+  Tre rappresentazioni geometriche del movimento (A1 sagoma nel piano
+  immagine, A2 descrizione tridimensionale, A3 riferita alla geometria del
+  corpo), piu grandezze integrali su finestra mobile e l altezza del bacino
+  rispetto al pavimento. Selezione del sottoinsieme tramite Dynamic Time
+  Warping: 12 grandezze su 33 candidate.
+
+------------------------------------------------------------------------------
+COME E STATO VALUTATO
+------------------------------------------------------------------------------
+  UP-Fall, dieci soggetti, camera laterale.
+  Validazione leave-one-subject-out a dieci ripetizioni.
+  Soglia decisionale fissa 0,50, dichiarata a priori, uguale per tutte le
+  configurazioni. Metrica F2: il richiamo pesa il quadruplo della precisione.
+
+------------------------------------------------------------------------------
+IL RISULTATO PRINCIPALE
+------------------------------------------------------------------------------
+  L architettura del classificatore NON e il fattore dominante.
+
+    LSTM          0,858        Random Forest   0,792
+    GRU           0,847        rete a grafo    0,779
+    Transformer   0,846
+    CNN 1D        0,833
+
+    differenza fra le due migliori        0,011
+    dispersione fra soggetti         0,08 - 0,10
+
+  La differenza fra due architetture e piu piccola della differenza fra due
+  persone. Con questo protocollo e dieci soggetti non emerge evidenza
+  sufficiente per attribuire un ruolo dominante alla scelta dell architettura.
+
+  Incidono molto di piu:
+
+  GEOMETRIA DELLA RIPRESA
+    stessa vista               F2  0,822
+    vista diversa              F2  0,488      costo  0,334
+    addestrando su entrambe    F2  0,731      recupera il 73 % della perdita
+    causa geometrica: l escursione dell angolo del tronco passa da 74,0 gradi
+    nella vista laterale a 33,2 nella frontale rialzata, 2,23 volte piu piccola
+
+  CAMBIO DI ARCHIVIO  (UP-Fall -> UR-Fall)
+    in dominio                          F2  0,971
+    archivio esterno, soglia schierata   F2  0,034
+    archivio esterno, soglia oracolo     F2  0,492
+    il 49 % del divario si recupera ricalibrando la soglia, il 51 % no: la
+    perdita e in parte di calibrazione e in parte di reale capacita
+    discriminativa
+
+  RAPPRESENTAZIONE DELLE GRANDEZZE
+    da A3 alla configurazione finale     F2  0,898 -> 0,953   (+0,055)
+    falsi negativi                            45 -> 14
+    falsi positivi                           172 -> 124
+    in laboratorio i due errori migliorano insieme, non c e scambio
+
+  DEFINIZIONE DEL COMPITO
+    riconoscere la transizione di caduta, lo stato a terra o entrambi non e lo
+    stesso problema, e la scelta cambia il comportamento piu della scelta del
+    modello
+
+------------------------------------------------------------------------------
+IL BENCHMARK NON DESCRIVE L ESERCIZIO
+------------------------------------------------------------------------------
+  La stessa evoluzione della rappresentazione che in laboratorio vale 0,055
+  punti di F2 -- dello stesso ordine della dispersione fra soggetti -- in
+  ambiente domestico porta le finestre positive da circa 140 all ora a meno di
+  3 all ora.
+
+  Il benchmark puo comprimere in pochi centesimi differenze che in condizioni
+  operative sono enormi.
+
+------------------------------------------------------------------------------
+IL SISTEMA IN ESERCIZIO
+------------------------------------------------------------------------------
+  COSTO, misurato su 4,59 ore continue sul dispositivo
+    percezione                      116,38 ms     85 % del tempo
+    classificazione, ammortizzata    19,51 ms
+    totale                          136,65 ms per fotogramma,  7,3 fps
+    Il collo di bottiglia e la percezione, non la classificazione: sostituire
+    il classificatore non cambia la frequenza raggiunta.
+
+  ACCELERATORE NEURALE: risultato negativo, e va dichiarato
+    cambiare stimatore di posa costa    0,216 di F2
+    dimezzare il frame rate costa       0,041 di F2
+    accelerare un singolo modulo non migliora il sistema
+
+  VALIDAZIONE DOMESTICA
+    due abitazioni, quattro giornate, nove sessioni, 14,98 ore
+    finestre positive / ora                496
+    EVENTI di allarme / ora               11,1
+    rapporto fra le due contabilita       44,8
+    latenza mediana in laboratorio        2,44 s
+
+    Contare finestre invece di eventi sovrastima di 44,8 volte cio che una
+    persona percepirebbe. La valutazione operativa va fatta sull evento.
+
+  ADATTAMENTO ALL AMBIENTE
+    controesempi raccolti in una abitazione, verifica nell altra
+      nonni -> studente      0,342 -> 0,171 eventi/ora
+      studente -> nonni      1,781 -> 0,890 eventi/ora
+    il beneficio si trasferisce in entrambe le direzioni, circa un fattore due.
+    Non e generalizzazione a case nuove ma adattamento al dominio mediante
+    hard negatives, con evidenza di trasferimento fra i due ambienti.
+
+  SENSIBILITA ALLA PERDITA DI LANDMARK
+    riferimento                        F2  0,853
+    peggioramento massimo (spalle)         0,037
+    dispersione fra soggetti               0,071
+    Nella simulazione controllata non emerge un singolo gruppo di landmark la
+    cui perdita determini da sola il collasso del sistema.
+
+------------------------------------------------------------------------------
+LA TESI IN UNA FRASE
+------------------------------------------------------------------------------
+  Il risultato principale non e l individuazione del classificatore con qualche
+  centesimo di F2 in piu, ma la dimostrazione che protocollo di valutazione,
+  rappresentazione del movimento, geometria della ripresa, dominio di utilizzo
+  e logica di decisione incidono sul comportamento reale del sistema piu della
+  scelta dell architettura stessa.
+
+  E che la sperimentazione in ambiente reale non ha soltanto verificato il
+  modello costruito in laboratorio: ne ha cambiato la definizione del problema.
+  Il caso delle persone distese su divani e letti, che il benchmark non
+  contiene, e l esempio piu chiaro.
+
+------------------------------------------------------------------------------
+LIMITI DA DICHIARARE
+------------------------------------------------------------------------------
+  - cinque cadute domestiche soltanto: il richiamo in ambiente reale non e
+    stimabile con precisione
+  - le cadute sono simulate da persone giovani e sane, non dalla popolazione a
+    cui il sistema e destinato
+  - due sole abitazioni: non si puo parlare di generalizzazione a case nuove
+  - la prova di durata piu lunga e di 4,59 ore, non raggiunge le dodici ore
+  - l altezza del bacino dal pavimento e stata reintrodotta DOPO aver osservato
+    gli errori domestici: non e una scelta a priori, e la configurazione rivista
+    va distinta da quella inizialmente installata
+  - un riferimento di letteratura omogeneo non esiste: i sistemi vision-based
+    non riportano tassi di falsi allarmi per ora in abitazioni reali. Il
+    termine di paragone disponibile, 0,049 allarmi/ora, viene da un sistema
+    accelerometrico indossato

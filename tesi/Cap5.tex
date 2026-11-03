@@ -1,768 +1,670 @@
-\chapter{Implementazione su dispositivo edge e validazione in ambiente reale}
+\chapter{Implementation on an edge device and validation in a real environment}
 \label{cap:edge}
-\label{cap:campo}
 
-% ---------------------------------------------------------------------
-% FUSIONE 2026-08-26. Unione del vecchio Capitolo 6 (deployment) con il
-% vecchio Capitolo 7 (ambiente reale).
-%
-% Le due parti rispondono a due domande diverse -- quanto costa, e che
-% cosa succede in una casa -- ma sono lo stesso oggetto misurato due
-% volte, e separarle costringeva a ripetere la descrizione della board
-% in entrambi i capitoli.
-%
-% ATTENZIONE alla cesura fra la Sezione sul bilancio computazionale e
-% quella sul protocollo delle sessioni: e' li' che il capitolo cambia
-% oggetto. Va segnata con il paragrafo di transizione, MAI con un
-% titolo: un titolo la trasformerebbe in due mezzi capitoli.
-%
-% Entrambe le etichette sono alias e vanno tenute.
-% ---------------------------------------------------------------------
+In Chapter~\ref{cap:sperimentale} the system was evaluated on recordings already available, without imposing any constraint on the time needed to process each frame. In this chapter we shall instead verify the operation of the whole pipeline, analysing the porting to a Radxa ROCK 4D, the computational cost and the choice of the operating configuration. We shall then move to a real environment and analyse the domestic acquisitions, evaluating the system during prolonged operation and in the passage from metrics on the individual windows to alarm events.
 
-I capitoli precedenti hanno stabilito che cosa il sistema riconosce, e con
-quale protocollo la misura sia difendibile. Restano due domande che nessun
-dataset di riferimento puo' chiudere: quanto costa far girare la catena, e su
-quale hardware; e che cosa succede lasciando il sistema acceso per ore in
-un'abitazione dove nessuno cade.
+\section{Edge platform and operating configuration}
+\label{sec:piattaforma}
 
-Questo capitolo risponde a entrambe, ed e' diviso di conseguenza. La prima
-parte verifica l'ipotesi economica da cui il lavoro e' partito --- \emph{un
-dispositivo da poche decine di euro basta a eseguire l'intera catena in tempo
-reale, rendendo superflui un server con GPU e la trasmissione dei dati fuori
-dall'abitazione} --- e si chiude con una scelta che va in direzione contraria
-al lavoro svolto per ottenerla.
+A \textbf{Radxa ROCK 4D} with a Rockchip RK3576 SoC, 6~GB of memory and an integrated 6~TOPS NPU was used for the implementation. The overall cost of the platform, USB camera included, is of the order of a hundred euros per acquisition point.
+Unlike a centralised architecture, in which one or more cameras send the images to an external server, here the whole pipeline is executed locally: acquisition, pose estimation, feature extraction and classification. Only the information associated with a possible alarm is transmitted outside.
 
-La seconda parte porta il sistema in due abitazioni reali. Il suo risultato
-principale non e' un numero di prestazione: e' che \textbf{l'insieme di
-verifica su cui l'intero settore misura rende indistinguibili alternative che
-in esercizio differiscono di ordini di grandezza}. Non ne sbaglia l'ordine ---
-una versione precedente di questo lavoro lo sosteneva, e la
-Sezione~\ref{sec:rovesciamento} spiega perche' quella conclusione sia stata
-ritirata --- ma comprime lo scarto fino a renderlo non dichiarabile.
-
-\section{Piattaforma hardware e vincoli di porting}
-
-L'hardware di riferimento è una \textbf{Radxa ROCK 4D}: SoC Rockchip RK3576, 6~GB di memoria, e un acceleratore neurale integrato da 6~TOPS. Il costo è dell'ordine del centinaio di euro, telecamera USB compresa.
-
-\begin{center}
-\begin{tabular}{lll}
+\begin{table}[htbp]
+\centering
+\caption{Comparison between local processing on an edge device and the use of a remote server.}
+\label{tab:edge_vs_server}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
 \toprule
- & Nodo \emph{edge} & Server con GPU \\
+& \textbf{Edge node} & \textbf{Server with GPU} \\
 \midrule
-Calcolo & SoC ARM + NPU 6 TOPS & CPU x86 + GPU dedicata \\
-Costo per stanza & $\sim$100 € & migliaia di € (condiviso) \\
-Rete richiesta & nessuna & flusso video continuo \\
-Dati in uscita & solo allarmi & fotogrammi \\
+Computation & ARM SoC + NPU & x86 CPU + dedicated GPU \\
+Cost & per node & shared infrastructure \\
+Network required & not necessary & necessary \\
+Data transmitted & alarm information & video stream \\
 \bottomrule
-\end{tabular}
-\end{center}
+\end{tabularx}
+\end{table}
 
-La differenza che conta non è il prezzo assoluto ma il \textbf{costo per stanza}. Un server si ammortizza su molte telecamere, ma richiede che ogni telecamera gli mandi il proprio flusso: la scala abbatte il costo di calcolo e moltiplica quello di rete, e soprattutto sposta fuori dall'abitazione dati che il Capitolo~\ref{cap:contesto} ha argomentato debbano restarci. Un nodo autonomo per stanza non ha economia di scala, ma il suo costo marginale è noto e la sua superficie di esposizione è nulla.
+The main difference concerns the \textbf{cost per room}. A server can be shared between several cameras, but requires each of them to transmit its own video stream continuously. This reduces the computational cost per individual room, but increases the dependence on the network and the data have to leave the home. An edge node dedicated to each room does not enjoy the same economy of scale, but has a known cost per installation and keeps the processing and the data local, as required in Chapter~\ref{cap:contesto}.
 
-\paragraph{Gli ostacoli del porting.}
+\subsection{Porting constraints}
 
-Tre difficoltà, riportate perché un lavoro puramente simulativo non le incontra e documentarle è parte del contributo di un capitolo sul \emph{deployment}. Hanno una proprietà in comune: nessuna delle tre produce un messaggio d'errore che indichi la causa.
+Three main problems emerged during the porting.
 
-\paragraph{L'architettura del processore.} Il RK3576 implementa ARMv8.0. I pacchetti MediaPipe recenti sono compilati per ARMv8.1 e usano le istruzioni atomiche LSE, assenti nel set precedente: l'esecuzione termina con \texttt{illegal instruction}, senza alcun messaggio che indichi la causa reale. L'unica versione funzionante è la 0.10.9.
+The first concerns the architecture of the processor. The more recent versions of MediaPipe tried on the board are compiled for ARMv8.1, whereas the RK3576 implements ARMv8.0. Execution terminated with an \texttt{illegal instruction} error. Version 0.10.9 works correctly and was therefore retained.
 
-\paragraph{La rimozione di un'API.} MediaPipe 1.0 ha eliminato \texttt{mp.solutions}, l'interfaccia impiegata dal codice di estrazione. Aggiornare avrebbe comportato riscrivere l'intera catena di feature e, con essa, invalidare il confronto con tutte le misure precedenti. La versione è stata quindi congelata, ed è una decisione da dichiarare: il sistema è vincolato a una libreria che gli autori considerano superata.
+The second problem concerns the interface used by the code. The more recent versions of MediaPipe have progressively replaced the \texttt{mp.solutions} interface, on which the feature extraction pipeline had been built. Changing interface would have required modifying a significant part of the code already used in the earlier experiments. This too is a reason why the version compatible with the existing pipeline was retained.
 
-\paragraph{La forma statica del modello accelerato.} Il modello convertito per l'NPU accetta un tensore di forma fissa a quattro dimensioni. Fornendone uno a tre dimensioni non si ottiene alcun errore: l'inferenza semplicemente non viene eseguita, e la funzione restituisce in tempi bassissimi. È l'origine di uno degli episodi discussi nella sezione seguente.
+The third problem emerged during the trials with the NPU. The converted model requires a four-dimensional input tensor. With a three-dimensional tensor the inference was not executed, but no explicit error was returned. The time measured therefore came out very low without the model having actually processed the data. From this trial onwards it was verified that the computation was really being carried out and that the output was correct before any speed measurement was used.
 
-\section{Verifica di equivalenza fra calcolatore e dispositivo}
+\section{Verification of equivalence between computer and device}
 \label{sec:parita}
 
-Prima di misurare quanto sia veloce il sistema sul dispositivo occorre stabilire che calcoli \emph{le stesse cose} che calcolava sul calcolatore di sviluppo. La verifica confronta le probabilità prodotte dai due sistemi sugli stessi campioni:
+Before measuring performance on the board, it was verified that the classifier produced the same results as those obtained on the computer.
+The first trial was carried out on 200 windows already computed, thereby excluding the camera and the pose estimator.
 
-\begin{center}
+\begin{table}[htbp]
+\centering
+\caption{Comparison of the predictions on 200 precomputed windows.}
+\label{tab:parita}
 \begin{tabular}{lr}
 \toprule
-Scarto massimo sulle predizioni & $2{,}2 \times 10^{-16}$ \\
-Campioni divergenti & 0 \\
+Maximum discrepancy between the predictions & $2{,}2\times10^{-16}$ \\
+Differing decisions & 0 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-È la precisione della rappresentazione in virgola mobile: i due sistemi sono numericamente identici. La stessa verifica, ripetuta sul pacchetto multi-persona, ha dato scarto massimo esattamente nullo.
+No differing decisions were observed. At parity of features, normalisation and classifier, the two systems therefore produce the same result. The comparison was then repeated starting directly from the videos. Out of 56 clips, 55 produced the same final decision. In one recording alone, containing a fall, the decision turned out different.
+The difference arises before the classifier. MediaPipe maintains a temporal state in order to follow the person, and small variations in the landmarks change the features obtained. When the score is close to the threshold, this variation can change the final decision.
 
-\paragraph{Perché la verifica viene prima, e non dopo.}
+Some faulty measurements were identified during these tests. In one trial different models showed almost identical times because no person was detected in the frames used. In another trial about 1.315~fps were measured because the inference on the NPU was not being executed, owing to the wrong input shape.
+An early check on the landmarks was also too weak: it verified only that the coordinates were positive, and therefore treated as valid even points that were clearly placed wrongly. The measurements reported in the following sections are therefore used only after both the execution of the computation and the consistency of the output have been checked.
 
-Questo controllo può sembrare una formalità. Non lo è, e la ragione è che nel corso del lavoro \textbf{tre misure distinte hanno riportato come successo il proprio fallimento}, in forme diverse e tutte plausibili a prima vista.
+\subsection{Comparison between pose estimators}
+\label{sec:stimatore}
 
-\begin{enumerate}
+Pose estimation is the most expensive stage of the pipeline. MediaPipe on the CPU of the Radxa takes about 92,6~ms per frame, that is 10,8~fps. It is therefore not possible to keep the 18~fps of the original dataset. In order to increase the speed, YOLOv8-pose quantised to INT8 and run on the NPU was tried.
 
-\item \textbf{Latenze identiche fra configurazioni diverse.} Quattro modelli di dimensione molto diversa producevano tempi indistinguibili. Il motivo era che nessuna persona veniva rilevata nei fotogrammi di prova: si stava cronometrando il ramo vuoto, quello che si percorre quando non c'è nulla da elaborare.
+The inference alone turns out to be 5,16 times faster. The gain for the whole pipeline was initially 1,71 times, because the post-processing took 12,14~ms per frame. After this part of the code had been vectorised, the time dropped to 0,94~ms and the overall gain rose to 2,17 times.
+Speed alone is not, however, enough. The quality of the pose was therefore verified over 29.681 frames belonging to different activities.
 
-\item \textbf{1315 fotogrammi al secondo dichiarati.} Un valore fuori scala di due ordini di grandezza rispetto a qualunque aspettativa. L'input aveva tre dimensioni invece di quattro e l'inferenza non partiva affatto: il cronometro misurava il tempo di una funzione che ritornava senza fare nulla.
-
-\item \textbf{«Nove keypoint su nove trovati»}, con le ginocchia disegnate sul torace. Il criterio di validità era $x > 0$ e $y > 0$, senza alcun controllo sulla confidenza: qualunque coordinata numericamente lecita veniva contata come rilevamento riuscito.
-
-\end{enumerate}
-
-Tutti e tre gli episodi condividono una struttura: \emph{il sistema non ha svolto il lavoro, e la misura ha riportato un risultato eccellente.} Un cronometro non distingue fra un'operazione veloce e un'operazione non eseguita, e un contatore non distingue fra un rilevamento corretto e un valore che sta nell'intervallo giusto per caso.
-
-\begin{quote}
-Un banco di prova che non verifica di aver svolto il lavoro misura il proprio fallimento e lo riporta come successo.
-\end{quote}
-
-Ne segue una regola operativa che questo lavoro ha adottato dopo il secondo episodio e mantenuto fino alla fine: \textbf{la verifica di equivalenza precede sempre la verifica di velocità}, e nessuna misura di prestazione viene accettata prima che sia stato dimostrato che il calcolo è avvenuto.
-
-\section{Confronto fra stimatori di posa e configurazione operativa}
-\label{sec:npu}
-
-Con lo stimatore di partenza eseguito sulla CPU il dispositivo non regge il
-carico. Questa sezione descrive la strada percorsa per farlo reggere ---
-portare la percezione sull'acceleratore neurale, il che comporta cambiare
-stimatore --- e si chiude con la decisione di non percorrerla.
-
-Occupa lo spazio che occupa perché il lavoro speso per ottenere quel risultato
-negativo è stato consistente, e perché una scelta verificata e smentita è un
-risultato, mentre una scelta assunta e mai messa alla prova non lo è.
-
-\paragraph{Il punto di partenza non è utilizzabile.}
-
-MediaPipe eseguito sulla CPU del dispositivo impiega \textbf{92,6~ms per fotogramma} a livello di sistema, cioè \textbf{10,8~fps}. Il Capitolo~\ref{cap:risultati} ha misurato che a 9~fps le cadute non rilevate raddoppiano rispetto ai 18~fps del dataset: la configurazione di partenza è quindi già sotto la soglia, e non è una base su cui costruire.
-
-\paragraph{Il guadagno dell'acceleratore, e dove finisce.}
-
-Sostituendo lo stimatore con YOLOv8-pose~\cite{yolopose} quantizzato ed eseguito sull'NPU, la \emph{sola inferenza} risulta \textbf{5,16 volte} più veloce. Ma la misura a livello di sistema dà \textbf{1,71}, non 5,16.
-
-La differenza sta nella post-elaborazione: la decodifica dell'uscita e la soppressione dei rilevamenti ridondanti, scritte in Python con cicli espliciti, costavano \textbf{12,14~ms} — più di un terzo del tempo totale. Riscritte in forma vettoriale scendono a \textbf{0,94~ms}, cioè \textbf{12,9 volte}, e il guadagno di sistema sale a 2,17.
-
-È un esempio istruttivo di \textbf{collo di bottiglia che si sposta}: accelerando la componente più costosa se ne rende dominante una che prima era invisibile. Il primo numero, 5,16, non era sbagliato — misurava esattamente ciò che dichiarava di misurare — ma rispondeva a una domanda diversa da quella che interessava.
-
-\paragraph{Il prezzo del cambio di stimatore.}
-
-È la parte che ribalta la conclusione del capitolo, ed è interessante proprio perché il risultato è negativo.
-
-\paragraph{YOLOv8 non localizza una persona distesa.} Ritenzione delle pose per tipo di attività, su 29.681 fotogrammi:
-
-\begin{center}
-\begin{tabular}{lrr}
+\begin{table}[htbp]
+\centering
+\caption{Pose retention with YOLOv8-pose INT8 and MediaPipe. Five-subject experiment.} \label{tab:ritenzione}
+\begin{tabular}{lcc}
 \toprule
-Attività & YOLOv8 INT8 & MediaPipe \\
-\midrule
-In piedi, sedersi, raccogliere, saltare & 100\% & 100\% \\
-Caduta in avanti sulle mani & 79,2\% & 99,5\% \\
-\textbf{Stare sdraiati} & \textbf{43,6\%} & \textbf{79,1\%} \\
+\textbf{Activity} & \textbf{YOLOv8 INT8} & \textbf{MediaPipe} \\
+\midrule Standing, sitting down, picking up, jumping & 100\% & 100\% \\
+Forward fall onto the hands & 79,2\% & 99,5\% \\
+\textbf{Lying down} & \textbf{43,6\%} & \textbf{79,1\%} \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-Su tutto ciò che accade in piedi i due stimatori sono indistinguibili. Il divario si apre \textbf{solo sui corpi orizzontali} — cioè esattamente sulla fase post-caduta, che è la più lunga e la più informativa.
+The difference appears above all when the person is close to the floor. For the lying position, YOLOv8 keeps the detection in 43,6\% of the frames against 79,1\% for MediaPipe. Lowering the YOLOv8 threshold to 0,05 brings it to 58,9\%, still below MediaPipe.
 
-\paragraph{Non è una questione di soglia.} L'obiezione naturale è che basti abbassare la confidenza minima. È stata verificata: scendendo a $0{,}05$, la ritenzione su «stare sdraiati» arriva al 58,9\%, ancora venti punti sotto MediaPipe. Il rilevatore non è prudente, semplicemente non trova la persona.
+A difference in the estimated geometry was also observed. With YOLOv8 the projected length of the torso goes from 83,5 pixels when standing to 56,5 pixels on the ground. With MediaPipe it goes instead from 83,8 to 100,7 pixels. This quantity is used in the body-centric normalisation. An error in the length of the torso therefore changes several features at once. In order to measure the final effect, the two estimators were compared while features, classifier, threshold and protocol were kept unchanged.
 
-\paragraph{E dove la trova, la misura male.} La lunghezza del torso proiettata passa da 83,5 a 56,5 pixel fra la postura eretta e quella a terra, cioè $-32\%$; con MediaPipe va da 83,8 a 100,7. Su una telecamera laterale un torso che si distende \emph{non deve accorciarsi}: l'avvicinamento alla telecamera semmai lo allunga.
-
-Il punto è che \texttt{torso\_len} è il \textbf{denominatore dell'intera normalizzazione body-centric}. Un suo errore non resta locale: si propaga a ogni feature del vettore, ed è sistematico e correlato con la classe — cioè la forma di errore peggiore possibile, perché imita il segnale che si vuole misurare.
-
-\paragraph{Il confronto a parità di protocollo.} Le due catene sono state infine confrontate variando soltanto lo stimatore di posa: stessa validazione, stesso insieme di grandezze, stesso modello, stessa soglia. È l'unico confronto del capitolo in cui il divario supera nettamente la dispersione, e per questo è quello su cui la decisione si regge.
-
-\paragraph{Provenienza dei valori di $F_2$.} I confronti di
-prestazione riportati in questa sezione provengono dall'impianto a
-\textbf{cinque} soggetti e non sono stati ripetuti dopo l'estensione a dieci.
-Le misure di \emph{tempo} --- millisecondi per fotogramma, ripartizione del
-costo, frequenza raggiunta --- non ne dipendono, perché sono state prese sul
-dispositivo e non su un insieme di verifica: quelle restano valide come sono.
-I valori di $F_2$ vanno invece letti come indicativi, e la conclusione che
-sostengono --- quale stimatore di posa adottare --- va confermata prima della
-consegna.
-
-\begin{center}
-\begin{tabular}{lrrr}
+\begin{table}[H]
+\centering
+\caption{Performance obtained by replacing the pose estimator. Five-subject experiment.}
+\label{tab:stimatori_f2}
+\begin{tabular}{lccc}
 \toprule
-Stimatore & F2 & Falsi positivi & Falsi negativi \\
-\midrule
-MediaPipe & \textbf{0,909 $\pm$ 0,095} & \textbf{17} & \textbf{23} \\
-YOLOv8 INT8 & 0,682 $\pm$ 0,044 & 225 & 59 \\
+\textbf{Estimator} & \textbf{$F_2$} & \textbf{FP} & \textbf{FN} \\
+\midrule MediaPipe & $0{,}909 \pm 0{,}095$ & 17 & 23 \\
+YOLOv8 INT8 & $0{,}682 \pm 0{,}044$ & 225 & 59 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-Il divario è di \textbf{0,227}, molto fuori dalle deviazioni: è una delle poche differenze misurate in questo lavoro che \emph{non} cada dentro il rumore.
+The mean difference of $F_2$ is 0,227, and YOLOv8 increases both the false positives and the false negatives. These values come from the five-subject experimental configuration and were not repeated after the extension to ten subjects. They are therefore used as indicative results for the choice of the estimator, whereas the timing measurements were obtained directly on the board.
 
-\subsection{La catena che va in esercizio}
+\subsection{Choice of the operating configuration}
 \label{sec:decisione}
 
-La prima parte del capitolo non si conclude dichiarando che il sistema gira sull'acceleratore a 26,5~fps. Si conclude con una scelta motivata dai numeri, e la scelta è \textbf{contraria alla direzione seguita per ottenerli}.
+The final choice must hold together processing frequency and quality of the pose. The Random Forest was used on the board. In the tests of Chapter~\ref{cap:sperimentale} some neural networks obtain slightly better results, but the differences between the main architectures remain small with respect to the variability observed between subjects. The Random Forest was therefore preferred because it is simpler to run on the device, does not require the TensorFlow stack and reduces the software dependencies of the pipeline.
 
-Il confronto onesto non è a parità di dati ma a \textbf{parità di condizioni operative}: ciascuna catena valutata al frame rate che raggiunge davvero sul dispositivo.
-
-\begin{center}
-\begin{tabular}{llrrr}
-\toprule
-Catena & Sul dispositivo & F2 & FP & FN \\
+\begin{table}[htbp]
+\centering
+\caption{Configurations considered for operation on the device.}
+\label{tab:catene}
+\begin{tabular}{llccc}
+\toprule \textbf{Configuration} & \textbf{On the device} & \textbf{$F_2$} & \textbf{FP} & \textbf{FN} \\
 \midrule
-MediaPipe @ 18 fps & non raggiungibile & 0,898 & 23 & 24 \\
-\textbf{MediaPipe @ 9 fps} & \textbf{10,8 fps} & \textbf{0,857} & \textbf{57} & \textbf{49} \\
+MediaPipe @ 18 fps & not attainable & 0,898 & 23 & 24 \\
+MediaPipe @ 9 fps & 10,8 fps & 0,857 & 57 & 49 \\
 YOLOv8 @ 18 fps & 26,5 fps & 0,682 & 225 & 59 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-\textbf{MediaPipe sottocampionato batte YOLOv8 a piena velocità di 0,175}, e lo batte su ogni voce: recall $0{,}866$ contro $0{,}775$, falsi negativi 49 contro 59, falsi allarmi 57 contro 225.
+MediaPipe at 18~fps is not usable on the board, but it reaches 10,8~fps and can therefore be used with a sequence subsampled to 9 samples per second. Moreover, of the two configurations that can actually be run, MediaPipe at 9~fps keeps the better results: $F_2=0{,}857$ against 0,682 for YOLOv8, while recall is 0,866 and 0,775 respectively. The number of errors is lower as well: 49 false negatives and 57 false positives with MediaPipe, against 59 and 225 with YOLOv8.
 
-I due costi, messi accanto:
-
-\begin{center}
-\begin{tabular}{lr}
-\toprule
-Sottocampionare MediaPipe da 18 a 9 fps & $-0{,}041$ \\
-Cambiare stimatore di posa & $-0{,}216$ \\
-\midrule
-Rapporto & $5{,}3\times$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\textbf{Rinunciare a metà del frame rate costa cinque volte meno che rinunciare allo stimatore.} Il sistema va quindi costruito su MediaPipe, con il modello addestrato alla frequenza che il dispositivo regge davvero, così che addestramento ed esercizio coincidano.
-
-Il costo va dichiarato e non attenuato: le cadute non rilevate passano dal 9,6\% al 13,4\%.
-
-\paragraph{Che cosa resta del lavoro sull'acceleratore.}
-
-La velocità dell'NPU è reale e misurata: $12{,}9\times$ sulla post-elaborazione, 26,5~fps a sistema. Non è quel lavoro a essere in discussione, ma il rapporto fra ciò che fa guadagnare e ciò che fa perdere \emph{su questo compito}.
-
-Resta la strada più promettente se il divario dello stimatore si chiude, e le tre vie sono note:
-
-\begin{itemize}
-\item un modello di dimensione superiore al più piccolo della famiglia;
-\item un confronto in virgola mobile contro la versione quantizzata a 8 bit, per \textbf{isolare la quantizzazione} — che oggi non è isolata, ed è un limite da dichiarare: non si sa quanta parte dei 0,227 sia dovuta alla rete e quanta alla quantizzazione;
-\item il rilevamento del contesto — dove sono i mobili — che su un rilevatore di oggetti sarebbe quasi gratuito, perché il secondo modello serve comunque.
-\end{itemize}
-
-\section{Caratterizzazione del costo computazionale e stabilità termica}
-
-Valori a regime, per fotogramma:
-
-\begin{center}
-\begin{tabular}{lrr}
-\toprule
-Fase & Tempo & Quota \\
-\midrule
-Pre-elaborazione & 1,21 ms & 3,2\% \\
-\textbf{Inferenza sull'acceleratore} & \textbf{33,34 ms} & \textbf{88,4\%} \\
-Post-elaborazione & 0,94 ms & 2,5\% \\
-Classificatore (ammortizzato) & 2,20 ms & 5,8\% \\
-\midrule
-\textbf{Totale} & \textbf{37,7 ms} & \textbf{26,5 fps} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{Una nota sulle unità.} Il costo del classificatore compare
-nell'elaborato con due valori diversi, e la differenza va spiegata perché
-altrimenti sembra una discordanza: \textbf{4,47~ms per finestra} nel capitolo
-dei risultati, \textbf{2,20~ms per fotogramma} nella tabella qui sopra. Non
-sono due misure in disaccordo, sono la stessa misura in due unità. Il
-classificatore non viene eseguito a ogni fotogramma: la finestra avanza con
-passo due, quindi si decide una volta ogni due fotogrammi, e il costo
-ammortizzato per fotogramma è circa la metà di quello per finestra. La tabella
-riporta il costo per fotogramma perché è quello che concorre al bilancio dei
-37,7~ms.
-
-Il dato che merita una discussione è l'ultima riga prima del totale. \textbf{Il classificatore — l'oggetto su cui si concentra la letteratura, e su cui si è concentrato il Capitolo~\ref{cap:risultati} — è il 5,8\% del costo.} Tutto il resto è percezione.
-
-È coerente con quanto il Capitolo~\ref{cap:risultati} ha misurato sull'accuratezza: fra la migliore e la peggiore architettura corrono $0{,}066$, dentro la dispersione fra soggetti, mentre fra due punti di vista ne corrono $0{,}438$. \textbf{Il classificatore è marginale due volte}: nel costo di calcolo e nella determinazione del risultato.
-
-\subsection{Comportamento termico e limiti operativi}
-
-Un dispositivo che regge per un minuto non regge necessariamente per cinque
-ore. Vanno verificate separatamente due proprietà distinte: che non si
-rallenti al salire della temperatura, e che nell'esercizio prolungato non
-incontri difetti che una misura breve non può produrre. La seconda ha dato
-tre risultati, e nessuno dei tre era prevedibile a tavolino.
-
-\paragraph{La temperatura a regime.}
-
-Dieci minuti di carico continuo, 18.291 inferenze: deriva della latenza $+3{,}9\%$, frequenza dell'acceleratore invariata a 950~MHz, temperature stabili fra 60 e 63~$^\circ$C. Nessun rallentamento automatico.
-
-La verifica è stata estesa a una delle sessioni domestiche descritte nella seconda parte di questo capitolo: \textbf{cinque ore continue}, picco di $79{,}5\,^\circ$C con andamento a plateau dopo circa quaranta minuti, e frame rate senza gradini. L'assenza di gradini è il criterio: un dispositivo che si rallenta da solo mostra cali bruschi, non una deriva lenta.
-
-\paragraph{Tre limiti che solo l'esercizio prolungato rivela.}
-
-Sono difetti che nessuna misura di laboratorio avrebbe potuto produrre, ed è la ragione per cui questo capitolo non poteva chiudersi con il bilancio della sezione precedente.
-
-\paragraph{Il costo del multi-persona cresce con le persone.} Lo stimatore esegue il modello dei \emph{landmark} \textbf{una volta per ogni persona rilevata}:
-
-\begin{center}
-\begin{tabular}{lr}
-\toprule
-Stanza vuota & 7,5 fps \\
-Una persona & $\sim$4,0 fps \\
-Due persone & $\sim$2--3 fps \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Il degrado è massimo esattamente nella condizione che la modalità multi-persona esiste per gestire. A 4~fps una finestra di 22 campioni copre 5,5 secondi invece di 2,4: il modello riceve una densità temporale mai vista in addestramento. La correzione — riaddestrare con finestra più corta — è nota e non ancora eseguita.
-
-\paragraph{Il dispositivo si sospendeva da solo.} La gestione dell'energia del sistema operativo sospendeva la macchina dopo venti minuti senza interazione, anche ad alimentazione di rete. In una sessione da cinque ore ha dormito \textbf{un'ora e nove minuti}.
-
-È il difetto peggiore possibile per una prova di durata, perché \textbf{non fallisce: sembra riuscire}. Il conteggio del tempo usa l'orologio monotòno, che durante la sospensione non avanza; al risveglio la registrazione riprende e alla fine dichiara la durata richiesta. Un test notturno avrebbe prodotto un tasso di falsi allarmi eccellente e privo di significato.
-
-La correzione è banale — disattivare la sospensione — ma il difetto non era osservabile senza una sessione lunga e non sorvegliata, ed è stato individuato solo confrontando l'orologio da parete con quello di esecuzione. Il registratore ora riporta entrambi.
-
-\paragraph{La cattura si interrompe.} Il dispositivo di acquisizione viene rienumerato dal sistema operativo (\texttt{/dev/video0} diventa \texttt{/dev/video1}), tipicamente al risveglio o dopo un'instabilità del bus. Senza sorveglianza la sessione prosegue cieca fino alla fine.
-
-La correzione adottata sposta la lettura in un flusso di esecuzione separato: se non arrivano fotogrammi entro venti secondi, il ciclo principale — che resta vivo — lo dichiara e riapre il dispositivo. Nella sessione da cinque ore è intervenuto una volta, recuperando in venti secondi ciò che il giorno precedente era costato otto minuti di cecità silenziosa.
-
-\medskip
-
-I tre difetti hanno una caratteristica comune, e vale la pena enunciarla: \textbf{nessuno di essi produce un errore.} Producono numeri plausibili, e sono osservabili solo confrontando ciò che il sistema dichiara con una grandezza indipendente — l'orologio, il conteggio dei fotogrammi, la temperatura. È la stessa lezione della sezione~\ref{sec:parita}, incontrata una seconda volta e in un contesto diverso.
-
-\bigskip
-
-Fin qui il dispositivo e' stato misurato per quello che costa: fotogrammi al
-secondo, ripartizione del tempo di calcolo, comportamento termico. Da qui in
-avanti viene misurato per quello che fa, in una casa, per ore, con nessuno che
-cade.
-
-\section{Motivazione e protocollo delle sessioni in ambiente domestico}
-
-Questa sezione contiene quattro cose, e vanno lette nell'ordine in cui sono
-scritte: la ragione per cui una prova domestica era necessaria, la previsione
-formulata prima di eseguirla, il protocollo con cui è stata eseguita, e ciò
-che la prima ora ha mostrato.
-
-L'ordine non è espositivo ma cronologico, ed è l'unica forma in cui la
-previsione conserva valore: una previsione registrata dopo i fatti non è una
-previsione.
-
-\paragraph{Perché il laboratorio non basta.}
-\label{sec:perche-non-basta}
-
-Il divario fra prestazioni dichiarate e comportamento sul campo non è un'ipotesi di questo lavoro: è un fenomeno documentato. Bagalà e colleghi hanno preso tredici algoritmi di rilevamento cadute pubblicati, che dichiaravano sensibilità comprese fra il 76\% e il 100\% su cadute simulate, e li hanno rieseguiti su un archivio di ventinove cadute reali confermate. La sensibilità media misurata è stata del \textbf{57,0\%} con una dispersione di 27,3 punti, e i falsi allarmi in ventiquattro ore di monitoraggio andavano da cinque a ottantacinque al giorno a seconda dell'algoritmo.
-
-Il fenomeno è stato riconfermato di recente e su scala molto maggiore. Il benchmark OmniFall unifica otto dataset pubblici di rilevamento cadute --- fra cui UP-Fall --- per circa ottanta ore annotate a livello di fotogramma, e li confronta con un insieme di cadute \emph{vere} riprese fuori dal laboratorio. Il modello addestrato su UP-Fall passa da un F1 di 72,9\% in dominio a \textbf{16,9\%} sulle cadute reali; su Le2i il crollo è da 100\% a 58,8\%. E il collo di bottiglia identificato è proprio la distinzione fra \emph{fallen} e \emph{lying}: i modelli confondono sistematicamente chi è caduto con chi è disteso.
-
-Ci sono due ragioni per cui un dataset di laboratorio non può misurare ciò che serve, e sono di natura diversa.
-
-La prima è la \textbf{frequenza di base}, ed è quantificabile a priori: la tratta il paragrafo seguente.
-
-La seconda è più insidiosa perché non si vede finché non si va a misurare: il dataset \textbf{non contiene le situazioni difficili} dell'ambiente di destinazione. UP-Fall non ha divani, non ha più persone in scena, e --- come si vedrà --- le sue persone orizzontali che non sono cadute stanno a terra invece che rialzate. Ogni intervento progettato per una condizione che il dataset non rappresenta viene giudicato da quel dataset come un peggioramento.
-
-\paragraph{Il problema della frequenza di base.}
-\label{sec:frequenza-base}
-
-Questa sezione è stata scritta \emph{prima} della prima sessione, ed è importante che si legga in quest'ordine: contiene una previsione, e una previsione registrata dopo i fatti non è una previsione.
-
-Il modello di riferimento produce, nella configurazione allora in uso, circa 46 falsi positivi su 4.767 finestre negative, cioè lo \textbf{0,96\% per finestra}. È un tasso per finestra, e va tenuto distinto dai conteggi cumulati del Capitolo~\ref{cap:risultati}, che sommano i dieci fold e riguardano configurazioni diverse. In laboratorio, dove le finestre positive sono il 4,5\% del totale, quello 0,96\% corrisponde a una precision di 0,819 --- un numero che si presenta bene.
-
-In un soggiorno la quota di finestre positive è circa lo zero per cento. Proiettando lo stesso tasso per finestra sul funzionamento continuo:
-
-\begin{center}
-\begin{tabular}{lrr}
-\toprule
-Modalità di finestratura & Finestre/giorno & Falsi allarmi/giorno \\
-\midrule
-Finestre non sovrapposte & $\sim$34.560 & $\sim$332 \\
-Finestre con stride 5 & $\sim$311.000 & $\sim$2.990 \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Cioè fra \textbf{14 e 125 falsi allarmi all'ora}.
-
-Il punto metodologico è che \textbf{la precision non è una proprietà del modello}: dipende da quanto sono frequenti gli eventi positivi nell'insieme su cui la si calcola. Riportare una precision misurata su un insieme quasi bilanciato come se descrivesse il comportamento in esercizio è un errore diffuso in letteratura, e qui viene quantificato con dati propri.
-
-Il termine di paragone esterno rende la distanza esplicita. Il criterio che circola come soglia di accettabilità clinica è rilevare almeno il 95\% delle cadute con al massimo \textbf{uno o due falsi allarmi alla settimana}. I sistemi realmente installati e documentati riportano 73\% di sensibilità con un falso allarme ogni quarantasei giorni, oppure 80\% con uno ogni venti giorni --- e nel primo caso una precision del 37,5\%, in un sistema considerato funzionante. Fra la previsione di 14--125 allarmi all'ora e il bersaglio di uno o due alla settimana ci sono \textbf{tre o quattro ordini di grandezza}, e non si colmano migliorando il classificatore.
-
-\paragraph{Protocollo delle sessioni.}
-\label{sec:protocollo-campo}
-
-Sono stati registrati \textbf{dodici blocchi in quattro giornate, in due abitazioni, per 9,6 ore complessive}. I partecipanti sono familiari dello studente, informati e consenzienti; il relatore è stato informato della natura della raccolta.
-
-La telecamera è montata \textbf{lateralmente} a 1,5--2~m di altezza. Non è una scelta di comodo: discende direttamente dal risultato del Capitolo~\ref{cap:risultati}, dove il passaggio da una vista laterale a una frontale rialzata dimezza l'accuratezza.
-
-I blocchi si dividono in tre tipi:
-
-\begin{itemize}
-  \item \textbf{vita normale}, che fornisce il denominatore dei falsi allarmi ed è l'unico tipo registrato a casa dei nonni;
-  \item \textbf{cadute recitate}, con orari annotati dall'operatore, che fornisce il recall;
-  \item \textbf{trappole}, cioè attività costruite per far sbagliare il sistema: sdraiarsi sul divano, sedersi di scatto, chinarsi, stare a terra volontariamente, più persone in campo.
-\end{itemize}
-
-\paragraph{Etica e privacy come contenuto, non come adempimento.} Il registratore scritto per queste sessioni salva in modo continuo \emph{soltanto posa e feature}: mai il video. Le immagini vengono conservate solo in una finestra di pochi secondi attorno agli allarmi, restano sul dispositivo e non entrano nel repository. È il \emph{privacy-by-design} argomentato nel Capitolo~\ref{cap:contesto} dimostrato in pratica invece che dichiarato --- e ha richiesto di rimuovere dal prototipo una registrazione video continua che era stata aggiunta per comodità di sviluppo e che contraddiceva l'argomento stesso della tesi.
-
-Una scelta va dichiarata perché limita i risultati: \textbf{i partecipanti anziani non eseguono cadute recitate}. Nei loro blocchi c'è soltanto vita normale. La ragione è di sicurezza, e la conseguenza è che il recall non è mai misurato sulla popolazione a cui il sistema sarebbe destinato.
-
-\paragraph{La prima ora, e cosa ha cambiato.}
-\label{sec:prima-ora}
-
-Il primo blocco è durato trentanove minuti e ha prodotto \textbf{2.735 allarmi all'ora}: \textbf{ventidue volte} il limite superiore della previsione della sezione~\ref{sec:frequenza-base}. Una previsione costruita per essere scomoda si è rivelata ottimistica di oltre un ordine di grandezza.
-
-Il dato che spiega il meccanismo è la distribuzione nel tempo:
-
-\begin{center}
-\begin{tabular}{lrr}
-\toprule
-Minuti & Pose valide & Allarmi \\
-\midrule
-0--15 (stanza vuota) & 0--29\% & \textbf{0} \\
-15--25 & 76\% & 105--124 \\
-25--35 & 76--99\% & 454--462 \\
-35--40 (cadute) & 81\% & 642 \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\textbf{Zero allarmi in quindici minuti di stanza vuota.} Il problema non è rumore di fondo: è che ogni movimento di una persona presente genera finestre positive, e a finestre sovrapposte un singolo evento ne produce decine.
-
-\section{Metriche di evento e prestazioni di sistema}
-\label{sec:falsi-allarmi}
-\label{sec:finestre-eventi}
-
-Nella sessione da cinque ore, dopo aver alzato la soglia, il tasso scende a 41,7 finestre sopra soglia all'ora, che diventano \textbf{3,41 allarmi all'ora contando gli eventi} invece delle singole finestre. È un miglioramento di quasi tre ordini di grandezza rispetto alla prima ora, ed è ancora \textbf{settanta volte} sopra gli $0{,}049$ eventi all'ora misurati da Kangas et al. su 15.500 ore di funzionamento reale~\cite{kangas}, e tre ordini di grandezza sopra il criterio clinico di uno o due allarmi alla settimana.
-
-La terza sessione, a casa dei nonni, ha dato \textbf{1.635 allarmi all'ora}: \textbf{trentanove volte} la casa precedente, a parità di configurazione, di soglia e di stimatore. La causa è stata osservata direttamente sui fotogrammi conservati attorno agli allarmi: \textbf{due persone anziane distese su due divani, immobili, nel pomeriggio}. Non è un caso limite costruito per mettere in difficoltà il sistema; è la loro vita normale, ed è esattamente la popolazione a cui il sistema sarebbe destinato.
-
-\paragraph{Il filtro temporale non basta, e la ragione è strutturale.} La logica di soppressione delle raffiche --- richiedere $N$ finestre consecutive sopra soglia e poi sospendere per un periodo --- è progettata per \emph{eventi}. Una persona distesa per un'ora non è un evento ma uno \emph{stato che dura}, e fa riscattare l'allarme a ogni scadenza del periodo di sospensione. Il filtro comprime le raffiche e non gli stati, e in una casa con anziani il falso positivo dominante è uno stato.
-
-\subsection{Aggregazione delle finestre in eventi}
-
-Prima di ogni altra cosa va fissata l'unità di misura, perché è all'origine di
-gran parte dei numeri irriportabili di questo capitolo.
-
-Il sistema produce una decisione ogni frazione di secondo. Una singola caduta
-genera quindi una \emph{raffica} di finestre consecutive sopra soglia --- su
-una delle sessioni registrate una sola caduta ne ha prodotte centoventinove ---
-e contarle come altrettanti allarmi non è una semplificazione: è un errore di
-un fattore misurato in \textbf{47,8}.
-
-Un allarme è definito da due parametri dichiarati: \textbf{cinque finestre
-consecutive} sopra soglia perché venga emesso, e \textbf{trenta secondi} di
-sospensione dopo l'emissione. Ogni numero di questo capitolo espresso in
-«eventi all'ora» adotta questa regola; i numeri espressi in «finestre all'ora»
-la precedono, e i due non vanno confrontati fra loro né con la letteratura,
-che riporta eventi.
-
-\subsection{La definizione del compito, misurata in abitazione}
-
-La diagnosi del paragrafo precedente --- il falso positivo dominante è uno
-stato che dura, e nessun filtro temporale comprime uno stato --- contiene già
-la soluzione, ma in una direzione che non è quella del filtro. Se lo stato è
-il problema, il sistema non deve riconoscere lo stato.
-
-I tre compiti definiti nel Capitolo~\ref{cap:metodologia} sono stati quindi
-misurati sulle stesse registrazioni domestiche, con la stessa regola di
-allarme e la stessa soglia:
-
-\begin{center}
-\begin{tabular}{lrr}
-\toprule
-Compito & Eventi/ora & Cadute rilevate \\
-\midrule
-\textbf{evento} --- la transizione & \textbf{1,6} & 3/5 \\
-stato --- persona a terra & 29,5 & 0/5 \\
-allarme --- l'uno o l'altro & 36,4 & 4/5 \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\textbf{Un fattore ventitré sui falsi allarmi, al costo di una caduta su
-cinque.} Il compito \emph{stato}, che è la formulazione più diffusa in
-letteratura, è anche l'unico che in queste registrazioni non rileva alcuna
-caduta: riconosce la persona distesa sul divano e quella caduta a terra come
-la stessa configurazione, e alla soglia dichiarata satura sui divani.
-
-Il dato è coerente con quanto misurato in laboratorio nella
-sezione~\ref{sec:compito-risultati}, dove il compito \emph{evento} sbaglia
-sullo zero per cento delle finestre di persona distesa volontariamente. Che la
-stessa scelta produca lo stesso ordine in due contesti così diversi è la
-corroborazione più solida di cui questo lavoro disponga.
-
-\paragraph{Che cosa questo \emph{non} risolve.} Un evento e mezzo all'ora resta
-lontano dagli $0{,}05$ delle installazioni documentate, di un fattore trenta. E
-il compito \emph{evento} paga il proprio vantaggio esattamente dove costa di
-più: una caduta non rilevata su cinque. La direzione è giusta, la distanza dal
-requisito clinico non è colmata.
-
-
-\begin{figure}[ht]
+\begin{table}[htbp]
 \centering
-\includegraphics[width=.76\textwidth]{figure/fig_compiti_casa.png}
-\caption{Gli stessi tre compiti misurati sulle registrazioni domestiche, con la regola di allarme dichiarata: cinque finestre consecutive sopra soglia e trenta secondi di sospensione. Il compito \emph{evento} è l'unico compatibile con un uso continuativo. Prodotta da \texttt{pipeline/figure\_tesi.py} sui risultati a dieci soggetti.}
-\label{fig:compiti-casa}
+\caption{Variation of $F_2$ associated with subsampling and with the change of pose estimator.}
+\label{tab:scomposizione}
+\begin{tabular}{lr}
+\toprule
+\textbf{Change} & \textbf{$\Delta F_2$} \\
+\midrule MediaPipe from 18 to 9 fps & $-0{,}041$ \\
+MediaPipe $\rightarrow$ YOLOv8 INT8 & $-0{,}216$ \\
+\midrule Ratio between the variations & $5{,}3\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the comparison carried out, changing estimator costs about five times more than halving the frequency. MediaPipe was therefore retained, and the model intended for the board was trained at 9 samples per second.
+Subsampling does nonetheless have a cost, reported in Table~\ref{tab:catene}: the false negatives go from 24 to 49 and $F_2$ drops by $0{,}041$. YOLOv8 was evaluated only in the INT8 version. It is therefore not possible to separate the effect of the network from that of the quantisation.
+
+The NPU remains useful from a computational point of view: the inference of YOLOv8-pose is 5,16 times faster and, after the post-processing has been optimised, the pipeline reaches 26,5~fps. The limitation observed in this trial therefore concerns the quality of the estimator used, not the capability of the accelerator.
+
+\section{Computational performance and continuity of operation}
+
+Once the configuration had been chosen, the cost of the various stages and the behaviour of the board during prolonged trials were measured.
+
+\subsection{Computational cost and processing frequency}
+\label{sec:costo-computazionale}
+
+In order to assess the computational cost, two cases were considered separately: the accelerated chain with YOLOv8-pose on the NPU, shown in Table~\ref{tab:costo}, and the configuration actually installed, based on MediaPipe on the CPU.
+
+\begin{table}[htbp]
+\centering
+\caption{Cost per frame of the accelerated chain with YOLOv8-pose on the NPU.}
+\label{tab:costo}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Stage} & \textbf{Time} & \textbf{Share} \\
+\midrule
+Pre-processing & 1,21 ms & 3,2\% \\
+Perception & 33,34 ms & 88,4\% \\
+Post-processing & 0,94 ms & 2,5\% \\
+Classification, amortised cost & 2,21 ms & 5,9\% \\
+\midrule
+Total & 37,7 ms & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The overall time is about 37,7~ms per frame, corresponding to 26,5~fps. This configuration is not, however, the one used in the domestic trials. The figure does show that the dominant stage remains pose estimation, which takes up 88,4\% of the total time. The values for the accelerated chain come from a dedicated benchmark and were initially transcribed from the terminal. The measurement was not subsequently repeated with the same automatic instrumentation used for the installed chain. This constitutes a limitation on the reproducibility of the measurement.
+
+The configuration actually installed uses MediaPipe on the CPU instead. The times were measured directly on the board during the continuous session of 6 September, lasting 4,59~hours, and are reported in Table~\ref{tab:costo_installato}.
+
+\begin{table}[htbp]
+\centering
+\caption{Cost per frame of the installed configuration.}
+\label{tab:costo_installato}
+\begin{tabularx}{\textwidth}{Xrrr}
+\toprule
+\textbf{Stage} & \textbf{Time} & \textbf{Share} & \textbf{Accelerated chain} \\
+\midrule
+Perception & 116,38 ms & 85,2\% & 33,34 ms \\
+Classification, amortised cost & 19,51 ms & 14,3\% & 2,21 ms \\
+Other operations & 0,76 ms & 0,6\% & 2,15 ms \\
+\midrule
+Total & 136,65 ms & 100\% & 37,7 ms \\
+Frequency & 7,3 fps & & 26,5 fps \\
+\bottomrule
+\end{tabularx}
+
+\end{table}
+
+On the board the Random Forest takes 39,04~ms to classify a window. Since one decision is produced every two frames, the mean cost is 19,51~ms per frame. The remaining 0,76~ms cover the operations not included in the perception and classification measurements, such as frame acquisition, format conversion, buffer updating and data logging.
+
+For the accelerated chain the item ``other operations'' instead collects pre-processing and post-processing, amounting to $1{,}21+0{,}94=2{,}15$~ms.
+In both configurations the bottleneck remains perception: 88,4\% of the time in the accelerated chain and 85,2\% in the installed one. Changing the classifier would therefore have a limited effect on the overall frequency.
+
+The mean time of 136,65~ms corresponds to about 7,3~fps. The real frequency is not, however, constant: across the twelve domestic sessions it ranges between 1,15 and 8,20~fps, while in the two prolonged trials it is 7,26 and 6,47~fps. This variability also changes the temporal duration of the windows. The 22 samples used by the classifier correspond to 2,44~s at the design frequency of 9~fps, but to about 3,40~s when the frequency drops to 6,47~fps. During execution the same window may therefore represent a longer time interval than the one used during training.
+
+\subsection{Thermal stability and prolonged operation}
+\label{sec:continuita}
+
+Besides processing speed, the ability of the
+device to operate continuously without an evident reduction in performance due to temperature was verified. A first ten-minute trial was carried out, for a total of 18.291 inferences.
+The variation in latency between the beginning and the end was 3,9\%. The frequency of the accelerator remained at 950~MHz and the temperature settled between 60 and 63~$^\circ$C.
+
+A second check was obtained during the prolonged domestic session of 11 August, which lasted 6,11~hours of wall clock. This session is used here for the thermal measurement alone, and is not the reference continuous trial: the operating system suspended it for about 68 minutes, so that the effective operating time was 4,99~hours, and the dual-clock check that makes such an interruption detectable was introduced only afterwards. The maximum temperature recorded was 79,5~$^\circ$C and it settled after about forty minutes. No sudden drops in the frame rate attributable to \emph{thermal throttling} were observed.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figure/fig_termica_en.png}
+\caption{Temperature of the device and processing cadence during the
+prolonged domestic session of 11~August.}
+\label{fig:termica}
 \end{figure}
 
-\subsection{Richiamo, tolleranza di accoppiamento e persistenza}
-\label{sec:recall-campo}
+During this session, however, the operating system suspended for about 68 minutes. The program did not terminate and resumed execution after the wake-up. In order to make this problem observable, a check based on the comparison between system time and monotonic time was added.
 
-Sulle cinque cadute annotate della sessione dedicata, la configurazione di riferimento ne rileva quattro.
+It was moreover observed that the USB camera can be renumbered by the operating system, for example from \texttt{/dev/video0} to \texttt{/dev/video1}. In this case the program may remain active without receiving new frames. Capture is therefore monitored separately and, if no new frame arrives for more than 20~s, the camera is reopened.
 
-Il numero va però letto con tre riserve, e la terza è emersa solo ricontando gli allarmi nel modo in cui li conterebbe chi usa il sistema.
+A later trial, carried out on 6 September, covered 4,59~continuous hours. No suspensions of the operating system were detected. The camera dropped out twice, for about five seconds in total, and was reopened automatically. The mean cadence was 7,26~fps.
 
-La prima è la numerosità: \textbf{cinque cadute} non stimano un recall, danno un indizio. La seconda è che in quella sessione l'inquadratura era difettosa, con il corpo che esce dal bordo inferiore dell'immagine in quattro casi su cinque.
+During this trial the system produced 14 events. They are not, however, counted as false alarms, because in that version of the recorder the frames around the alerts were not yet being retained, and it is therefore not possible to verify what actually happened. The 4,59-hour trial does not cover a whole night and therefore cannot demonstrate twelve hours of continuous operation.
 
-\paragraph{La terza: quel «quattro su cinque» conta finestre, non allarmi.} Un sistema installato non produce finestre ma \emph{eventi}: una caduta o viene segnalata o no, e una raffica di finestre consecutive sopra soglia è un allarme, non cento. Ricontando per evento, il recall dipende da due parametri dell'analisi che non erano stati dichiarati --- la \textbf{tolleranza di accoppiamento}, cioè entro quanto tempo dalla caduta annotata un allarme conta come rilevamento, e la \textbf{persistenza}, cioè quante finestre consecutive sopra soglia servono perché l'allarme scatti.
+\subsection{Resource budget}
+\label{sec:risorse}
 
-\begin{center}
+In Chapter~\ref{cap:contesto} computational and economic sustainability was listed among the requirements of the system. Table~\ref{tab:risorse} summarises the main resources demanded by the platform used.
+
+\begin{table}[htbp]
+\centering
+\caption{Resource budget of the installed system.}
+\label{tab:risorse}
+\begin{tabular}{@{}p{4.6cm}p{9.0cm}@{}}
+\toprule
+\textbf{Quantity} & \textbf{Value} \\
+\midrule
+Platform & Radxa ROCK 4D, Rockchip RK3576 SoC \\
+Memory available & 5.923~MB (6~GB nominal) \\
+Accelerator & integrated NPU, 6~TOPS \\
+Cost & of the order of 100~\euro{} per room, USB camera included \\
+Model size & 606.409~bytes for the classifier, 1.175~bytes for the scaler; 607.584~bytes for everything needed to run \\
+Cost per frame & Section~\ref{sec:costo-computazionale} \\
+CPU / NPU split & Section~\ref{sec:stimatore} \\
+Continuity of operation & Section~\ref{sec:continuita} \\
+Memory used by the process & \textbf{297~MB} peak, that is 5\% of the memory available \\
+\midrule
+\textbf{Power consumption} & \textbf{not measured} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The peak memory of the complete process is 297~MB, about 5\% of the memory available. Memory is therefore not a limitation for running the pipeline. The classifier is small as well, about 0,6~MB. The main computational cost therefore remains tied above all to pose estimation.
+
+Power consumption was not measured. This quantity would require a direct measurement of the current drawn during operation and cannot be derived reliably from the specifications of the board alone.
+
+A further limitation concerns $h_{\text{pav}}$. The floor reference is estimated using the frames in which the person is standing, and is therefore not available immediately after start-up. The effect was verified over 422 domestic sequences.
+
+\begin{table}[H]
+\centering
+\caption{Availability of the classification with and without $h_{\text{pav}}$.}
+\label{tab:pavimento_disponibilita}
 \begin{tabular}{lcc}
 \toprule
-Tolleranza & Persistenza 1 & Persistenza 5 \\
+{} & \textbf{Sequences evaluated} & \textbf{Share} \\
 \midrule
-$\pm 10$~s & 0/4 & 0/4 \\
-$\pm 30$~s & 2/5 & 1/5 \\
-$\pm 60$~s & 3/5 & 1/5 \\
-$\pm 90$~s & \textbf{4/5} & 1/5 \\
+With $h_{\text{pav}}$ & 36 out of 422 & 8,5\% \\
+Without $h_{\text{pav}}$ & 422 out of 422 & 100\% \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-Il valore riportato finora si colloca nell'angolo \emph{più permissivo} della tabella: una banda di tre minuti attorno alla caduta e un allarme che scatta su una singola finestra. Con parametri clinicamente difendibili --- l'allarme entro mezzo minuto e non su una finestra isolata --- il recall è \textbf{una caduta su cinque}.
+With $h_{\text{pav}}$ active, 91,5\% of the sequences produce no decision because the reference is not yet available. In the offline analyses of the domestic sequences the twelve-feature configuration, without $h_{\text{pav}}$, is therefore used. In continuous operation the problem concerns above all the initial phase, because the estimate is built only once. An alternative solution would be to calibrate the plane of the floor during installation.
 
-La tolleranza larga non è sostenibile per due ragioni. L'annotazione dell'operatore è al minuto, quindi l'istante vero è noto a meno di sessanta secondi e $\pm 30$~s è già generoso; e in una sessione che produce centinaia di finestre sopra soglia all'ora, in una banda di tre minuti un allarme si trova quasi sempre, e viene attribuito alla caduta anche quando è stato causato da altro. Contraddice inoltre la motivazione clinica del Capitolo~\ref{cap:contesto}: se il danno dipende dal tempo passato a terra, un allarme novanta secondi dopo non è un rilevamento tempestivo.
+\section{Validation in a domestic environment}
+\label{sec:campo}
 
-Sullo stesso criterio è stato ricontato l'archivio esterno: su venti riprese di caduta di UR-Fall il sistema non ne segnala \textbf{nessuna}. Il conteggio per finestra ne dava nove su 144; per evento dà zero, perché i punteggi si fermano appena sotto la soglia e non vi restano abbastanza a lungo.
+After the trials on the board, the system was left running in a domestic environment. The aim is to verify the behaviour of the pipeline during longer acquisitions and with activities different from those in the dataset, in which the environment, the lighting, the position of the people and above all the frequency of falls change, the latter being far lower during real use than in an experimental dataset.
 
-\paragraph{Il terzo parametro implicito.} È la terza volta in questo lavoro che un numero di intestazione dipende da un'impostazione dell'analisi lasciata come costante: dopo il sottocampionamento applicato alle sessioni e la media dei modelli della validazione incrociata al posto di quello installato, ora la tolleranza e la persistenza. Tutte e tre nella direzione che migliora il risultato, e nessuna per scelta deliberata --- sono impostazioni ereditate da uno script all'altro. Il rimedio adottato è esporle come parametri e riportare il recall di campo come \textbf{intervallo con i parametri dichiarati}, mai come numero singolo.
+\subsection{Protocol of the domestic sessions}
+\label{sec:protocollo-campo}
 
-\paragraph{Un errore di misura che andava trovato prima di ogni confronto.} La valutazione fuori linea dava inizialmente 2 cadute su 5 dove la board, sugli stessi eventi e con lo stesso modello, ne aveva segnalate 4. Due procedure che guardano gli stessi dati non possono dare risultati diversi, e finché la discrepanza non è stata spiegata nessun confronto fra configurazioni era valido.
+Before the domestic trials, the configuration in use produced 46 false positives over 4.767 negative windows, that is 0,96\%. In the dataset this value can be compatible with good precision, because the share of positive examples is far greater than it would be during ordinary domestic use. When the system is left running for many hours, by contrast, even a low error rate is applied to a very large number of windows.
+At 9~fps, with a window of 22 samples and a stride of two, a new decision is produced every $2/9 \simeq 0,22$~s, for a total of about 388.800 windows per day.
 
-Le cause erano due. La prima, minore: fuori linea si mediavano i modelli della validazione incrociata, ciascuno addestrato su un sottoinsieme dei soggetti, mentre sul dispositivo gira un modello addestrato su tutti. La seconda, decisiva: l'analisi applicava alle sessioni lo stesso sottocampionamento usato su UP-Fall --- un fotogramma su due, per portare i 18~fps del dataset ai 9 su cui il modello è addestrato --- ma \textbf{le sessioni sulla board girano già a 7--8~fps}, e dimezzarle le porta a quattro. La finestra da 22 campioni copriva così cinque secondi e mezzo invece di due e mezzo, e la caduta ci si perdeva dentro.
-
-È lo stesso difetto già trovato e risolto sul lato hardware, ricomparso \textbf{dal lato opposto della catena}: introdotto dall'analisi invece che dal dispositivo. Corrette entrambe le cause, la configurazione di riferimento dà 4 su 5, esattamente come la board.
-
-\section{Discordanza fra prestazioni di benchmark e comportamento reale}
-\label{sec:rovesciamento}
-
-È il risultato centrale del capitolo e, si sostiene qui, dell'intera tesi.
-
-Tre interventi sono stati progettati per la robustezza in ambiente domestico:
-l'altezza del bacino rispetto al pavimento stimata automaticamente
-(\emph{A3h}); l'inserimento in addestramento di controesempi ricavati dalle
-sessioni senza cadute; e le grandezze integrali al posto delle derivate
-istantanee (\emph{A3i}). Tutti e tre sono stati valutati con la \emph{stessa}
-procedura, sugli \emph{stessi} modelli, su due insiemi di verifica diversi:
-la validazione incrociata su dieci soggetti di laboratorio, e sette ore di
-registrazione continua in due abitazioni.
-
-\begin{center}
-\begin{tabular}{lrrr}
+\begin{table}[ht]
+\centering
+\caption{Projection of the false positive rate over one day of continuous operation, as observed on the dataset.}
+\label{tab:falsi_positivi_giorno}
+\begin{tabular}{lrr}
 \toprule
-Configurazione & $F_2$ laboratorio & Finestre/ora in casa & Cadute \\
+\textbf{Windowing} & \textbf{Windows/day} &
+\textbf{False positives/day} \\
 \midrule
-A3 --- riferimento & $0{,}898 \pm 0{,}075$ & 139,9 & 3/5 \\
-A3h --- con l'altezza & $0{,}931 \pm 0{,}051$ & 70,4 & 2/5 \\
-A3h + controesempi & $0{,}942 \pm 0{,}060$ & \textbf{2,1} & 2/5 \\
-A3i --- con gli integrali & $0{,}943 \pm 0{,}064$ & 9,8 & \textbf{4/5} \\
-\textbf{A3i + controesempi} & $\mathbf{0{,}953 \pm 0{,}055}$ & 2,7 & 3/5 \\
+Non-overlapping & $\sim35{.}345$ & $\sim341$ \\
+With a stride of 2 samples & $\sim388{.}800$ & $\sim3{.}751$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-\paragraph{Una precisazione sull'unità.} La colonna centrale conta
-\textbf{finestre} sopra soglia per ora, non eventi di allarme. Le due
-grandezze differiscono di quasi due ordini di grandezza, e la
-sezione~\ref{sec:finestre-eventi} le distingue: qui si usano le finestre
-perché è la grandezza su cui le cinque configurazioni sono direttamente
-confrontabili, non perché sia quella da riportare.
+The two cases correspond to about 14 and 156 positive windows per hour. These are not, however, distinct alarms, because several consecutive windows may belong to the same episode. The calculation therefore serves to show why the false positive rate per window is not enough to evaluate a continuous system. Twelve blocks were recorded, spread over four days and two private homes, for a total duration of 9,6~hours.
 
-\subsection{Confronto fra configurazioni nei due domini}
-
-Va detto subito, perché una versione precedente di questo lavoro sosteneva il
-contrario. Con cinque soggetti la configurazione A3h con i controesempi
-risultava la \emph{peggiore} in laboratorio ($F_2 = 0{,}780$) e quasi la
-migliore in casa, e se ne era tratto un rovesciamento dell'ordine. Con dieci
-soggetti quella stessa configurazione ottiene $0{,}942$, e \textbf{le due
-graduatorie non si contraddicono}: la configurazione peggiore in laboratorio è
-anche la peggiore in casa.
-
-Il rovesciamento era in larga parte un effetto della scarsità di dati. Averlo
-scritto e poi smentito è, nell'economia di questo lavoro, un episodio della
-stessa storia che il Capitolo~\ref{cap:protocollo} racconta: una differenza
-più piccola della dispersione fra soggetti non è una differenza, e con cinque
-persone $0{,}780$ e $0{,}917$ non lo erano.
-
-\subsection{Ampiezza dello scarto, non ordine}
-
-Stabilito che le due graduatorie concordano, resta da spiegare perché il
-dataset di riferimento non basti comunque. La risposta non sta nell'ordine ma
-nell'\emph{ampiezza}: lo scarto che in un'abitazione vale un fattore
-cinquantadue, in laboratorio si comprime dentro la dispersione fra soggetti,
-e diventa quindi una differenza che non si può dichiarare.
-
-\paragraph{Sul dataset di riferimento i due errori migliorano insieme.} Prima
-di leggere lo scambio conviene guardare i due tipi di errore separatamente,
-invece di comprimerli in $F_2$. Sulle stesse dieci persone e con lo stesso
-protocollo:
-
-\begin{center}
-\begin{tabular}{lrrrr}
+\begin{table}[htbp]
+\centering
+\caption{Protocol of the domestic sessions.}
+\label{tab:protocollo_domestico}
+\begin{tabular}{@{}p{5.0cm}p{8.6cm}@{}}
 \toprule
-Configurazione & $F_2$ & Recall & Falsi neg. & Falsi pos. \\
+\textbf{Item} & \textbf{Value} \\
 \midrule
-A3 --- riferimento          & $0{,}898$ & $0{,}929$ & 45 & 172 \\
-A3h                         & $0{,}931$ & $0{,}962$ & 22 & 137 \\
-A3h + controesempi          & $0{,}942$ & $0{,}965$ & 22 & 129 \\
-A3i                         & $0{,}943$ & $0{,}977$ & 14 & 150 \\
-\textbf{A3i + controesempi} & $\mathbf{0{,}953}$ & $\mathbf{0{,}980}$ & \textbf{14} & \textbf{124} \\
+Environments & 2 private homes \\
+Days & 4 \\
+Blocks recorded & 12 \\
+Total duration & about 9,6 hours \\
+Position of the camera & lateral with respect to the area of movement, optical axis roughly horizontal, 1,2--1,5~m above the floor \\
+Activities & ordinary daily activities, sitting down quickly, bending over, lying down voluntarily and the presence of several people \\
+Falls & 5 across the 12 sessions, all simulated \\
+Ground truth & temporal annotation of the falls alone \\
+Participants & total number not recorded; there are blocks with one, two and three people in view at the same time \\
+Size of the environments & not recorded \\
+Hours with a valid pose & 7,45 out of 9,58 ($77,8\%$) \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-Passando dalla configurazione di riferimento a quella finale i falsi negativi
-scendono da 45 a 14 e i falsi positivi da 172 a 124. \textbf{In laboratorio la
-configurazione finale non introduce alcuno scambio: migliora entrambi gli
-errori.} Lo scambio compare soltanto in casa, ed è precisamente questo il
-punto del capitolo --- le due condizioni non misurano la stessa cosa, e
-comprimere i due errori in un solo numero nasconde la differenza invece di
-riassumerla. La Figura~\ref{fig:errori} riporta le stesse quantità.
+The twelve blocks described here constitute the August acquisition campaign, and their total duration is reported as effective operating time. The analysis of alarm events in Section~\ref{sec:finestre-eventi} uses a partly different set, and the two should not be confused. That analysis considers nine sessions: the eight August blocks longer than nine minutes, which alone are long enough for a rate per hour to be meaningful, together with the prolonged board session of 6 September, recorded later and therefore absent from this campaign. It also counts wall-clock time rather than effective operating time. The two accounting bases differ mainly for the session of 11 August, which lasted 6,11~hours of wall clock but only 4,99~hours of effective operation, the difference being the 68-minute suspension of the operating system described in Section~\ref{sec:continuita}.
+
+The acquisitions comprise ordinary daily activities, five simulated falls and some activities chosen deliberately because they are potentially ambiguous, such as sitting down quickly, bending over and lying down voluntarily, and the simultaneous presence of several people. The camera was placed laterally with respect to the main area of movement, about 1,2--1,5~m above the floor. The distance was chosen so as to keep the person visible both when standing and when on the ground.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.82\textwidth]{figure/fig_errori.png}
-\caption{Falsi negativi e falsi positivi per configurazione, LOSO su dieci soggetti. Dalla configurazione di riferimento a quella finale entrambi diminuiscono: sul dataset di riferimento non esiste lo scambio che compare in abitazione.}
-\label{fig:errori}
+\includegraphics[width=0.85\textwidth]{figure/fig_stanza_en.png}
+\caption{Layout scheme used during the domestic acquisitions.}
+\label{fig:stanza}
 \end{figure}
 
-La conclusione che sostituisce il rovesciamento si legge confrontando le due
-colonne per \emph{ampiezza}, non per ordine.
+The system saves pose, features and classifier scores. The RGB images are retained locally only in the vicinity of the alerts, so that errors can be checked afterwards. The complete video stream is therefore neither transmitted nor stored continuously.
 
-\begin{center}
+The acquisitions were carried out in real homes, with the lighting and the furnishings present in those environments and during ordinary daily activities.
+The five falls considered in the first evaluation are all simulated. The elderly participants were not asked to perform falls; their recordings contain only ordinary daily activities, including situations in which the person remains lying on a sofa. These acquisitions therefore reproduce realistic domestic conditions, but do not constitute a clinical validation on natural falls.
+
+\subsection{Quality of the acquisitions and usable data}
+
+The continuous presence of people in the frame was not annotated. It is therefore not possible to measure directly the actual hours of people in the scene. What can be computed is the time during which the estimator returned a valid pose: 7,45~hours out of the 9,58 recorded, that is 77,8\%. This is a lower bound on the time of presence, because a person may be in the frame without producing a valid pose, for example when part of the body leaves the image.
+
+\begin{table}[ht]
+\centering
+\caption{Share of frames with a valid pose across the days of acquisition.}
+\label{tab:qualita_pose_domestiche}
+\begin{tabular}{lll}
+\toprule
+\textbf{Day} & \textbf{Place} & \textbf{Valid poses} \\
+\midrule
+10 August & first home & 0,6--39,8\% \\
+11 August & first home & 83,0\% \\
+12 August & second home & 86,8--99,3\% \\
+13 August & second home & 25,9--97,6\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The six blocks recorded on 10 August have a percentage of valid poses between 0,6\% and 39,8\%. The camera was too close and parts of the body often left the frame. These blocks are not used in the quantitative results that follow. On the following days the framing was widened.
+
+\section{Event-level metrics}
+\label{sec:falsi-allarmi}
+\label{sec:finestre-eventi}
+
+The classifier produces a probability for every temporal window. In continuous operation, however, several consecutive windows may exceed the threshold during the same fall or during the same activity. Treating every positive window as a new alarm would therefore overestimate the number of alerts received by the user. For this reason the decisions on the windows are kept distinct from the alarm events.
+
+\subsection{From windows to alarm events}
+
+The classifier produces a probability for every temporal window, but several consecutive windows may refer to the same activity. For this reason
+we do not treat every window above the threshold as a new alarm, but
+generate an alarm when at least five consecutive windows exceed the decision threshold.
+
+After the alarm, a suspension interval of 30~s is applied, during which any subsequent positive windows are treated as part of the same episode.
+
+The set used from here on comprises nine sessions, counted in wall-clock time: the eight blocks of the August campaign of Table~\ref{tab:protocollo_domestico} that exceed nine minutes, and the prolonged board session of 6 September. The four shortest August blocks, lasting between two and seven minutes, are excluded because a rate per hour computed on them would not be meaningful. The recordings were not all acquired with the same threshold: four of the nine sessions used $0{,}45$ and five used $0{,}50$.
+
+Recomputing all the sessions with a threshold of $0{,}50$, the overall ratio between windows above the threshold and events changes by about 1\%. The difference therefore does not alter the conclusions, but it is kept explicit. Over the nine sessions used for this analysis, for a total duration of 14,98~hours, the ratio between windows above the threshold and events is 44,8.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{figure/fig_sessione_en.png}
+\caption{Positive windows and events generated during a prolonged session.}
+\label{fig:sessione}
+\end{figure}
+
+In the session of 11 August shown in Figure~\ref{fig:sessione}, 208 windows above the threshold and 14 events generated are observed, a ratio of 14,9. The value differs from the overall ratio of 44,8 because the duration of the positive sequences changes from one recording to another. For the domestic trials the number of events per hour was therefore used as the main operational measure, keeping the number of windows above the threshold separate.
+
+The latter remains useful for distinguishing a brief error from a persistent state. A person lying on a sofa, for example, may keep the score high for a prolonged period. The suspension interval reduces the number of alerts, but the classifier may go on interpreting that configuration as positive.
+
+\subsection{Recall and criteria for associating the events}
+\label{sec:recall-campo}
+
+The five simulated falls were annotated only to the minute. In order to associate them with the alarms, the temporal tolerance and the persistence required were therefore varied.
+
+\begin{table}[ht]
+\centering
+\caption{Falls associated with a detection as the criterion used varies.}
+\label{tab:associazione_cadute}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Tolerance} &
+\textbf{Persistence 1} &
+\textbf{Persistence 5} \\
+\midrule
+$\pm10$ s & 0/5 & 0/5 \\
+$\pm30$ s & 2/5 & 2/5 \\
+$\pm60$ s & 4/5 & 2/5 \\
+$\pm90$ s & 4/5 & 2/5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The result of 4/5 is obtained with a tolerance of $\pm60$~s and by treating a single positive window as sufficient. The first positive windows of the four falls recognised appear at $11{,}8$, $19{,}4$, $27{,}7$ and $32{,}3$~s from the annotated minute. The resulting recall is $0{,}80$, with a 95\% confidence interval running from $0{,}28$ to $0{,}99$. With only five falls the value is therefore very uncertain.
+
+With the operational rule of five consecutive windows, by contrast, two of the five falls generate an event. The other three produce runs of two, three and zero positive windows, below the persistence threshold. Recall must therefore always be reported together with the association criterion used.
+
+A difference was moreover found during this check between the offline analysis and the one carried out on the board. The first analysis indicated two falls recognised out of five, whereas during execution on the device four were obtained. The difference depended on two aspects. In the offline analysis the mean of the models obtained during cross-validation was used, whereas the model installed on the board was the final one, retrained on the whole set available. In addition, the subsampling from 18 to 9~fps was applied a second time to the board recordings. Once these two differences had been removed, the offline analysis reproduces the behaviour observed on the device.
+
+A more precise check was possible in the session of 9 September, in which four simulated falls were annotated directly on the frames. The classifier recognises three of the four falls, while the aggregation rule generates two alarm events. Figures~\ref{fig:sessione_v5_andamento} and~\ref{fig:sessione_v5_cadute} show respectively the course of the whole session and the detail of the falls.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.96\textwidth]{figure/fig_sessione_v5_andamento_en.png}
+\caption{Course of the score during the session of 9 September. In the first 697~s the system produces no decisions, because the plane of the floor is not yet available. In the 203~s that follow, 624 windows are produced, 36 of them above the threshold, and two alarm events}
+\label{fig:sessione_v5_andamento}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.96\textwidth]{figure/fig_sessione_v5_cadute_en.png}
+\caption{Detail of the four simulated falls and of the false positive associated with the sofa in the session of 9 September}
+\label{fig:sessione_v5_cadute}
+\end{figure}
+
+The first fall produces a sufficient run of windows above the threshold and correctly generates an alarm. Figure~\ref{fig:caduta_board} shows a frame from the same sequence, with the skeleton and the score produced directly by the board.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{figure/fig_caduta_board_en.png}
+\caption{Real frame from the session of 9 September, with the skeleton and the score produced by the board. The overlay is the one the device draws in real time.}
+\label{fig:caduta_board}
+\end{figure}
+
+The second fall occurs about six seconds after the first. The classifier recognises it, but no new alarm is generated because the system is still within the 30~s suspension interval. This case shows an important difference between an error of the classifier and an error of the aggregation logic: the fall was recognised by the model, but suppressed by the operational rule.
+
+In the same session a person sitting on the sofa produces a run of four windows above the threshold. No alarm is generated, because the five consecutive windows required are not reached. Persistence therefore removes some false positives, but it can also suppress real events that are very close in time.
+
+\subsection{Detection latency}
+\label{sec:latenza}
+
+Another important quantity is the latency, which ought to be measured between the beginning of the fall and the generation of the alarm. In the first domestic recordings this value cannot be obtained directly, because the falls are annotated only to the minute.
+
+In the four falls recognised, the first positive window appears at 11,8, 19,4, 27,7 and 32,3~s respectively with respect to the annotated minute. These values do not, however, represent the latency of the system, because the exact second at which the fall began is not known.
+
+What can be computed instead is the time introduced by the configuration of the pipeline. Considering a mean frequency of 8,02~fps, a window of 22 samples and a persistence of five consecutive windows, the following decomposition is obtained.
+
+\begin{table}[ht]
+\centering
+\caption{Decomposition of the time introduced by the configuration of the pipeline at the mean frequency of 8,02~fps.}
+\label{tab:latenza}
 \begin{tabular}{lrr}
 \toprule
-Da A3 ad A3i + controesempi & In laboratorio & In casa \\
+\textbf{Component} & \textbf{Time} & \textbf{Share} \\
 \midrule
-Variazione & $+0{,}055$ di $F_2$ & da 139,9 a 2,7 finestre/ora \\
-Rapporto & --- & \textbf{52$\times$} \\
-Confronto con il rumore & \textbf{dentro} la dispersione ($\pm 0{,}06$--$0{,}08$) & --- \\
+Computation per frame & 0,125 s & 3,2\% \\
+Filling of the window & 2,743 s & 71,0\% \\
+Persistence & 0,997 s & 25,8\% \\
+\midrule
+Total & 3,865 s & 100\% \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-\textbf{La stessa coppia di configurazioni differisce di un fattore
-cinquantadue in una casa e di una quantità indistinguibile dal rumore in
-laboratorio.} Il dataset di riferimento non sbaglia l'ordine: comprime una
-differenza enorme in una differenza che non si può dichiarare.
+The largest contribution is due to the filling of the window, 2,743~s. The computation per frame accounts for only 3,2\% of the total. Latency therefore depends above all on the length of the window and on the persistence required in order to generate the alarm. Reducing the processing time alone would have a smaller effect than changing these two parameters.
 
-L'effetto pratico è identico a quello di un ordinamento errato. Chi selezioni
-la configurazione sulla base del solo $F_2$ di laboratorio non ha alcuna
-ragione statistica per preferire A3i con i controesempi ad A3 di riferimento:
-le due sono indistinguibili, e la seconda è più semplice. Sceglierebbe quindi
-la più semplice, e installerebbe un sistema che produce cinquantadue volte i
-falsi allarmi.
+The value of 0,997~s represents the minimum time needed to obtain five consecutive windows. In the two falls for which the whole sequence is available, the time observed is instead 1,70 and 1,28~s. Some windows drop temporarily below the threshold, restarting the count.
+With the annotations available it is therefore possible to estimate the time introduced by the pipeline, but not the full latency between the physical beginning of the fall and the alert.
 
-\subsection{Analisi della causa}
+\section{Comparison between benchmark and real behaviour}
+\label{sec:rovesciamento}
+\label{sec:confronto-domini}
 
-In entrambi gli insiemi esistono persone orizzontali che non sono cadute, ma
-sono di tipo opposto.
+Finally, the same configurations were compared on the benchmark and in the domestic recordings. The metrics used in the two cases are different, so the absolute values are not compared directly: what we observe is how the difference between the configurations changes in going from the dataset to the domestic environment.
 
-\begin{center}
-\begin{tabular}{lrl}
+\subsection{Comparison of the configurations}
+
+Five configurations built on representation A3 were considered. A3h adds the height above the floor, A3i introduces the integral quantities, while the configurations with counter-examples also use negative examples collected in the domestic recordings.
+
+The feature $h_{\text{pav}}$ had not been selected initially. It was reintroduced after false positives had been observed on people lying on raised surfaces. The result obtained on the same recordings is therefore not regarded as a verification independent of that choice.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of the configurations on the benchmark and in the domestic recordings.}
+\label{tab:configurazioni}
+\begin{tabular}{lccc}
 \toprule
-Negativi orizzontali & Quota & Dove stanno \\
+\textbf{Configuration} &
+\textbf{$F_2$ laboratory} &
+\textbf{Windows/hour at home} &
+\textbf{Falls} \\
 \midrule
-Archivio di laboratorio & circa un quinto & a terra \\
-Sessioni domestiche & circa metà & su una superficie rialzata \\
+A3 & $0{,}898\pm0{,}075$ & 139,9 & 3/5 \\
+A3h & $0{,}931\pm0{,}051$ & 70,4 & 2/5 \\
+A3h + counter-examples & $0{,}942\pm0{,}060$ & 2,1 & 2/5 \\
+A3i & $0{,}943\pm0{,}064$ & 9,8 & 4/5 \\
+A3i + counter-examples & $0{,}953\pm0{,}055$ & 2,7 & 3/5 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-In laboratorio sdraiarsi sul pavimento è una delle azioni registrate come
-attività ordinaria: lì «corpo a terra» non discrimina, perché a terra ci si
-trova sia dopo una caduta sia per scelta. In una casa chi è orizzontale senza
-essere caduto sta quasi sempre su un divano o su un letto, e la distinzione fra
-divano e pavimento è esattamente quella che serve --- ed è quella che
-l'archivio, non avendo divani, non può premiare.
+On the benchmark every configuration improves on A3. Between A3 and A3i with counter-examples the difference in $F_2$ is 0,055, of the same order as the variability between subjects. In the domestic recordings, by contrast, the positive windows went from 139,9 to 2,7 per hour, about 52 times fewer. The individual types of error also improve on the benchmark.
 
-Se ne ricava un enunciato che si ritiene valga oltre il caso particolare:
+\begin{table}[ht]
+\centering
+\caption{False negatives and false positives of the five configurations in the LOSO evaluation on ten subjects.}
+\label{tab:errori_configurazioni}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Configuration} & \textbf{$F_2$} &
+\textbf{Recall} & \textbf{FN} & \textbf{FP} \\
+\midrule
+A3 & 0,898 & 0,929 & 45 & 172 \\
+A3h & 0,931 & 0,962 & 22 & 137 \\
+A3h + counter-examples & 0,942 & 0,965 & 22 & 129 \\
+A3i & 0,943 & 0,977 & 14 & 150 \\
+A3i + counter-examples & 0,953 & 0,980 & 14 & 124 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{quote}
-Un insieme di verifica non può misurare un miglioramento su una condizione che
-non rappresenta. Non si limita a sovrastimare le prestazioni: \textbf{rende
-indistinguibili alternative che in esercizio differiscono di ordini di
-grandezza}, e lo fa con la stessa apparente sicurezza con cui distinguerebbe
-alternative davvero equivalenti.
-\end{quote}
+Going from A3 to A3i with counter-examples, the false negatives fall from 45 to 14 and the false positives from 172 to 124. The improvement in recall is therefore not obtained by increasing the false positives.
 
-\subsection{Compromesso fra richiamo e falsi allarmi}
+\subsection{Analysis of the differences between the two domains}
 
-La tabella contiene anche il prezzo di questi interventi, e non è piccolo.
+The main difference between the dataset and the domestic recordings concerns the negative activities with people in a horizontal position. In the dataset these activities take place mostly close to the floor. In the domestic recordings a person may instead be lying on a bed or a sofa.
 
-I controesempi domestici riducono le finestre in allarme di un fattore
-cinquantadue, ma fanno scendere il recall da quattro cadute su cinque a tre. Su
-A3h scendono a due. \textbf{Non è un miglioramento: è uno scambio}, e in un
-sistema di sicurezza è lo scambio nella direzione che pesa di più.
+\begin{table}[htbp]
+\centering
+\caption{Qualitative distribution of the negative configurations with a person in a horizontal position.}
+\label{tab:negativi_orizzontali}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Domain} & \textbf{Approximate share} &
+\textbf{Prevailing position} \\
+\midrule
+Laboratory & about a fifth & floor \\
+Domestic environment & about half & raised surface \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-C'è di più, ed è la riserva più seria del capitolo. I controesempi sono
-ricavati dalle stesse abitazioni su cui il sistema viene poi misurato. La
-verifica incrociata --- controesempi di una casa, misura sull'altra --- mostra
-che il beneficio \emph{trasferisce}, ma dimezzato, e che il costo in recall
-resta intero: da quattro cadute su cinque a due.
+The median height of the hips in the horizontal negatives is about $+0{,}02$ trunk lengths in the dataset and $+1{,}47$ in the domestic recordings.
+This difference explains why $h_{\text{pav}}$ has a limited effect on the benchmark but turns out more useful in the domestic recordings. A benchmark can only assess the conditions present in its own data. If a situation typical of the real environment is poorly represented, a feature designed to distinguish it may have a reduced effect during the evaluation on the dataset.
 
-Il che significa che i controesempi sono \textbf{adattamento al dominio di
-installazione} --- \emph{domain adaptation} nella terminologia corrente --- e
-non generalizzazione. Sono utili, e vanno raccolti al momento
-dell'installazione come si tara un sensore; ma chiamarli robustezza sarebbe
-improprio, e due abitazioni non bastano a dire quanto di quel beneficio
-sopravviva alla terza.
+\subsection{Transfer of the counter-examples}
 
-\section{Effetto della finestra di accumulazione nei due domini}
+The domestic counter-examples were collected in the same two homes used for the evaluation. In order to check whether the improvement depended on the individual room alone, the model was trained with the counter-examples of one home and evaluated in the other.
+
+\begin{table}[ht]
+\centering
+\caption{Transfer of the counter-examples between the two homes.}
+\label{tab:trasferimento_controesempi}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Counter-examples used} &
+\textbf{Test home} &
+\textbf{Events/hour} \\
+\midrule
+None / home 2 & home 1 & $0{,}342 \rightarrow 0{,}171$ \\
+None / home 1 & home 2 & $1{,}781 \rightarrow 0{,}890$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In both cases the number of events per hour roughly halves. The improvement therefore does not depend on the room in which the examples were collected alone. With only two homes it is not, however, possible to verify generalisation to new environments. The counter-examples must therefore be regarded as a form of adaptation to the domestic domain. Moreover, with A3i, adding the counter-examples brings the falls recognised from 4/5 to 3/5. The same trade-off was observed when the three definitions of the task were compared.
+
+\begin{table}[ht]
+\centering
+\caption{Behaviour of the three definitions of the task in the domestic recordings.}
+\label{tab:compiti_domestici}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Task} & \textbf{Alarm events/hour} &
+\textbf{Falls detected} \\
+\midrule
+Event & 1,6 & 3/5 \\
+State & 29,5 & 0/5 \\
+Alarm & 36,4 & 4/5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \emph{event} task produces 1,6 events per hour, against 29,5 for the \emph{state} task and 36,4 for the \emph{alarm} task, but it recognises one fall fewer than the alarm task. Here too it is therefore not possible to evaluate a configuration by considering a single metric.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.86\textwidth]{figure/fig_compiti_casa_en.png}
+\caption{Comparison between the three definitions of the task in the domestic recordings, using the same event aggregation rule.}
+\label{fig:compiti-casa}
+\end{figure}
+
+\subsection{Effect of the accumulation window}
 \label{sec:finestra-k}
 
-Le sezioni precedenti hanno mostrato la discordanza su un intervento
-progettuale. Questa la ripete su un \emph{iperparametro}, che è il caso in cui
-è meno attesa e più facile da ignorare: la finestra su cui le grandezze
-integrali si accumulano.
+The integral quantities are computed over a sliding window of $K$ samples. Different values were tried while the rest of the pipeline was kept unchanged.
+The laboratory results reported in Table~\ref{tab:effetto_k} come from the five-subject experiment and serve to describe the trend of the parameter.
 
-\paragraph{Provenienza di questa scansione.} I valori di laboratorio della
-tabella provengono dall'impianto a \textbf{cinque} soggetti: la scansione non
-è stata ripetuta su dieci, dove è stato misurato il solo $K = 31$ poi adottato.
-La colonna di campo e il fenomeno che la sezione descrive non ne dipendono ---
-riguardano il confronto fra due colonne, non il valore assoluto dell'una ---
-ma i numeri di $F_2$ vanno letti come indicativi.
-
-
-La compressione descritta nella sezione precedente riguarda scelte progettuali. Si ripresenta, in forma ancora più netta, su una singola costante numerica --- ed è stato trovato senza cercarlo, perché a quel punto ogni configurazione veniva misurata su entrambi gli insiemi.
-
-Le grandezze integrali si accumulano su una finestra mobile di $K$ fotogrammi. Il valore iniziale, $K = 9$, era stato \emph{scelto} e non ottimizzato. Variandolo, con tutto il resto identico e con lo stesso $K$ usato anche nel calcolo sulle sessioni domestiche:
-
-\begin{center}
+\begin{table}[ht]
+\centering
+\caption{Effect of $K$ on the benchmark and in the domestic recordings.}
+\label{tab:effetto_k}
 \begin{tabular}{rrrrr}
 \toprule
-$K$ & F2 laboratorio & Falsi neg. & Falsi allarmi/ora & Cadute \\
+$K$ &
+\textbf{$F_2$ laboratory} &
+\textbf{FN} &
+\textbf{Alarms/hour at home} &
+\textbf{Falls} \\
 \midrule
-5 & $0{,}859 \pm 0{,}125$ & 23 & --- & --- \\
-9 & $0{,}896 \pm 0{,}090$ & 21 & 156,7 & 4/5 \\
-15 & $0{,}928 \pm 0{,}048$ & 24 & 137,6 & 4/5 \\
-22 & $0{,}963 \pm 0{,}016$ & 9 & 17,3 & 4/5 \\
-\textbf{31} & $\mathbf{0{,}980 \pm 0{,}020}$ & 4 & \textbf{14,0} & \textbf{4/5} \\
-45 & $\mathbf{0{,}987 \pm 0{,}008}$ & \textbf{3} & 17,0 & \textbf{3/5} \\
+5  & $0{,}859\pm0{,}125$ & 23 & --    & -- \\
+15 & $0{,}928\pm0{,}048$ & 24 & 137,6 & 4/5 \\
+22 & $0{,}963\pm0{,}016$ & 9  & 17,3  & 4/5 \\
+31 & $0{,}980\pm0{,}020$ & 4  & 14,0  & 4/5 \\
+45 & $0{,}987\pm0{,}008$ & 3  & 17,0  & 3/5 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-A $K = 31$ i falsi allarmi in casa scendono di un fattore undici a parità di recall, e la dispersione fra soggetti passa da $\pm 0{,}090$ a $\pm 0{,}020$.
+On the benchmark, $F_2$ almost always increases as $K$ grows and reaches its maximum with $K=45$. At home, by contrast, going from $K=31$ to $K=45$ the alarms rise from 14,0 to 17,0 per hour and the falls recognised drop from 4/5 to 3/5.
+The value $K=31$ was chosen partly on the basis of these domestic results. The choice is therefore not independent of the data used in the evaluation. Repeating the selection within the individual folds, nine folds out of ten choose $K=45$ and the mean $F_2$ increases by 0,026. If the laboratory result alone were used, $K=31$ would therefore not be chosen.
 
-La riga decisiva è l'ultima. Da $K = 31$ a $K = 45$ \textbf{l'F2 di laboratorio continua a salire} --- ed è il valore più alto misurato in tutto il lavoro --- \textbf{mentre sul campo si perde una caduta} e i falsi allarmi risalgono. Ottimizzando sulla sola metrica di laboratorio si sceglierebbe 45, cioè il valore sbagliato.
+With $K=31$ the integral features use a longer history than the 22-sample window supplied to the classifier. The system remains causal, because only samples already observed are used and the accumulation is reset between independent recordings. $K$ does, however, represent a number of samples and not a fixed duration. At the median cadence of the archive, 31 samples correspond to about 1,72~s; across the recordings of the dataset the duration varies roughly between 1,58 and 2,15~s. On the device the misalignment is greater. At 9~fps, 31 samples correspond to about 3,4~s and, taking the classifier window into account as well, some features may depend on a total history of close to 5,8~s.
 
-\paragraph{Perché non è un artefatto.} Per $K > 22$ la finestra di accumulazione supera quella di classificazione, quindi le grandezze integrali riassumono fotogrammi precedenti alla finestra su cui il modello decide. Va detto esplicitamente perché sembra sospetto, e non lo è: l'informazione è \emph{solo passata}, quindi disponibile in tempo reale a un sistema che riceve fotogrammi in streaming; le grandezze si calcolano da geometria e mai dalle etichette; l'accumulazione non attraversa il confine fra due riprese. La conferma sostanziale è che il miglioramento si osserva sulle \emph{sessioni domestiche}, che non entrano in alcuna validazione incrociata e che il modello non ha mai visto. Resta da dichiarare che il campo di ricezione temporale effettivo passa da 2,4~s a circa 5,8~s: il sistema decide su ventidue campioni, ma le sue feature riassumono più del doppio del tempo.
+When the frequency of the board drops, the same number of samples covers an even longer interval. One solution for the future is to define $K$ as a duration and derive the number of samples from the actual frequency, instead of keeping it fixed.
 
-\section{Modalità di fallimento osservate}
+\section{Failure modes and operational limitations}
+\label{sec:fallimenti}
 \label{sec:modi-fallire}
 
-I blocchi costruiti per far sbagliare il sistema hanno prodotto tre risultati che vale la pena separare.
+The domestic trials made it possible to observe some problems that do not emerge directly from the evaluation on the dataset. They concern both the representation used by the classifier and the prolonged operation of the device.
 
-\paragraph{Il modello non guardava la dinamica.} L'obiezione naturale al problema del divano è che sdraiarsi e cadere hanno dinamiche diverse --- una lenta e controllata, l'altra rapida --- e che il modello dovrebbe distinguerle senza sapere dove si trova il corpo. La verifica ha mostrato che il modello assegnava punteggi alti anche a corpi completamente immobili, con una correlazione fra punteggio e movimento effettivo di $+0{,}139$: praticamente nulla. La causa non era il modello ma le grandezze fornite, ed è discussa nel Capitolo~\ref{cap:metodologia}: le derivate istantanee hanno autocorrelazione a un fotogramma fra 0,11 e 0,41, contro 0,84--0,93 delle grandezze statiche. Ciò che arrivava al modello come dinamica era in gran parte rumore.
+\subsection{Errors tied to the representation and to the scene}
 
-\paragraph{Il tracciamento multi-persona funziona e non è validabile.} È stato implementato con un'identità e un motore di feature indipendenti per ciascuna persona in scena. Nell'unica finestra in cui è stato messo alla prova --- 291 fotogrammi con due persone contemporaneamente visibili --- non ha prodotto alcuno scambio di soggetto. Ma nessuno degli archivi pubblici disponibili contiene più persone in scena: UP-Fall ne ha una sola nel 99,8\% dei fotogrammi. La capacità che serve davvero in una casa è precisamente quella che nessun dato di laboratorio può misurare, e settantun secondi di prova non la sostituiscono.
+The false positives on people lying down led us to check how far the score produced depended on the movement present in the window. The correlation measured is $+0{,}139$, therefore very low. The instantaneous derivatives moreover turned out to be sensitive to the noise of the pose and did not describe the dynamics in a stable way. From this observation the integral quantities used in configuration A3i were introduced.
 
-\paragraph{Un filtro geometrico in addestramento peggiora il bilancio.} Il \emph{Physics Guard} del prototipo iniziale agiva solo in inferenza. Portato anche in addestramento, con soglia a 110$^\circ$ sull'angolo del tronco, riduce i falsi positivi da 141 a 65 --- il valore più basso ottenuto senza controesempi --- ma porta il recall da 0,941 a 0,872 e raddoppia i falsi negativi. Con una metrica che pesa il recall il doppio della precision lo scambio è \textbf{netto negativo}, e i controesempi ottengono lo stesso effetto sui falsi positivi senza costare recall.
+A second problem concerns raised surfaces. In the negative frames with the person in a horizontal position, the median height of the hips is about $+0{,}02$ trunk lengths in the dataset and $+1{,}47$ in the domestic recordings. In the first case the person is generally close to the floor; in the second they may be lying on a bed or a sofa. This difference led to the reintroduction of $h_{\text{pav}}$ and to the use of the domestic counter-examples.
 
-\paragraph{Limiti operativi emersi sul campo.}
-\label{sec:limiti-operativi}
+A geometric filter based on the trunk angle was also tested. With a threshold of $110^\circ$ the false positives drop from 141 to 65, but recall falls from 0,941 to 0,872 and the false negatives increase. The filter was therefore not retained in the final configuration.
 
-Due difetti non sarebbero emersi da nessuna misura di laboratorio, e sono parte del contributo di un capitolo sul funzionamento reale.
+\subsection{Presence of several people}
 
-\paragraph{Il test che sembrava riuscito.} La prima sessione di durata terminava senza errori e con il registro completo fino in fondo. Il conteggio dei fotogrammi però non tornava con la durata dichiarata, e la temperatura della board era scesa di tredici gradi a metà sessione: \textbf{il dispositivo si era sospeso per inattività dopo venti minuti}, e il registratore, che misura il tempo con un orologio che durante la sospensione non avanza, non se ne era accorto. Il test non è fallito, \emph{è sembrato riuscire} --- che è il modo peggiore in cui una misura può essere sbagliata. La correzione è un secondo orologio, quello di sistema, con la differenza fra i due dichiarata nel riepilogo di ogni sessione.
+The pipeline was extended so as to keep the identity and the feature state of every person observed separate. In the only sequence available with
+two people visible at the same time, made up of 291 frames, no
+identity swaps were observed. The trial is, however, too short to validate multi-person tracking. UP-Fall, too, almost always contains a single person and cannot be used to check this case.
 
-\paragraph{Il frame rate crolla con il numero di persone.} Lo stimatore multi-persona esegue il modello dei punti corporei una volta per ciascuna persona rilevata. Con due persone in scena il sistema scende a 4~fps, e a quella frequenza la finestra temporale copre il doppio del tempo per cui il modello è stato addestrato. È lo stesso disallineamento fra frequenza di addestramento e di esercizio discusso nella sezione~\ref{sec:recall-campo}, qui indotto dall'hardware.
+The presence of several people also increases the computational cost, because landmark estimation is carried out separately for each subject. In the trials, about 7,5~fps were measured with the room empty, 4~fps with one person and 2--3~fps with two. The reduction in frequency also changes the time interval represented by the windows. At 2--3~fps, 22 samples cover a much longer interval than the one used during training.
 
-\paragraph{In sintesi.}
+\subsection{Problems of continuous operation}
+During one of the prolonged sessions the operating system suspended the board for about 68 minutes. The program remained active and resumed normally after the wake-up. A check between system time and monotonic time was therefore added in order to detect any interruptions.
 
-Il sistema, nella configurazione ottimizzata, produce \textbf{14,0 falsi allarmi all'ora} contando le finestre sopra soglia, e ne rileva 4 su 5 con il criterio permissivo oppure 1 su 5 con quello clinicamente difendibile della sezione~\ref{sec:recall-campo}. Entrambi i valori restano sopra il criterio clinico di uno o due alla settimana, e questo va detto senza attenuazioni: il sistema misurato in questo lavoro \textbf{non è pronto per l'installazione}.
+We also observed the loss of the USB camera. In some cases the device is renumbered by the operating system, for example from \texttt{/dev/video0} to \texttt{/dev/video1}. The program may then remain active without receiving new frames. The camera is read in a separate thread and the main loop checks the time elapsed since the last frame. If it exceeds 20~s, the device is reopened. In the longest session this mechanism recovered capture in about twenty seconds; in an earlier trial the same problem had produced several minutes without images.
 
-Ma il capitolo non serviva a dimostrare che lo fosse. Serviva a misurare la distanza, a spiegarne il meccanismo, e a mostrare che \textbf{quella distanza non è visibile dall'insieme di verifica su cui il settore misura} --- il quale, anzi, avrebbe indicato la direzione opposta.
+A further limitation concerns the computation of events per hour. Across the nine sessions considered, 1,41~hours without decisions are observed out of 14,98~total hours. Computing the rate only over the hours in which the system was actually producing decisions, the value goes from 11,1 to 12,2 events per hour, about 10\% more. The ratio between positive windows and events, 44,8, does not change, because both quantities are computed on the same decisions.
+
+Taken together, the trials show that the pipeline can be run locally and kept active for prolonged periods, but they are not enough for the system to be regarded as validated for a real installation. The acquisitions concern only two homes and five simulated falls. Moreover, the session containing the five falls has a share of valid poses of 25,9\%, owing to sub-optimal framing. The recall values obtained in this part must therefore be read with these limitations in mind.
+

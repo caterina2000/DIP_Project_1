@@ -53,7 +53,7 @@ import numpy as np
 
 import config
 
-ARCHITETTURE = ('gru', 'lstm', 'cnn', 'transformer', 'foresta')
+ARCHITETTURE = ('gru', 'lstm', 'cnn', 'transformer', 'grafo', 'foresta')
 
 
 # ============================================================
@@ -269,6 +269,89 @@ class Transformer(ModelloKeras):
         return keras.layers.GlobalAveragePooling1D()(x)
 
 
+def _strato_adiacenza():
+    """
+    Restituisce lo strato che mescola i nodi del grafo.
+
+    E' definito dentro una funzione, e non a livello di modulo, per la stessa
+    ragione di `_auc_allarme`: importare TensorFlow all'importazione di questo
+    file renderebbe impossibile usarlo dagli script che non ce l'hanno.
+
+    L'adiacenza e' APPRESA e non fissata, ed e' una scelta obbligata: su un
+    grafo di giunti l'adiacenza e' l'anatomia, qui i nodi sono grandezze
+    geometriche e non esiste un'adiacenza data. Ricavarla dalla correlazione
+    misurata sui dati porrebbe la domanda di su quali dati -- e stimarla su
+    tutto sarebbe leakage. Una matrice appresa non stima nulla dall'esterno del
+    fold, e la variante e' quella dei lavori con adiacenza adattiva.
+
+    La softmax sulle righe fa si' che ogni nodo distribuisca un peso totale
+    unitario sui vicini: senza normalizzazione la scala delle attivazioni
+    dipenderebbe dal numero di nodi.
+    """
+    import tensorflow as tf
+    from tensorflow import keras
+
+    class Adiacenza(keras.layers.Layer):
+        def build(self, forma_ingresso):
+            n = int(forma_ingresso[2])
+            self.A = self.add_weight(
+                shape=(n, n), initializer='glorot_uniform',
+                trainable=True, name='adiacenza')
+            super().build(forma_ingresso)
+
+        def call(self, x):
+            return tf.einsum('btnc,nm->btmc', x, tf.nn.softmax(self.A, axis=-1))
+
+    return Adiacenza
+
+
+class Grafo(ModelloKeras):
+    """
+    Rete a grafo spazio-temporale sulle grandezze.
+
+    CHE COS'E', E CHE COSA NON E'
+    -----------------------------
+    E' la famiglia che la tesi dichiarava di non aver provato. La struttura e'
+    quella di una ST-GCN: si alternano una convoluzione SPAZIALE, che mescola
+    i nodi secondo l'adiacenza, e una convoluzione TEMPORALE, che guarda una
+    finestra di fotogrammi sullo stesso nodo.
+
+    NON e' una GCN sullo scheletro. I nodi qui sono le dodici grandezze
+    geometriche in ingresso, non i giunti del corpo: l'ingresso e' lo stesso
+    delle altre cinque architetture, ed e' l'unico modo perche' il confronto
+    misuri l'ARCHITETTURA e non la rappresentazione. Una GCN sui giunti
+    richiederebbe le coordinate grezze dei landmark, che questo CSV non
+    contiene -- andrebbero riestratte -- e cambierebbe insieme architettura e
+    ingresso, cioe' due variabili invece di una.
+
+    Va detto anche il limite che ne segue: con dodici nodi che non hanno una
+    struttura anatomica, il vantaggio tipico di una rete a grafo -- sfruttare
+    una topologia nota -- non c'e'. Cio' che resta e' il meccanismo: mescolare
+    esplicitamente i canali con pesi appresi prima di guardare il tempo.
+    """
+
+    def _corpo(self, x, keras):
+        canali = self.kw.get('canali', 32)
+        nucleo = self.kw.get('nucleo_tempo', 5)
+        blocchi = self.kw.get('blocchi', 2)
+        drop = self.kw.get('dropout', 0.3)
+
+        L, N = self.forma           # (lunghezza_finestra, n_grandezze)
+        Adiacenza = _strato_adiacenza()
+
+        # (B, L, N) -> (B, L, N, 1): ogni grandezza diventa un nodo con un canale
+        h = keras.layers.Reshape((L, N, 1))(x)
+        for _ in range(blocchi):
+            h = Adiacenza()(h)                                   # spaziale
+            h = keras.layers.Conv2D(canali, (1, 1), activation='relu')(h)
+            h = keras.layers.BatchNormalization()(h)
+            h = keras.layers.Conv2D(canali, (nucleo, 1), padding='same',
+                                    activation='relu')(h)        # temporale
+            h = keras.layers.BatchNormalization()(h)
+            h = keras.layers.Dropout(drop)(h)
+        return keras.layers.GlobalAveragePooling2D()(h)
+
+
 # ============================================================
 # FORESTA CASUALE
 # ============================================================
@@ -346,7 +429,7 @@ class Foresta:
 # FABBRICA
 # ============================================================
 _CLASSI = {'gru': GRU, 'lstm': LSTM, 'cnn': CNN,
-           'transformer': Transformer, 'foresta': Foresta}
+           'transformer': Transformer, 'grafo': Grafo, 'foresta': Foresta}
 
 
 def costruisci(architettura: str, forma, n_classi: int, **kw):

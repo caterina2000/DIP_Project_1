@@ -68,7 +68,7 @@ COMPITI = {
 }
 
 
-def finestre(df, colonne, positive, k_min=5):
+def finestre(df, colonne, positive, k_min=5, valuta=None):
     """
     Finestre con positivo definito dalle classi OmniFall in `positive`.
 
@@ -77,7 +77,13 @@ def finestre(df, colonne, positive, k_min=5):
     """
     L, passo, step = (config.LUNGHEZZA_FINESTRA, config.PASSO_FINESTRA,
                       config.FRAME_STEP)
-    X, y, duro, sog = [], [], [], []
+    # `valuta` e' l'insieme di classi con cui si GIUDICA, che non e'
+    # necessariamente quello con cui si addestra: i tre compiti vanno
+    # confrontati sulla stessa verita', altrimenti hanno prevalenze diverse
+    # e le precision non sono commensurabili.
+    if valuta is None:
+        valuta = positive
+    X, y, y_al, duro, sog = [], [], [], [], []
     for (s, _), g in df.groupby([COL_SOGGETTO, COL_RIPRESA], sort=True):
         g = g.sort_values(COL_FOTOGRAMMA)
         if COL_POSA in g.columns:
@@ -92,15 +98,17 @@ def finestre(df, colonne, positive, k_min=5):
             f = cls[i:i + L]
             X.append(v[i:i + L])
             y.append(int(np.isin(f, positive).sum() >= k_min))
+            y_al.append(int(np.isin(f, valuta).sum() >= k_min))
             duro.append(float(np.isin(f, VOLONTARIO).mean()))
             sog.append(s)
     if not X:
         raise ValueError('nessuna finestra')
-    return (np.stack(X), np.array(y, np.int8), np.array(duro), np.array(sog))
+    return (np.stack(X), np.array(y, np.int8), np.array(y_al, np.int8),
+            np.array(duro), np.array(sog))
 
 
-def loso(df, colonne, positive, modello, soglia, k_min=5):
-    X, y, duro, sog = finestre(df, colonne, positive, k_min)
+def loso(df, colonne, positive, modello, soglia, k_min=5, valuta=None):
+    X, y, y_al, duro, sog = finestre(df, colonne, positive, k_min, valuta)
     soggetti = sorted(set(sog))
     ris, fa_d, fa_f = [], [], []
     for test in soggetti:
@@ -110,15 +118,16 @@ def loso(df, colonne, positive, modello, soglia, k_min=5):
         mod = costruisci(modello, (X.shape[1], X.shape[2]), 2)
         mod.addestra(sc.transform(X[m_tr]), y[m_tr].astype(int))
         p = probabilita_allarme(mod.probabilita(sc.transform(X[m_te])))
-        ris.append(metriche(y[m_te], p, soglia))
-        yt, dt = y[m_te], duro[m_te]
+        # si valuta sull'etichetta di allarme, non su quella del compito
+        ris.append(metriche(y_al[m_te], p, soglia))
+        yt, dt = y_al[m_te], duro[m_te]
         md, mf = (yt == 0) & (dt >= 0.5), (yt == 0) & (dt < 0.5)
         if md.any():
             fa_d.append(float((p[md] >= soglia).mean()))
         if mf.any():
             fa_f.append(float((p[mf] >= soglia).mean()))
     return ris, float(np.mean(fa_d)) if fa_d else float('nan'), \
-        float(np.mean(fa_f)) if fa_f else float('nan'), y, duro
+        float(np.mean(fa_f)) if fa_f else float('nan'), y, y_al, duro
 
 
 def main():
@@ -128,6 +137,11 @@ def main():
     ap.add_argument('--feature', default='DTW')
     ap.add_argument('--camera', type=int, default=1)
     ap.add_argument('--soglia', type=float, default=0.5)
+    ap.add_argument('--valuta-sul-compito', action='store_true',
+                    help='valuta ogni compito sulla propria etichetta invece '
+                         'che su quella di allarme: riproduce il '
+                         'comportamento precedente, in cui le tre prevalenze '
+                         'erano diverse e gli F2 non confrontabili')
     a = ap.parse_args()
 
     colonne = (feature_dtw() if a.feature.upper() == 'DTW'
@@ -148,8 +162,10 @@ def main():
 
     esito = []
     for nome, positive in COMPITI.items():
-        ris, fd, ff, y, duro = loso(df, colonne, positive, a.modello,
-                                    a.soglia)
+        valuta = None if a.valuta_sul_compito else COMPITI['allarme']
+        ris, fd, ff, y, y_al, duro = loso(df, colonne, positive,
+                                          a.modello, a.soglia,
+                                          valuta=valuta)
         ag = aggrega(ris)
         etich = {'evento': 'fall', 'stato': 'fallen',
                  'allarme': 'fall O fallen'}[nome]
@@ -158,7 +174,8 @@ def main():
               f"{dec(ag['recall_media']):>8}{dec(ag['precision_media']):>8}"
               f"{dec(100*fd, 1) + '%':>20}{dec(100*ff, 1) + '%':>9}")
         esito.append({'compito': nome, 'positivo': etich,
-                      'prevalenza': float(y.mean()),
+                      'prevalenza_addestramento': float(y.mean()),
+                      'prevalenza_valutazione': float(y_al.mean()),
                       'allarme_difficili': fd, 'allarme_facili': ff, **ag})
 
     n_duro = int((duro >= 0.5).sum())

@@ -30,18 +30,51 @@ import sys
 QUI = os.path.dirname(os.path.abspath(__file__))
 os.chdir(QUI)
 
-CAPITOLI = sorted(glob.glob('Cap*.tex'))
-# Conclusioni.tex non si chiama Cap*: dal 26 agosto e' un file a se',
-# e senza questa riga la sua etichetta `cap:conclusioni` risulta assente
-# e i rimandi dell'Introduzione vengono segnalati come orfani.
-FILE = CAPITOLI + ['Conclusioni.tex', 'Introduzione.tex', 'Bibliografia.tex']
-FILE = [f for f in FILE if os.path.exists(f)]
-
 problemi = []
 
 
 def leggi(f):
     return io.open(f, encoding='utf-8').read()
+
+
+# Che cosa si controlla: i file che tesi.tex include davvero. Prima si
+# prendevano tutti i Cap*.tex della cartella con una glob, e il 5 settembre e'
+# bastata una bozza --- Cap1_riordinato.tex, una proposta di riordino non
+# inclusa in tesi.tex --- per produrre quattro problemi su un documento che
+# compilava benissimo: una label duplicata e tre citazioni non definite.
+#
+# Un controllo che segnala errori su file che non compilano smette di essere
+# un cancello. Si impara a scorrerlo, ed e' il modo in cui un errore vero
+# passa inosservato.
+def inclusi(radice='tesi.tex'):
+    if not os.path.exists(radice):
+        return []
+    # una riga commentata non include niente
+    vivo = '\n'.join(r for r in leggi(radice).split('\n')
+                     if not r.lstrip().startswith('%'))
+    fuori = []
+    for m in re.finditer(r'\\(?:include|input)\{([^}]+)\}', vivo):
+        nome = m.group(1)
+        if not nome.endswith('.tex'):
+            nome += '.tex'
+        if os.path.exists(nome) and nome not in fuori:
+            fuori.append(nome)
+    return fuori
+
+
+FILE = inclusi()
+if not FILE:
+    # senza tesi.tex si ricade sul comportamento precedente, cosi' lo script
+    # resta utilizzabile su una cartella di soli capitoli
+    FILE = (sorted(glob.glob('Cap*.tex'))
+            + ['Introduzione.tex', 'Bibliografia.tex'])
+    FILE = [f for f in FILE if os.path.exists(f)]
+CAPITOLI = [f for f in FILE if f.startswith('Cap')]
+
+# I .tex che stanno nella cartella e che nessuno include. Non sono un
+# problema --- una bozza in lavorazione e' legittima --- ma vanno detti: se no
+# si lavora per giorni su un file che nel PDF non entra.
+ORFANI = sorted(set(glob.glob('*.tex')) - set(FILE) - {'tesi.tex'})
 
 
 def riga_di(t, i):
@@ -88,7 +121,7 @@ for f in FILE:
 
 # ------------------------------------------------------------------ figure
 vuote = []
-for f in CAPITOLI + ['Conclusioni.tex']:
+for f in CAPITOLI:
     t = leggi(f)
     for m in re.finditer(r'\\begin\{figure\}.*?\\end\{figure\}', t, re.S):
         b, n = m.group(0), riga_di(t, m.start())
@@ -133,7 +166,7 @@ print('=' * 74)
 print('\n%-16s %7s %7s %5s %6s' % ('file', 'righe', 'parole', 'sez.', 'fig.'))
 print('-' * 46)
 tot = 0
-for f in ['Introduzione.tex'] + CAPITOLI + ['Conclusioni.tex']:
+for f in ['Introduzione.tex'] + CAPITOLI:
     if not os.path.exists(f):
         continue
     t = leggi(f)
@@ -146,6 +179,11 @@ for f in ['Introduzione.tex'] + CAPITOLI + ['Conclusioni.tex']:
         '%d+%dv' % (n_fig, n_vuote) if n_vuote else str(n_fig)))
 print('-' * 46)
 print('%-16s %7s %7d' % ('TOTALE', '', tot))
+
+if ORFANI:
+    print('\nNON INCLUSI DA tesi.tex: non controllati, e non finiscono nel PDF')
+    for o in ORFANI:
+        print('   ' + o)
 
 if vuote:
     print('\nFIGURE SENZA IMMAGINE (compilano, lasciano uno spazio bianco):')

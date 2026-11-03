@@ -1,0 +1,71 @@
+% ---------------------------------------------------------------------
+% Figura: la pipeline adottata in questo lavoro.
+%
+% Richiede nel preambolo di tesi.tex:
+%   \usepackage{tikz}
+%   \usetikzlibrary{arrows.meta,positioning}
+%
+% Si inserisce con \input{fig_pipeline} dove serve.
+% Struttura ispirata alla Figura 1 di Hoang et al. (IEEE Access, 2023),
+% ma con un solo ramo percorso: il ramo appreso e' tratteggiato perche'
+% e' stato confrontato nel Capitolo 4 e non schierato sul dispositivo.
+% ---------------------------------------------------------------------
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  blocco/.style   = {draw, rounded corners=2pt, align=center,
+                     text width=20mm, minimum height=10mm, inner sep=2pt},
+  dato/.style     = {blocco, fill=black!4},
+  scelto/.style   = {blocco, fill=black!10, very thick},
+  alt/.style      = {blocco, dashed, draw=black!45, text=black!55},
+  fr/.style       = {-{Stealth[length=1.8mm]}, thick},
+  fralt/.style    = {-{Stealth[length=1.8mm]}, dashed, draw=black!45}
+]
+
+% --- riga 1: dal video alla finestra temporale ---
+\node[dato] (video) at (0,0)    {Video RGB};
+\node[dato] (posa)  at (2.7,0)  {MediaPipe Pose\\33 landmark};
+\node[dato] (feat)  at (5.4,0)  {Feature\\geometriche\\e integrali};
+\node[dato] (dtw)   at (8.1,0)  {Selezione DTW\\12 su 33};
+\node[dato] (fin)   at (10.8,0) {Finestre\\$L=22$, passo 2};
+
+\draw[fr] (video) -- (posa);
+\draw[fr] (posa)  -- (feat);
+\draw[fr] (feat)  -- (dtw);
+\draw[fr] (dtw)   -- (fin);
+
+% --- riga 2: dalla finestra all'allarme (verso sinistra) ---
+\node[scelto] (rf)      at (10.8,-2.3) {Random Forest};
+\node[alt]    (reti)    at (10.8,-4.1) {GRU, LSTM,\\CNN 1D,\\Transformer,\\grafo};
+\node[dato]   (soglia)  at (8.1,-2.3)  {Soglia $0{,}50$};
+\node[dato]   (regola)  at (5.4,-2.3)  {Cinque finestre\\consecutive};
+\node[dato]   (allarme) at (2.7,-2.3)  {Allarme};
+
+\draw[fr] (fin)    -- (rf);
+\draw[fr] (rf)     -- (soglia);
+\draw[fr] (soglia) -- (regola);
+\draw[fr] (regola) -- (allarme);
+
+% ramo confrontato ma non schierato
+\draw[fralt] (fin.east)  -- ++(0.7,0) |- (reti.east);
+\draw[fralt] (reti.west) -| (soglia.south);
+
+% --- protocollo di valutazione ---
+\node[align=center, text width=34mm, draw, dotted, rounded corners=2pt,
+      inner sep=3pt] (val) at (2.0,-4.1)
+      {Valutazione\\LOSO su 10 soggetti\\$F_2$};
+\draw[fralt, draw=black!60] (allarme.south) -- (val.north);
+
+\end{tikzpicture}
+
+\caption{La catena adottata in questo lavoro, dal fotogramma all'allarme. Il
+ramo continuo e' la configurazione installata sul dispositivo; il ramo
+tratteggiato raccoglie le architetture confrontate nel
+Capitolo~\ref{cap:protocollo} a parita' di rappresentazione, finestre e
+protocollo, ma non schierate. La struttura segue quella generale degli
+approcci skeleton-based descritta in~\cite{HO}, percorsa pero' in un solo
+ramo.}
+\label{fig:pipeline}
+\end{figure}

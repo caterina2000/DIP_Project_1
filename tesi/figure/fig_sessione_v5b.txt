@@ -1,0 +1,98 @@
+FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=FIGURE — fig_sessione_v5_andamento.png e fig_sessione_v5_cadute.png
+=
+
+PROVENIENZA
+-----------
+deploy_board/sessioni/20260909_v5/sess_20260909_v5.csv
+  (624 finestre decise, dai 697.4 ai 900.0 s)
+deploy_board/sessioni/20260909_v5/cadute.csv
+  (verita' di riferimento, trascritta dal LEGGIMI)
+
+CHE COSA E' RICAVATO, E CHE COSA E' DICHIARATO
+---------------------------------------------
+Ricavato dai punteggi applicando la regola installata
+(soglia 0.50, 5 finestre consecutive, sospensione 30 s):
+  finestre sopra soglia   36
+  raffiche che toccano 5  3  -> [743.5, 749.5, 856.3]
+  allarmi emessi          2  -> [743.5, 856.3]
+
+Dichiarato, e NON usato per disegnare: le bande delle quattro
+cadute e del falso positivo, che vengono da cadute.csv.
+
+VERIFICA
+--------
+L'esito ricavato per ciascuna caduta e' stato confrontato
+con quello dichiarato nel LEGGIMI: tutto coincide.
+
+PERCHE' DUE FIGURE
+------------------
+La prima mostra la sessione intera e i 697 s iniziali in cui il
+sistema non decide: e' il costo del riscaldamento della stima
+del pavimento. La seconda entra nei duecento secondi in cui
+accade tutto, e disegna le sospensioni: e' li' che si vede
+perche' una caduta vista benissimo non suona.
+
+PRODOTTA DA
+-----------
+pipeline/figura_sessione_v5b.py

@@ -1,0 +1,67 @@
+=== DTWH su v5 ===
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- foresta · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788965553.137895   26692 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788965559.288308   26692 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.782   0.884   0.535   114    99    15
+Subject_02            0.50   0.750   0.949   0.408   149   216     8
+Subject_03            0.50   0.665   0.648   0.743   107    37    58
+Subject_04            0.50   0.969   0.962   1.000   100     0     4
+Subject_05            0.50   0.838   0.806   1.000   116     0    28
+Subject_06            0.50   0.921   0.904   1.000   122     0    13
+Subject_07            0.50   0.907   0.887   1.000   149     0    19
+Subject_08            0.50   0.899   0.970   0.694   163    72     5
+Subject_09            0.50   0.995   1.000   0.977   171     4     0
+Subject_10            0.50   0.919   0.920   0.914   138    13    12
+--------------------------------------------------------------------
+media +- dev                 0.865   0.893   0.827  1329   441   162
+                           +-0.099
+parametri: 10,684 · durata 11 s
+salvato: risultati\addestramento\run_foresta_tre_classi_DTWH_cam1_L22.json
+
+
+=== DTW su v5 ===
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- foresta · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788965578.255758   18888 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788965582.155277   18888 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.813   0.984   0.479   127   138     2
+Subject_02            0.50   0.758   0.930   0.436   146   189    11
+Subject_03            0.50   0.645   0.630   0.712   104    42    61
+Subject_04            0.50   0.906   0.885   1.000    92     0    12
+Subject_05            0.50   0.682   0.632   1.000    91     0    53
+Subject_06            0.50   0.838   0.807   0.991   109     1    26
+Subject_07            0.50   0.867   0.839   1.000   141     0    27
+Subject_08            0.50   0.854   0.875   0.778   147    42    21
+Subject_09            0.50   0.994   1.000   0.972   171     5     0
+Subject_10            0.50   0.884   0.880   0.898   132    15    18
+--------------------------------------------------------------------
+media +- dev                 0.824   0.846   0.827  1260   432   231
+                           +-0.099
+parametri: 13,290 · durata 10 s
+salvato: risultati\addestramento\run_foresta_tre_classi_DTW_cam1_L22.json
+

@@ -1,0 +1,41 @@
+==========================================================================
+SCELTA DI K DENTRO IL FOLD — K provati: [5, 15, 22, 31, 45]
+==========================================================================
+  adottato    K = 31
+  colonne     12 (selezione DTW)
+  soggetti    10
+  modo        tre_classi
+
+CONTROLLO DI RIPRODUZIONE
+--------------------------------------------------------------------------
+  riprese 110, fotogrammi 58,359, colonne confrontate 12
+  A3_testa_vel_rel       scarto massimo 0.000e+00
+  A3_percorso            scarto massimo 0.000e+00
+  A3_hip_vel             scarto massimo 0.000e+00
+  riproduce esattamente feature_v5 sulle colonne adottate
+
+  Subject_01   K interno = 45  F2 su Subject_01: 0,864 con K scelto, 0,863 con K=31   (0.9 min)
+  Subject_02   K interno = 45  F2 su Subject_02: 0,739 con K scelto, 0,751 con K=31   (1.7 min)
+  Subject_03   K interno = 31  F2 su Subject_03: 0,676 con K scelto, 0,676 con K=31   (2.6 min)
+  Subject_04   K interno = 45  F2 su Subject_04: 0,897 con K scelto, 0,873 con K=31   (3.5 min)
+  Subject_05   K interno = 45  F2 su Subject_05: 0,897 con K scelto, 0,874 con K=31   (4.5 min)
+  Subject_06   K interno = 45  F2 su Subject_06: 0,961 con K scelto, 0,952 con K=31   (5.4 min)
+  Subject_07   K interno = 45  F2 su Subject_07: 0,845 con K scelto, 0,819 con K=31   (6.4 min)
+  Subject_08   K interno = 45  F2 su Subject_08: 0,927 con K scelto, 0,882 con K=31   (7.3 min)
+  Subject_09   K interno = 45  F2 su Subject_09: 0,894 con K scelto, 0,773 con K=31   (8.2 min)
+  Subject_10   K interno = 45  F2 su Subject_10: 0,808 con K scelto, 0,785 con K=31   (9.2 min)
+
+==========================================================================
+fold che scelgono K = 31: 1 su 10
+F2 medio con K scelto dentro il fold : 0,851
+F2 medio con K = 31 fisso              : 0,825
+differenza                           : -0,0262
+==========================================================================
+
+Come si legge. Una differenza POSITIVA significa che il K adottato
+rende piu' di quello scelto senza guardare il soggetto di prova:
+e' la quota di prestazione che il leakage spiega. Una differenza
+negativa o nulla significa che la scelta a posteriori non ha
+aggiunto nulla, e che il valore adottato regge da solo.
+
+salvato in risultati\dtw\k_per_fold.json

@@ -1,0 +1,58 @@
+FIGURA — CHE COSA FA IL DTW, E CHE COSA FA LA BANDA
+File: fig_dtw_spiegazione.png
+Prodotta da: pipeline/figura_dtw.py
+Comando:     python pipeline/figura_dtw.py --lingua it --grandezza A3_discesa
+
+CHE COSA SI VEDE
+  (a) due riprese di caduta vere, la stessa grandezza, z-scored e ricampionate
+      a 200 campioni come fa la selezione. Le tratteggiate sono le
+      corrispondenze del cammino DTW, una ogni sette passi.
+  (b) la matrice dei costi cumulati. In grigio cio' che la banda esclude, in
+      tratteggio la diagonale --- cioe' il confronto uno-a-uno che farebbe una
+      distanza euclidea --- e in rosso il cammino trovato. Il riquadro nero
+      segna la zona dove il cammino si allontana di piu' dalla diagonale, ed
+      e' quella ripresa ingrandita in (c).
+  (c) lo stesso disegno di (b), ma solo sul riquadro segnato: alla scala
+      intera la banda (larga appena 10 campioni su 200) e il cammino si
+      confondono con la diagonale; qui si vedono distinti.
+  La legenda con tutti gli elementi dei tre pannelli sta sotto la figura,
+  non sovrapposta ai dati.
+
+E' una figura METODOLOGICA: spiega il criterio, non riporta un risultato.
+
+NUMERI DI QUESTA ESECUZIONE
+  grandezza          A3_discesa
+  camera             1
+  riprese di caduta  50
+  scarto fra i picchi 11 campioni
+  banda              |i-j| <= 10   (src/dtw.py, FINESTRA_WARPING)
+  passi del cammino  251, di cui 69 sul bordo della banda
+  distanza           0.030633  (coincide con src.dtw a meno di 1e-9)
+
+CONTROLLO ESEGUITO
+  src/dtw.py non conserva la matrice: tiene due righe. Qui la ricorsione e'
+  ripetuta per intero e lo script verifica che la distanza coincida con quella
+  di src.dtw, altrimenti si ferma. Senza, la figura mostrerebbe un
+  allineamento diverso da quello che decide la selezione.
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figure/fig_dtw_spiegazione.png}
+\caption{Che cosa il \emph{Dynamic Time Warping} allinea, e che cosa il
+vincolo di banda impedisce. A sinistra due riprese di caduta di UP-Fall,
+la stessa grandezza, normalizzate e ricampionate come fa la procedura di
+selezione: hanno la stessa forma ma raggiungono il picco a 11 campioni
+di distanza, e le tratteggiate sono le corrispondenze che il DTW stabilisce.
+Al centro la matrice dei costi cumulati: la diagonale tratteggiata e' il
+confronto uno-a-uno che una distanza punto per punto imporrebbe, la regione
+grigia e' quella che il vincolo $|i-j|\leq 10$ esclude, e in rosso il cammino
+di costo minimo; il riquadro nero segna dove il cammino si allontana di piu'
+dalla diagonale. A destra lo stesso riquadro ingrandito, perche' alla scala
+dell'intera matrice una banda larga 10 campioni su 200 e' troppo sottile per
+distinguerla dal cammino. Le curve e il cammino sono quelli veri; la figura
+spiega il criterio e non riporta un risultato. Prodotta da
+\texttt{pipeline/figura\_dtw.py}.}
+\label{fig:dtw}
+\end{figure}

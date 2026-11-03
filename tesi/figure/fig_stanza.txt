@@ -1,0 +1,42 @@
+FIGURA — fig_stanza.png
+=======================
+
+CHE COSA MOSTRA
+---------------
+In alto l'inquadratura REALE della board nell'abitazione in cui
+si sono svolte le sessioni. Sotto, lo schema del protocollo:
+pianta a sinistra, alzato a destra.
+
+PERCHE' LA FOTOGRAFIA
+---------------------
+Lo schema dice che l'inquadratura deve contenere sia l'area di
+caduta sia le superfici rialzate. La fotografia lo mostra: il
+divano e il pavimento libero stanno nello stesso fotogramma, ed e'
+esattamente la condizione che rende necessaria l'altezza del
+bacino dal pavimento.
+
+PERSONE
+-------
+Nessuna. Il fotogramma ritrae la stanza vuota, ripresa per
+verificare l'inquadratura prima di una sessione. E' l'unica
+immagine di ambiente domestico che entra nella tesi, ed entra
+perche' non c'e' nessuno dentro.
+
+PROVENIENZA
+-----------
+tesi/figure/sorgenti/inquadratura_board.jpg
+  ritagliata da deploy_board/sessioni/20260909_diretta/clip/
+  f00019.7.jpg sulla Radxa ROCK 4D: fotogramma reale, nessuna
+  persona in scena, tolte solo le fasce con il punteggio in
+  sovraimpressione sopra e sotto.
+
+NON E' UNA MISURA
+-----------------
+Pianta e alzato sono la resa grafica del protocollo, non un
+rilievo: le dimensioni degli ambienti non sono state registrate,
+e la tabella del protocollo lo dichiara. L'unica quota reale e'
+l'altezza della telecamera, 1,2-1,5 m.
+
+PRODOTTA DA
+-----------
+pipeline/figura_stanza.py --lingua it

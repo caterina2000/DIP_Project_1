@@ -1,0 +1,45 @@
+{
+  "sorgente": "escursione_viste_10sog.csv",
+  "soglia_salto": 0.45,
+  "tutte": {
+    "n_coppie": 50,
+    "cam1_media": 74.69672983852318,
+    "cam2_media": 35.07660075967419,
+    "cam1_dev": 23.740380284870113,
+    "cam2_dev": 23.19039211851275,
+    "rapporto_fra_le_medie": 2.1295316028569755,
+    "rapporto_per_sequenza_min": 0.488496652494768,
+    "rapporto_per_sequenza_max": 7.366431012699233,
+    "rapporto_per_sequenza_mediano": 2.7666412502075435,
+    "cam1_sopra_60": 39,
+    "cam2_sopra_60": 10,
+    "sequenze_cam2_maggiore_o_uguale": 3
+  },
+  "senza_cambio_di_persona": {
+    "n_coppie": 39,
+    "cam1_media": 73.95704447643283,
+    "cam2_media": 33.23724125918875,
+    "cam1_dev": 24.17718898240437,
+    "cam2_dev": 23.53937891029282,
+    "rapporto_fra_le_medie": 2.2251258430176333,
+    "rapporto_per_sequenza_min": 0.9767073302954064,
+    "rapporto_per_sequenza_max": 7.366431012699233,
+    "rapporto_per_sequenza_mediano": 2.7864153637368663,
+    "cam1_sopra_60": 30,
+    "cam2_sopra_60": 8,
+    "sequenze_cam2_maggiore_o_uguale": 1
+  },
+  "cambi_di_persona": {
+    "cam1": 0,
+    "cam2": 11,
+    "su": 50
+  },
+  "posa_rilevata_media": {
+    "cam1": 85.7179977383052,
+    "cam2": 97.01397792964815
+  },
+  "salto_massimo_osservato": {
+    "cam1": 0.3133844584226608,
+    "cam2": 0.6605563312768936
+  }
+}

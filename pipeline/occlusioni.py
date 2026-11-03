@@ -91,7 +91,10 @@ GRUPPI = [
     ('caviglie', CAVIGLIE),
     ('gambe (ginocchia+caviglie)', GINOCCHIA + CAVIGLIE),
     ('spalle', SPALLE),
-    ('anche  (riferimento di A3)', ANCHE),
+    # NON l'avverbio: sono i landmark delle ANCHE. Il relatore l'ha letta
+    # come «anche = inoltre» e ha proposto «nessuna occlusione», che e'
+    # gia' la prima barra. Se l'ha fraintesa lui la fraintende chiunque.
+    ('anche del bacino (riferimento di A3)', ANCHE),
     ('meta sinistra', SINISTRA),
 ]
 CASUALI = (0.11, 0.22, 0.33, 0.55)     # 1, 2, 3, 5 punti dei nove usati
@@ -204,9 +207,17 @@ def main():
     ap.add_argument('--feature', default='DTW')
     ap.add_argument('--camera', type=int, default=1)
     ap.add_argument('--soglia', type=float, default=0.5)
+    # La selezione DTW e' cambiata con il dataset riestratto: `scelte.txt` e'
+    # quella corrente, `scelte_32grandezze.txt` quella di agosto. Poterla
+    # scegliere serve a separare l'effetto del MOTORE da quello delle COLONNE
+    # quando i due cambiano insieme.
+    ap.add_argument('--scelte', default=None,
+                    help='file della selezione DTW (default: scelte.txt)')
+    ap.add_argument('--suffisso', default='',
+                    help='suffisso del file di uscita, per non sovrascrivere')
     a = ap.parse_args()
 
-    colonne = (feature_dtw() if a.feature.upper() == 'DTW'
+    colonne = (feature_dtw(a.scelte) if a.feature.upper() == 'DTW'
                else FEATURE[a.feature if a.feature in FEATURE else a.feature.upper()])
     z = np.load(a.npz, allow_pickle=True)
     meta = pd.read_csv(os.path.join(config.FEATURE_DIR, a.meta),
@@ -277,13 +288,17 @@ def main():
 
     out = os.path.join(config.RISULTATI_DIR, 'occlusioni')
     os.makedirs(out, exist_ok=True)
-    with open(os.path.join(out, f'{a.modello}_{a.feature}.json'), 'w',
-              encoding='utf-8') as fh:
+    with open(os.path.join(out, f'{a.modello}_{a.feature}{a.suffisso}.json'),
+              'w', encoding='utf-8') as fh:
         json.dump({'modello': a.modello, 'feature': a.feature,
                    'camera': a.camera, 'soglia': a.soglia,
                    'simulazione': 'punto congelato all ultima posizione nota',
+                   'colonne': list(colonne),
+                   'scelte': a.scelte or 'risultati/dtw/scelte.txt',
+                   'npz': os.path.basename(a.npz),
                    'prove': esito}, fh, indent=2, ensure_ascii=False)
-    print(f'\nsalvato: risultati/occlusioni/{a.modello}_{a.feature}.json')
+    print(f'\nsalvato: risultati/occlusioni/'
+          f'{a.modello}_{a.feature}{a.suffisso}.json')
 
 
 if __name__ == '__main__':

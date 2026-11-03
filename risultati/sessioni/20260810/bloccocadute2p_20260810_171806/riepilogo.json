@@ -1,0 +1,19 @@
+{
+  "blocco": "cadute2p",
+  "inizio": "2026-08-10T17:18:06",
+  "fine": "2026-08-10T17:21:09",
+  "durata_h": 0.049,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.45,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 932,
+  "pose_valide": 6,
+  "quota_pose": 0.0064,
+  "fps_medio": 5.29,
+  "allarmi": 0,
+  "allarmi_per_ora": 0.0,
+  "clip_salvate": 0,
+  "cambi_di_persona_sospetti": 0,
+  "interrotta_da_utente": true
+}

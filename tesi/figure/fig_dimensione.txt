@@ -1,0 +1,26 @@
+FIGURA — fig_dimensione.png
+===========================
+
+CHE COSA MOSTRA
+---------------
+Due grandezze sullo stesso asse orizzontale, il numero di alberi della
+foresta: a sinistra l'F2, a destra la latenza per finestra in millisecondi.
+
+COME SI LEGGE
+-------------
+Serve a scegliere una dimensione, non a mostrare un risultato. Si cerca il
+punto oltre il quale l'F2 smette di salire mentre la latenza continua: la'
+si ferma, ed e' il motivo dei 50 alberi installati.
+
+PROVENIENZA
+-----------
+Dieci soggetti, leave-one-subject-out su feature_v5, camera 1, dodici
+grandezze DTW, soglia 0,50. Prodotta da pipeline/dimensione_foresta.py. La
+latenza e' misurata UNA FINESTRA ALLA VOLTA e su un solo processo, come fa
+il sistema installato, ma SUL CALCOLATORE: sulla board il Capitolo 5 riporta
+39,04 ms per finestra.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/dimensione_foresta.json

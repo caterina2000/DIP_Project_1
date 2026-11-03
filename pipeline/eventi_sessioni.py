@@ -42,6 +42,7 @@ Uso:
 
 import argparse
 import glob
+import json
 import os
 import sys
 
@@ -66,12 +67,41 @@ RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #      clip. Quelle non vengono duplicate qui perche' ritraggono persone
 #      identificabili, ed e' l'unico dato del progetto per cui la copia in
 #      piu' e' un rischio e non una comodita'.
+def elenco_punteggi(radice: str) -> 'list[str]':
+    """
+    I file dei punteggi per finestra, un elemento per sessione.
+
+    Due registratori hanno prodotto due nomi diversi. Le sessioni fino al
+    13 agosto vengono da `session_recorder.py` e si chiamano tutte
+    `punteggi.csv`; quelle di `deploy_board/rileva.py` portano il nome della
+    sessione, per esempio `notte_20260906_1523.csv`. Cercare solo il primo
+    nome faceva sparire la sessione del 6 settembre dal conto SENZA dirlo:
+    lo script stampava sette blocchi invece di otto e nessun errore
+    ([ISS-140](../docs/ISSUES.md#iss-140)).
+
+    Il file delle feature, che sta nella stessa cartella e finisce per
+    `_feature.csv`, non e' un file di punteggi e va escluso.
+    """
+    fuori = []
+    for cartella in sorted(glob.glob(os.path.join(radice, '*', '*'))):
+        if not os.path.isdir(cartella):
+            continue
+        canonico = os.path.join(cartella, 'punteggi.csv')
+        if os.path.exists(canonico):
+            fuori.append(canonico)
+            continue
+        proprio = os.path.join(cartella, os.path.basename(cartella) + '.csv')
+        if os.path.exists(proprio):
+            fuori.append(proprio)
+    return fuori
+
+
 def _dove_sono_le_sessioni():
     da_ambiente = os.environ.get('SESSIONI_REALI')
     if da_ambiente:
         return da_ambiente
     locale = os.path.join(RADICE, 'risultati', 'sessioni')
-    if glob.glob(os.path.join(locale, '*', '*', 'punteggi.csv')):
+    if elenco_punteggi(locale):
         return locale
     return os.path.join(os.path.dirname(RADICE), 'DIP_PROJECT',
                         'sessioni_reali')
@@ -100,19 +130,33 @@ def eventi(sopra: np.ndarray, tempi: np.ndarray, persistenza: int,
     return fuori
 
 
+def tempo_e_decisione(d: 'pd.DataFrame', soglia):
+    """
+    Istante e decisione per finestra, qualunque sia il registratore.
+
+    `session_recorder.py` scrive `t_unix` (epoch) e `sopra_soglia`;
+    `rileva.py` scrive `t_s` (secondi dall'avvio, orologio monotono) e
+    `sopra`. Per il conteggio degli eventi conta solo la DIFFERENZA fra gli
+    istanti, quindi le due origini sono equivalenti.
+
+    `soglia=None` usa la colonna registrata dalla board, cioe' la decisione
+    effettivamente presa in esercizio; un valore esplicito la ricalcola.
+    """
+    t = d['t_unix' if 't_unix' in d.columns else 't_s'].to_numpy(float)
+    p = d['punteggio'].to_numpy(float)
+    colonna = 'sopra_soglia' if 'sopra_soglia' in d.columns else 'sopra'
+    sopra = (d[colonna].to_numpy() == 1) if soglia is None else (p >= soglia)
+    return t, p, sopra
+
+
 def analizza(percorso: str, soglia, persistenza: int, sospensione: float):
     d = pd.read_csv(percorso)
     if len(d) < 2 or 'punteggio' not in d.columns:
         return None
-    t = d['t_unix'].to_numpy(float)
-    p = d['punteggio'].to_numpy(float)
+    t, p, sopra = tempo_e_decisione(d, soglia)
     ore = (t.max() - t.min()) / 3600.0
     if ore < 1e-4:
         return None
-
-    # `soglia=None` usa la colonna registrata dalla board, cioe' la decisione
-    # effettivamente presa in esercizio; un valore esplicito la ricalcola.
-    sopra = (d['sopra_soglia'].to_numpy() == 1) if soglia is None else (p >= soglia)
 
     ev = eventi(sopra, t, persistenza, sospensione)
     # tempo medio fra falsi allarmi: con meno di due eventi non e' definito
@@ -145,7 +189,7 @@ def main():
                          'parametri di debounce')
     a = ap.parse_args()
 
-    elenco = sorted(glob.glob(os.path.join(SESSIONI, '*', '*', 'punteggi.csv')))
+    elenco = elenco_punteggi(SESSIONI)
     righe = [r for f in elenco
              if (r := analizza(f, a.soglia, a.persistenza, a.sospensione))
              and r['ore'] >= a.min_ore]
@@ -186,6 +230,35 @@ def main():
     print('Il valore 0,4/ora usato finora nel progetto non trova riscontro:')
     print('e otto volte lo studio piu solido (ISS-050).')
 
+    # L'artefatto. Il fattore di sovrastima e' citato nel Capitolo 5, nella
+    # guida al lavoro e nel documento per il relatore, e fino al 7 settembre
+    # 2026 esisteva SOLTANTO in quei testi: `audit_numeri.py` lo dava per
+    # coperto perche' la cifra compariva per caso dentro altri file
+    # ([ISS-135](../docs/ISSUES.md#iss-135)). Ora ogni esecuzione lo scrive,
+    # con la tabella da cui esce.
+    fuori = {
+        # relativo: l'artefatto viaggia fra macchine, il percorso assoluto no
+        'sorgente': os.path.relpath(SESSIONI, RADICE),
+        'persistenza': a.persistenza,
+        'sospensione_s': a.sospensione,
+        'soglia': 'registrata dalla board' if a.soglia is None else a.soglia,
+        'min_ore': a.min_ore,
+        'n_sessioni': len(righe),
+        'ore_totali': tot_ore,
+        'finestre_sopra_totali': tot_fin,
+        'eventi_totali': tot_ev,
+        'eventi_ora_totale': tot_ev / tot_ore,
+        'finestre_ora_totale': tot_fin / tot_ore,
+        'fattore_sovrastima': tot_fin / max(tot_ev, 1),
+        'sessioni': sorted(righe, key=lambda x: -x['eventi_ora']),
+    }
+    dst = os.path.join(RADICE, 'risultati', 'campo', 'eventi_sessioni.json')
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    with open(dst, 'w', encoding='utf-8') as f:
+        json.dump(fuori, f, indent=1, ensure_ascii=False)
+    print()
+    print(f'scritto: {os.path.relpath(dst, RADICE)}')
+
     if a.sensibilita:
         print()
         print('=' * 100)
@@ -204,12 +277,9 @@ def main():
                     d = pd.read_csv(f)
                     if len(d) < 2:
                         continue
-                    t = d['t_unix'].to_numpy(float)
+                    t, _, sopra = tempo_e_decisione(d, a.soglia)
                     if (t.max() - t.min()) / 3600 < a.min_ore:
                         continue
-                    sopra = ((d['sopra_soglia'].to_numpy() == 1)
-                             if a.soglia is None
-                             else (d['punteggio'].to_numpy(float) >= a.soglia))
                     n += len(eventi(sopra, t, pers, sosp))
                 riga += f'{dec(n / tot_ore):>14}'
             print(riga)

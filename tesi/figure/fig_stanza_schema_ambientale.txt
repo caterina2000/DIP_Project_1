@@ -1,0 +1,3 @@
+FIGURA: fig_stanza_schema_ambientale.png
+Schema disegnato per la slide sui sistemi ambientali. Pianta schematica, nessuna persona, nessuna abitazione reale.
+Da verificare: il tipo di sensore a soffitto va confermato con Cap. 2 prima di presentarlo.

@@ -1,0 +1,28 @@
+FIGURA UNICA — LE TRE RAPPRESENTAZIONI AFFIANCATE
+File: fig_rappresentazioni.png
+Alternativa alle tre figure separate: si usa l'una O le altre, non entrambe.
+
+QUANDO USARE QUESTA
+  Se in impaginazione le tre figure singole risultano troppo piccole, oppure se
+  si preferisce che il confronto sia immediato. Va in testa alla sezione, dopo
+  il paragrafo che dice che le tre rappresentazioni sono «tre modi diversi di
+  trasformare la stessa posa», e le tre sottosezioni la richiamano.
+
+QUANDO USARE LE TRE SEPARATE
+  Se si vuole che ogni costruzione stia accanto al testo che la spiega. Le tre
+  sottosezioni sono lunghe: con una figura sola in testa, chi legge A3 ce l'ha
+  tre pagine sopra. Il confronto regge comunque, perche' il fotogramma e' lo
+  stesso in tutte e tre, e basta dirlo una volta.
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figure/fig_rappresentazioni.png}
+\caption{Le tre rappresentazioni sullo stesso fotogramma. A sinistra A1, con
+l'ellisse e i suoi due assi; al centro A2, con il vettore del tronco e l'origine
+sul bacino; a destra A3, con la lunghezza del tronco come unita' di misura e le
+altezze relative. In giallo i \emph{landmark} che ciascuna rappresentazione
+impiega: sette, cinque e nove.}
+\label{fig:rappresentazioni}
+\end{figure}

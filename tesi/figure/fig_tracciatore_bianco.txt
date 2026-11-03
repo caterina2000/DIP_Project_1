@@ -1,0 +1,21 @@
+due fotogrammi consecutivi, la dipendenza temporale
+
+ripresa            sub09_act05_trial01_cam01
+fotogrammi         28 -> 29
+file               2018-07-09T12_07_05.052213-1.png
+                   2018-07-09T12_07_05.097334-1.png
+spostamento medio  40.6 pixel sui 9 punti di A3
+per punto:
+     0    68.5 px
+    11    51.3 px
+    12    67.1 px
+    23    37.6 px
+    24    46.0 px
+    25    34.8 px
+    26    42.3 px
+    27    13.6 px
+    28     3.9 px
+
+coppia scelta come quella a spostamento massimo fra i
+primi 175 fotogrammi, 175 dei quali con posa valida.
+Stimatore in modalita tracciamento, come in estrazione.

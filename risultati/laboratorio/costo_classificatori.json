@@ -1,0 +1,60 @@
+{
+  "forma_finestra": [
+    22,
+    12
+  ],
+  "batch": 1,
+  "ripetizioni": 300,
+  "macchina": "calcolatore di sviluppo, non la board",
+  "python": "3.10.20",
+  "misure": [
+    {
+      "architettura": "gru",
+      "n_parametri": 24483,
+      "ms_mediana": 3.5118500236421824,
+      "ms_media": 3.5456623327142247,
+      "ms_dev": 0.38063898587027284,
+      "nota": "non addestrata, tf.function"
+    },
+    {
+      "architettura": "lstm",
+      "n_parametri": 32227,
+      "ms_mediana": 3.4521499765105546,
+      "ms_media": 3.5103003370265164,
+      "ms_dev": 0.39653924914484606,
+      "nota": "non addestrata, tf.function"
+    },
+    {
+      "architettura": "cnn",
+      "n_parametri": 46147,
+      "ms_mediana": 1.3248500181362033,
+      "ms_media": 1.382176666908587,
+      "ms_dev": 0.17999283263980678,
+      "nota": "non addestrata, tf.function"
+    },
+    {
+      "architettura": "transformer",
+      "n_parametri": 34499,
+      "ms_mediana": 1.6100499778985977,
+      "ms_media": 1.6583063313737512,
+      "ms_dev": 0.17047560361337635,
+      "nota": "non addestrata, tf.function"
+    },
+    {
+      "architettura": "grafo",
+      "n_parametri": 12323,
+      "ms_mediana": 1.7999999690800905,
+      "ms_media": 1.880163000508522,
+      "ms_dev": 0.21512422090088584,
+      "nota": "non addestrata, tf.function"
+    },
+    {
+      "architettura": "foresta",
+      "n_parametri": 6928,
+      "ms_mediana": 4.8488000757060945,
+      "ms_media": 5.2202393355158465,
+      "ms_dev": 0.888068094079578,
+      "nota": "installata, 50 alberi, n_jobs=1"
+    }
+  ]
+}

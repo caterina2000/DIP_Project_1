@@ -1,0 +1,44 @@
+FIGURA A2 — IL TRONCO NELLO SPAZIO
+File: fig_rappr_a2.png
+Prodotta da: pipeline/figura_rappresentazioni.py  (ambiente fall_processing)
+Stesso fotogramma di A1 e A3.
+
+CHE COSA SI VEDE
+  - in giallo i cinque landmark che A2 impiega: naso, spalle, anche
+  - la freccia nera: il vettore del tronco, dal punto medio delle anche a
+    quello delle spalle
+  - la crocetta: l'origine del riferimento, cioe' il centro delle anche
+  - la linea punteggiata: la verticale del riferimento dei world landmark,
+    rispetto alla quale l'angolo viene misurato
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.52\textwidth]{figure/fig_rappr_a2.png}
+\caption{A2 sui cinque \emph{landmark} impiegati --- naso, spalle e anche. La
+freccia e' il vettore del tronco, dal punto medio delle anche a quello delle
+spalle; la crocetta segna l'origine del riferimento. La linea punteggiata e' la
+verticale del riferimento dei \emph{world landmark}, rispetto alla quale
+l'angolo viene misurato: \textbf{non} e' la verticale della stanza.}
+\label{fig:rappr-a2}
+\end{figure}
+
+DOVE
+  Dopo l'elenco delle feature di base, accanto al paragrafo che spiega il
+  sistema di riferimento.
+
+FRASE DA AGGIUNGERE NEL TESTO
+  La Figura~\ref{fig:rappr-a2} rende esplicita questa differenza: la verticale
+  punteggiata rispetto a cui l'angolo e' misurato appartiene al riferimento del
+  corpo, e non coincide con la direzione della gravita' nella scena.
+
+ATTENZIONE, DA DIRE SE IL RELATORE CI FA CASO
+  Il disegno e' necessariamente una proiezione: A2 lavora in tre dimensioni, la
+  figura sta sul piano dell'immagine. E' un limite della resa grafica, non
+  della rappresentazione.
+
+VALORI DI QUESTO FOTOGRAMMA
+  angolo del tronco (A2, world landmark)  35,9 gradi
+  angolo del tronco (A3, piano immagine)  -117,7 gradi
+  I due non coincidono, e la ragione e' esattamente quella della didascalia.

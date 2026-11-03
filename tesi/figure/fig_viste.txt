@@ -1,0 +1,33 @@
+FIGURA — fig_viste.png
+======================
+
+CHE COSA MOSTRA
+---------------
+Che cosa succede alla decisione quando cambia il punto di vista: a sinistra
+F2 con la dispersione fra soggetti, a destra i due errori contati
+separatamente. Tre configurazioni: la vista laterale con se stessa, il
+trasferimento alla vista rialzata, e l'addestramento su entrambe.
+
+COME SI LEGGE
+-------------
+La barra dell'errore sull'F2 e' la DISPERSIONE FRA SOGGETTI: una differenza
+piu' piccola di quella non e' distinguibile dall'aver pescato una persona
+invece di un'altra. Il divario fra la prima e la seconda riga e' molte volte
+piu' grande, quindi e' un effetto vero.
+
+I NUMERI
+--------
+I falsi allarmi della seconda riga sono l'ordine di grandezza che il
+capitolo commenta: trasferire alla vista rialzata non peggiora un po' tutto,
+fa esplodere un errore solo.
+
+PROVENIENZA
+-----------
+Dieci soggetti, dataset riestratto (feature_v3), foresta casuale, soglia
+0,50 dichiarata a priori, leave-one-subject-out. Prodotta da
+pipeline/viste_incrociate.py.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/viste_incrociate_10sog.json

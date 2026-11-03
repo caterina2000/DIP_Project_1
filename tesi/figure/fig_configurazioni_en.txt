@@ -1,0 +1,34 @@
+FIGURA — fig_configurazioni_en.png
+==================================
+
+CHE COSA MOSTRA
+---------------
+Le cinque configurazioni di grandezze sul piano cadute mancate contro falsi
+allarmi, su dieci soggetti in leave-one-subject-out. Il punto pieno e' la
+configurazione installata. Accanto a ciascun punto il suo F2.
+
+COME SI LEGGE
+-------------
+In basso a sinistra si sbaglia meno, su entrambi i conti. Le frecce blu sono
+le aggiunte di grandezza --- altezza dal pavimento, integrali --- e
+scendono: tolgono cadute mancate, da 45 a 22 e a 14. Le frecce rosse sono i
+controesempi domestici e vanno a sinistra: tolgono falsi allarmi, da 150 a
+124, e non cambiano di una sola unita' le cadute mancate. Le due aggiunte
+agiscono su assi diversi, ed e' la ragione per cui conviene tenerle
+entrambe.
+
+I NUMERI
+--------
+La versione precedente di questa figura era un grafico a barre dell'F2. I
+cinque valori stanno fra 0,898 e 0,953: su un asse che parte da zero le
+barre erano indistinguibili, e l'F2 comprime in un numero solo due errori
+che qui si muovono in direzioni diverse.
+
+PROVENIENZA
+-----------
+Dieci soggetti, leave-one-subject-out.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/run_10soggetti.json

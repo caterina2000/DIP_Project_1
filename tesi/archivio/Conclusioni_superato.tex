@@ -1,0 +1,148 @@
+\chapter{Contributi, limiti e sviluppi}
+\label{cap:conclusioni}
+
+% ---------------------------------------------------------------------
+% Capitolo aggiunto: nella struttura precedente le conclusioni erano il
+% Cap. 6, ora occupato dalla validazione sul campo.
+%
+% Scritto il 2026-08-17. I contributi sono presentati come METODOLOGICI:
+% il valore del lavoro non e' un F2 piu' alto di altri, ed e' importante
+% che il capitolo non provi a farlo sembrare tale.
+%
+% NON usare il "4,32x sull'escursione dell'angolo del tronco": ISS-033 ha
+% accertato che non si riproduce (rieseguendo su 25 sequenze esce 1,99x).
+% Il numero da citare e' il 2,9x sull'accuratezza.
+%
+% [2026-09-29] Il divario in F2 fra le due camere NON e' piu' 0,422: quel
+% valore veniva dall'impianto preliminare a cinque soggetti (0,857 -> 0,434)
+% e non e' stato aggiornato quando il Capitolo 4 e' stato rifatto a dieci
+% soggetti, dove il risultato verificato e' 0,822 -> 0,488, divario 0,334
+% (tab:viste). Corretto qui e in Cap6.tex e Introduzione.tex, che citavano
+% ancora il valore vecchio. Non reintrodurre 0,422: vedi tab:viste in
+% Cap4.tex per il dato attuale.
+% ---------------------------------------------------------------------
+
+\section{Contributi}
+\label{sec:contributi}
+
+Il lavoro non rivendica un record di accuratezza, e sarebbe poco onesto farlo: i numeri pubblicati su UP-Fall sono più alti di quelli riportati qui. Rivendica invece che quei numeri e questi rispondano a domande diverse, e che la differenza sia misurabile.
+
+\paragraph{1. Un protocollo di valutazione per dataset con pochi soggetti, e la misura di cosa succede senza.} Con dieci soggetti, una divisione casuale delle finestre sovrapposte mette tutte e dieci le persone sia in addestramento sia in verifica. Applicando insieme le tre correzioni --- divisione per soggetto, normalizzazione delle scale, insieme di validation distinto da quello di verifica --- alla stessa configurazione e sugli stessi dati, l'F1 passa da $0{,}0000$ a $0{,}234$. Il primo valore non è un modello mediocre: è un modello che non ha mai predetto la classe positiva, e che senza il protocollo corretto sarebbe stato indistinguibile da uno funzionante.
+
+Il contesto rende il contributo leggibile. I lavori pubblicati su UP-Fall riportano accuratezze fra il 98\% e il 99,58\%, e almeno uno dichiara esplicitamente di usare partizioni casuali 70:30 dell'intero dataset --- cioè esattamente il difetto qui documentato. Un riscontro indipendente quantifica lo scarto: lo stesso classificatore che dà 89\% in \emph{k-fold} casuale scende al 76\% con divisione per soggetto.
+
+\paragraph{2. La quantificazione dell'effetto del punto di vista.} Il passaggio dalla telecamera laterale a quella frontale rialzata, a parità di soggetto, di caduta e di istante, costa $0{,}334$ di F2 su dieci soggetti in leave-one-subject-out --- da $0{,}822$ a $0{,}488$. La ragione è geometrica e non algoritmica: una telecamera che guarda dall'alto comprime la rotazione del tronco lungo il proprio asse ottico, e una persona eretta e una distesa si proiettano in modo simile. L'informazione che distingue una caduta viene cancellata dall'ottica prima che un modello possa elaborarla. Addestrando su entrambi i punti di vista l'$F_2$ sulla Camera~2 risale a $0{,}731$ e i falsi allarmi scendono da 3252 a 751: migliorano insieme, il che distingue un apprendimento più generale da uno spostamento di soglia.
+
+\paragraph{3. Un confronto fra classificatori a parità di protocollo, con esito contrario all'impostazione di partenza.} Sei architetture --- due ricorrenti, una convoluzionale, un encoder ad attenzione, una rete a grafo e un classificatore non sequenziale --- cadono entro $0{,}079$ di $F_2$, contro una dispersione fra soggetti compresa fra $0{,}08$ e $0{,}12$. Su dieci soggetti \textbf{nessuna fa meglio della GRU}, e il numero di parametri non ordina il risultato. Un solo confronto supera il valore critico, la rete a grafo con $t = -2{,}37$, e lo supera nel verso sbagliato: non sopravvive alla correzione per molteplicità, e va riportato come indicativo.
+
+Il contributo non è però la constatazione, che da sola sarebbe un risultato negativo: è la sua quantificazione. Il confronto appaiato permette di calcolare quante persone servirebbero per rendere significativa ciascuna differenza, e la risposta separa le domande in due classi. Distinguere una GRU da una LSTM richiederebbe \textbf{centotredici} soggetti; distinguere due definizioni del compito ne richiede \textbf{due}. Un fattore cinquantasei fra le due domande, e nessun archivio pubblico di cadute si avvicina alla prima cifra.
+
+\paragraph{4. La caratterizzazione end-to-end su hardware edge reale.} L'intera catena gira su un dispositivo da circa cento euro a \textbf{7,3 fotogrammi al secondo}, senza che alcun dato lasci l'abitazione. La ripartizione del costo per fotogramma è il dato meno atteso: la percezione è l'\textbf{85,2\%} del tempo, il classificatore il \textbf{14,3\%}. Tutta la letteratura sul confronto fra architetture, e tutto il lavoro del punto 3, agiscono su un settimo del problema. \emph{I valori sono quelli misurati sulla board durante 4,6 ore di esercizio continuo; fino al 6 settembre 2026 questo paragrafo dichiarava 26,5 fps con una ripartizione di $88{,}4\%$ e $5{,}8\%$, trascritti da una sessione di terminale e ritirati. Le proporzioni fra le fasi reggono, i valori assoluti no.}
+
+\paragraph{5. La quantificazione dello scarto fra precision di laboratorio e falsi allarmi in esercizio.} Una precision di $0{,}819$ misurata su un insieme quasi bilanciato corrisponde, proiettata sul funzionamento continuo, a 14--125 falsi allarmi all'ora. Misurati: \textbf{2.735}. La previsione, costruita per essere scomoda, era ottimistica di oltre un ordine di grandezza.
+
+\paragraph{6. Le grandezze integrali al posto delle derivate istantanee.} Il classificatore non usava la dinamica --- correlazione fra punteggio e movimento $+0{,}139$ --- non per un difetto di architettura ma perché ciò che riceveva come dinamica era rumore: le derivate hanno autocorrelazione a un fotogramma fra $0{,}33$ e $0{,}47$. Sostituendole con grandezze accumulate su una finestra mobile, l'autocorrelazione sale a $0{,}95$--$0{,}98$ e la separazione fra le classi, misurata sul rapporto fra le mediane, va da $7$ a $90$ volte contro le $5$--$26$ delle derivate. È l'unico intervento del lavoro che migliora simultaneamente in laboratorio e sul campo.
+
+\paragraph{7. La misura di ciò che il dataset di riferimento non riesce a distinguere.} Fra la configurazione di riferimento e quella adottata corrono $0{,}055$ di $F_2$ in laboratorio --- dentro la dispersione fra soggetti, quindi una differenza che non si può dichiarare --- e un fattore \textbf{cinquantadue} sui falsi allarmi in una casa. È il contributo che si ritiene principale, ed è discusso nella sezione seguente.
+
+\section{Il risultato che non era atteso}
+\label{sec:risultato-inatteso}
+
+Il lavoro era impostato su una domanda di ingegneria: \emph{quale architettura, e su quale hardware}. La risposta è che la domanda era mal posta, e per due ragioni indipendenti.
+
+La prima è che \textbf{l'architettura del classificatore non è la variabile che decide}. L'intero intervallo entro cui cadono sei architetture vale $0{,}079$; il divario fra due posizioni della telecamera vale $0{,}334$, cioè \textbf{oltre quattro volte tanto}, e quello fra due definizioni del compito $0{,}127$ con una differenza statisticamente netta, mentre nessuna coppia di architetture lo è. Ha una conseguenza pratica immediata per chi installa questi sistemi, ed è economicamente rilevante: spostare una telecamera costa meno che addestrare un modello più grande, e rende di più.
+
+La seconda, e più importante, riguarda \textbf{cosa un insieme di verifica può
+misurare}. Tre interventi progettati per la robustezza domestica sono stati
+giudicati da un archivio di laboratorio e da una casa reale, con gli stessi
+modelli e la stessa procedura. Fra la configurazione di riferimento e quella
+adottata corrono $0{,}055$ di $F_2$ in laboratorio --- \emph{dentro} la
+dispersione fra soggetti, quindi una differenza che il protocollo non
+autorizza a dichiarare --- e un fattore \textbf{cinquantadue} sulle finestre in
+allarme misurate in una casa.
+
+Lo stesso fenomeno si ripresenta su un singolo iperparametro: portando la
+finestra di accumulazione da 31 a 45 fotogrammi l'$F_2$ di laboratorio
+continua a salire mentre sul campo si perde una caduta.
+
+\paragraph{Una precisazione che il lavoro deve a sé stesso.} Una versione
+precedente di questa tesi sosteneva qualcosa di più forte: che l'archivio di
+laboratorio \emph{ordinasse in modo errato} le alternative, collocando ultima
+la configurazione che in casa risultava migliore. Quella affermazione era
+fondata su cinque soggetti, e non è sopravvissuta al raddoppio: su dieci, le
+due graduatorie concordano.
+
+L'enunciato che regge è quindi più debole in apparenza e più solido in
+sostanza:
+
+\begin{quote}
+Un insieme di verifica non può misurare un miglioramento su una condizione che
+non rappresenta. Non si limita a sovrastimare le prestazioni: \textbf{rende
+indistinguibili alternative che in esercizio differiscono di ordini di
+grandezza}, e lo fa con la stessa apparente sicurezza con cui distinguerebbe
+alternative davvero equivalenti.
+\end{quote}
+
+L'effetto pratico coincide con quello di un ordinamento errato. Chi selezioni
+la configurazione sul solo $F_2$ di laboratorio non ha alcuna ragione
+statistica per preferire la configurazione adottata a quella di riferimento:
+sono indistinguibili, e la seconda è più semplice. Sceglierebbe la più
+semplice, e installerebbe un sistema che produce cinquantadue volte i falsi
+allarmi --- avendo seguito la procedura corretta fino in fondo.
+
+La causa non è misteriosa ed è stata misurata. Nell'archivio di laboratorio le
+persone orizzontali che non sono cadute stanno \emph{a terra}, perché
+sdraiarsi sul pavimento è una delle attività registrate. In una casa stanno
+\emph{sul divano}. Un intervento che insegni a distinguere il divano dal
+pavimento non può essere premiato da un insieme che non contiene divani ---
+e vi consuma anzi capacità del modello su una distinzione che lì non serve.
+
+La differenza fra le due formulazioni è operativa. Che un dataset sovrastimi è noto, ed è misurato su scala ben maggiore di questo lavoro: il benchmark OmniFall, unificando otto dataset pubblici e confrontandoli con cadute reali, riporta per UP-Fall un crollo da 72,9\% a 16,9\% di F1. Che un dataset \emph{ordini male} è una proprietà diversa, e più dannosa: chi sovrastima produce un sistema peggiore di quanto crede; chi non distingue produce \emph{il sistema sbagliato}, avendo scartato quello giusto con piena fiducia nella misura e senza che nulla, nella procedura, potesse segnalarglielo.
+
+\section{Limiti}
+\label{sec:limiti}
+
+Si dichiarano senza attenuazioni, e alcuni sono sufficienti a delimitare quanto sopra si può portare.
+
+\begin{itemize}
+  \item \textbf{Dieci soggetti} nel dataset di addestramento, tutti giovani adulti, contro una popolazione bersaglio anziana. La dispersione fra fold, $\pm 0{,}05$--$0{,}14$, che il raddoppio dei soggetti non ha ridotto in modo apprezzabile, è dell'ordine di molte differenze confrontate nel Capitolo~\ref{cap:risultati}, che vanno quindi dichiarate non distinguibili.
+
+  \item \textbf{Le cadute sono recitate}, qui come in UP-Fall, in UR-Fall e nella quasi totalità della letteratura. Nessuno studio di pochi giorni può misurare cadute accidentali: una persona anziana cade meno di una volta all'anno. È il limite che questo lavoro condivide con il settore, e va detto invece che lasciato intendere.
+
+  \item \textbf{Il recall sul campo poggia su cinque cadute}, in una sessione con l'inquadratura difettosa. Non è una stima, è un indizio. E non è mai misurato sulla popolazione anziana, che per ragioni di sicurezza non ha eseguito cadute.
+
+  \item \textbf{Un solo archivio esterno} per la validazione fra dataset: non si distingue ciò che è specifico di UR-Fall da ciò che varrebbe per qualunque ambiente nuovo.
+
+  \item \textbf{Due sole abitazioni} per i controesempi domestici. Parte del guadagno misurato potrebbe essere adattamento a quelle due stanze e non robustezza generale, e servirebbe una terza casa per separare le due cose.
+
+  \item \textbf{Nessuna ricerca sistematica di iperparametri}, in nessun esperimento. Differenze inferiori a $\sim 0{,}02$ fra modelli neurali non sono interpretabili.
+
+  \item \textbf{Il tracciamento multi-persona non è validato}, e non lo è per assenza di dati: nessun archivio pubblico contiene più persone in scena.
+
+  \item \textbf{L'effetto della quantizzazione INT8 non è stato isolato} dagli altri fattori nel confronto fra stimatori di posa.
+
+  \item \textbf{Le occlusioni da mobilio non sono state misurate.} Il risultato sull'auto-occlusione riguarda YOLOv8, e rifatto sullo stimatore effettivamente installato non si riproduce: su MediaPipe la confidenza del volto passa da $0{,}997$ a $0{,}989$ fra la posizione eretta e quella a terra, cioè non degrada. Degradano gli arti. Il risultato originale va attribuito allo stimatore e non al problema.
+
+  \item \textbf{La prova di durata da dodici ore non è stata eseguita.} La sospensione automatica del dispositivo, che aveva reso invalida senza segnalarlo la prima sessione lunga, è ora rilevabile, ma la prova resta da fare.
+\end{itemize}
+
+\section{Sviluppi}
+\label{sec:sviluppi}
+
+Le direzioni che seguono non sono un elenco di possibilita': sono le cinque
+che questo lavoro ha incontrato senza poterle percorrere, e per ciascuna e'
+noto che cosa manchi per farlo. Sono ordinate per quanto sbloccano il resto,
+non per quanto sono interessanti.
+
+\paragraph{Taratura della soglia senza etichette, sul tasso di base stimato.} Il crollo cross-dataset si scompone in due parti di grandezza confrontabile: \textbf{il 49\% è taratura} della soglia --- il modello continua a ordinare le finestre, su una scala diversa --- e \textbf{il 51\% è perdita reale} di capacità discriminativa, che nessuna soglia recupera. La parte di taratura si correggerebbe con cadute etichettate dell'ambiente di destinazione, che chi installa non possiede. Una prova sull'impianto precedente indicava che fissare la soglia a un percentile della distribuzione dei punteggi osservati ne recupera circa il 70\%; ma richiede di assumere il tasso di base, e su una casa quell'assunzione produrrebbe fra 84 e 1.690 falsi allarmi all'ora, perché fissa il tasso di allarme invece di misurarlo. La direzione promettente non è assumere il tasso ma \emph{stimarlo}, per esempio da un periodo iniziale in cui si assuma l'assenza di cadute --- ipotesi realistica in una casa e falsa in un archivio.
+
+\paragraph{Mappa del contesto tramite rilevamento degli oggetti.} La distinzione fra divano e pavimento è oggi affidata a una stima automatica del piano del pavimento. Un rilevamento dei mobili eseguito \emph{all'avvio} e non per fotogramma --- i mobili non si muovono --- avrebbe costo nullo in esercizio e fornirebbe il contesto in modo diretto.
+
+\paragraph{Sessioni più lunghe e in più abitazioni}, con partecipanti anziani per il solo blocco di vita normale, e la prova di durata da dodici ore.
+
+\paragraph{Sintesi di punti di vista per riproiezione dello scheletro}, per attaccare il divario più grande misurato in questo lavoro. Va però dichiarato un limite noto del metodo: ruotare uno scheletro produce le coordinate di una vista nuova ma non la degradazione di confidenza che quella vista causerebbe realmente, e con auto-occlusioni in direzioni diverse lo scheletro trasformato non imita fedelmente il nuovo punto di vista. Il guadagno riportato in letteratura va quindi preso come limite superiore.
+
+\paragraph{Ensemble di architetture.} I benchmark cross-dataset più recenti indicano negli ensemble il guadagno di generalizzazione più affidabile fra le strategie confrontate. Cinque modelli addestrati a parità di protocollo sono già disponibili, quindi il costo dell'esperimento è quasi nullo.
+
+\paragraph{Ricerca di iperparametri}, per rendere interpretabili le differenze fra modelli neurali che questo lavoro dichiara non distinguibili.
+

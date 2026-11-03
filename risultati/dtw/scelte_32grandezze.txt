@@ -1,0 +1,12 @@
+A2_testa_rel_y
+A2_discesa
+A2_percorso
+A1_discesa
+A3_escursione
+A3_discesa
+A3_percorso
+A1_percorso
+A3_ginocchia_rel_y
+A1_escursione
+A3_hip_vel
+A3_testa_vel_rel

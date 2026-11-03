@@ -1,0 +1,23 @@
+sessione   : 20260813/bloccocadute_sola_20260813_091641
+clip       : 9
+pacchetto  : deploy_board/pacchetto_v2  (DTW 12 colonne, feature_v2_omnifall.csv,
+             selezione scelte_prima_di_v5.txt, 12.140 finestre / 569 positive)
+ambiente   : fall_processing, MediaPipe 0.10.9
+cadenza    : 10 fps dichiarata (le clip furono salvate a 10 fps)
+avvio      : 2026-09-10 14:54:13
+----------------------------------------------------------------------
+  evt_0001_092019           34%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0003_092126           60%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0006_092211           98%   0.600       4       7   installata=0  0,50=0  0,40=1  0,30=1
+  evt_0014_092236            6%   0.040       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0015_092414           75%   0.260       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0020_092527           38%   0.280       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0032_093132           42%   0.760       1       3   installata=0  0,50=0  0,40=1  0,30=1
+  evt_0037_093234            4%   0.120       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0038_094621           66%   0.260       0       0   installata=0  0,50=0  0,40=0  0,30=0
+    installata 0,50 5cons    0 allarmi
+    0,50 5su7                0 allarmi
+    0,40 2cons               2 allarmi
+    0,30 3su5                2 allarmi
+fine       : 2026-09-10 14:56:02
+csv scritti: 9 su 9

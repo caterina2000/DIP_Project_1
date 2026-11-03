@@ -27,7 +27,8 @@ riprende il lavoro trova una struttura diversa da quella descritta piu' sotto.
 
 ### La tesi e' qui
 
-`tesi/` contiene il testo: otto capitoli, le figure, e `controlla.py`. Prima
+`tesi/` contiene il testo: cinque capitoli piu' introduzione e conclusioni,
+le figure, e `controlla.py`. Prima
 stava in `DIP_PROJECT/tesi/`, dove non c'e' piu' nulla. Lo spostamento e'
 stato verificato con `diff -rq` prima della rimozione: 43 file identici.
 
@@ -40,7 +41,8 @@ Il 23 agosto e' stato scritto il capitolo sullo stato dell'arte, che non
 esisteva, portando i capitoli a otto. Il 26 sono diventati **cinque**:
 protocollo e risultati insieme, deployment e ambiente reale insieme, le
 conclusioni in un file proprio. Le etichette `\label{cap:...}` sono state
-tenute tutte come alias e tutti i `ef` si risolvono da soli.
+tenute tutte come alias e tutti i `
+ef` si risolvono da soli.
 
 La copia dei capitoli com'erano prima della fusione sta in
 `_superato/capitoli_pre_fusione/`, con il LEGGIMI che dice dove e' finito
@@ -81,25 +83,47 @@ LEGGIMI dice per ciascun file dove e' finito il suo contenuto.
 
 | | capitolo | parole | sez. | sottosez. | parole per titolo |
 |---|---|---:|---:|---:|---:|
-| | Introduzione | 966 | --- | --- | prosa continua |
-| 1 | Contesto applicativo e formulazione del problema | 2.858 | 4 | 4 | 357 |
-| 2 | Stato dell'arte | 2.507 | 5 | 0 | 501 |
-| 3 | Metodologia | 9.076 | 7 | 13 | 453 |
-| 4 | Protocollo di valutazione e risultati sperimentali | 7.872 | 9 | 7 | 492 |
-| 5 | Implementazione su edge e validazione in ambiente reale | 7.133 | 9 | 9 | 396 |
-| | Conclusioni | 2.103 | 5 | 0 | 420 |
-| | | **33.9k** | **39** | **33** | |
+| | Introduzione | 1.041 | --- | --- | prosa continua |
+| 1 | Contesto applicativo e formulazione del problema | 2.912 | 4 | 4 | 364 |
+| 2 | Stato dell'arte | 2.618 | 5 | 0 | 524 |
+| 3 | Metodologia | 9.498 | 7 | 13 | 475 |
+| 4 | Protocollo di valutazione e risultati sperimentali | 9.110 | 9 | 7 | 569 |
+| 5 | Implementazione su edge e validazione in ambiente reale | 8.002 | 9 | 9 | 445 |
+| | Conclusioni | 2.226 | 5 | 0 | 445 |
+| | | **35.4k** | **39** | **33** | |
+
+Misurato con `python tesi/controlla.py` il 2026-08-27. La tabella precedente
+diceva 33.9k ed era ferma al pomeriggio del 26: i due commit della sera ---
+«Capitolo 4: otto difetti trovati rileggendolo» e «Capitolo 5: undici difetti,
+due dei quali errori di fatto» --- hanno aggiunto testo a quei due capitoli, e
+l'Introduzione e' stata ritoccata dopo. **La struttura dei titoli non e'
+cambiata**: sono gli stessi 39 e 33.
 
 Il criterio e' un titolo d'indice ogni ~400 parole, e dal 26 agosto **tutti i
 capitoli lo rispettano**. Le regole di scrittura sono in
 [../CLAUDE.md](../CLAUDE.md), sezione 2.
 
 **Nessun testo e' stato cancellato** nella riorganizzazione: 129 declassamenti
-e rinomine, zero tagli. La tesi resta a 33.9k parole invece delle 30k previste
+e rinomine, zero tagli. La tesi resta a 35.4k parole invece delle 30k previste
 perche' tutto cio' che e' stato misurato e' rimasto dentro. La compressione a
 costo piu' basso, se servisse, e' spostare le trentadue grandezze in
 appendice: ~700 parole senza perdere niente.
 
+
+## Le prove
+
+`prove/` esiste dal 1 settembre 2026: 31 prove, `python prove/esegui.py`, due
+secondi. Coprono i tre punti in cui un errore non produce un'eccezione ma un
+numero --- motore geometrico, regola di etichettatura, aggregazione in eventi
+([ISS-125](ISSUES.md#iss-125)). Il LEGGIMI in quella cartella dice perche'
+quelle tre e non altre, e come si rigenera il file d'oro.
+
+Le verifiche della **board** non stanno li': stanno in
+`deploy_board/rileva.py --parita`, perche' devono girare sul dispositivo.
+Sono tre, e la terza --- la parita' sui fotogrammi --- e' quella che chiude il
+punto cieco di [ISS-106](ISSUES.md#iss-106).
+
+---
 
 ## Due progetti, due ruoli
 
@@ -211,6 +235,22 @@ ore, 16 anziani). Il valore 0,4/ora usato in precedenza non trova riscontro
 ---
 
 ## Quello che manca
+
+Aggiornato al **6 settembre 2026**.
+
+**Nel codice: niente.** `python tesi/controlla.py` -> «Nessun problema.
+Restano 0 figure da produrre»; `python prove/esegui.py` -> 31 prove su 31;
+nessun `DA COMPORRE` ne' `TODO` nei sorgenti. `fig:due_camere`, l'ultimo
+ambiente `figure` senza immagine, e' stata composta il 6 settembre da
+`pipeline/figura_due_camere.py`.
+
+**Da decidere sul testo, e non e' lavoro di codice:** i numeri
+dell'escursione fra le due viste. La rimisura pulita esiste
+([EXP-020](EXPERIMENTS.md#exp-020)) e sposta il rapporto da **1,99× a 2,44×**
+togliendo i due controesempi che il Capitolo 4 cita; la causa e' doppia
+([ISS-133](ISSUES.md#iss-133) e [ISS-134](ISSUES.md#iss-134)), e la seconda
+--- lo stimatore che su Camera2 perde chi cade in **6 riprese su 25** ---
+non e' quella che il capitolo dichiara.
 
 - riscrittura di quattro paragrafi della relazione (linguaggio, trade-off, narrazione)
 - prova lunga sulla board **dopo** la correzione del debounce

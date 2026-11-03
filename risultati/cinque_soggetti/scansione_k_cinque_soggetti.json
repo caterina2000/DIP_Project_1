@@ -1,0 +1,128 @@
+{
+ "AVVISO": "Misure dell impianto a CINQUE soggetti, copiate da DIP_PROJECT/training_results_baseline il 2026-09-01 per dare un artefatto alle tabelle del Capitolo 5 (ISS-126). Non sono confrontabili con i valori a dieci fold di risultati/addestramento/.",
+ "scansione_finestra_accumulazione": {
+  "K=5": {
+   "run": "rf_A3i_L22_cam1_k5",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 5,
+   "f2": 0.8587298776192585,
+   "f2_dev": 0.12540394579965403,
+   "recall": 0.9344928779955728,
+   "precision": 0.8034707773784755,
+   "fn_tot": 23,
+   "fp_tot": 252
+  },
+  "K=15": {
+   "run": "rf_A3i_L22_cam1_k15",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 5,
+   "f2": 0.9276473496885265,
+   "f2_dev": 0.04817659326508379,
+   "recall": 0.9355274328096022,
+   "precision": 0.9274336283185841,
+   "fn_tot": 24,
+   "fp_tot": 41
+  },
+  "K=22": {
+   "run": "rf_A3i_L22_cam1_k22",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 5,
+   "f2": 0.9629201601721441,
+   "f2_dev": 0.016140360896455083,
+   "recall": 0.9743917423245966,
+   "precision": 0.9313050367855121,
+   "fn_tot": 9,
+   "fp_tot": 31
+  },
+  "K=31": {
+   "run": "rf_A3i_L22_cam1_k31",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 5,
+   "f2": 0.9795681802981987,
+   "f2_dev": 0.020127272097864506,
+   "recall": 0.9871684916766885,
+   "precision": 0.9552046783625731,
+   "fn_tot": 4,
+   "fp_tot": 19
+  },
+  "K=45": {
+   "run": "rf_A3i_L22_cam1_k45",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 5,
+   "f2": 0.9866587756607496,
+   "f2_dev": 0.007693865144201661,
+   "recall": 0.9898711943793911,
+   "precision": 0.9751152599253865,
+   "fn_tot": 3,
+   "fp_tot": 10
+  },
+  "K=9 (esercizio)": {
+   "run": "rf_A3i_L22_cam1_integrali",
+   "k_integrali": null,
+   "feature_set": "A3i",
+   "n_fold": 10,
+   "f2": 0.9427375124108343,
+   "f2_dev": 0.06359861666246223,
+   "recall": 0.9770743072858071,
+   "precision": 0.8753187652845412,
+   "fn_tot": 14,
+   "fp_tot": 150
+  }
+ },
+ "confronto_stimatori": {
+  "MediaPipe": {
+   "run": "rf_A3_L45_cam1_mp",
+   "k_integrali": null,
+   "feature_set": "A3",
+   "n_fold": 5,
+   "f2": 0.9089643562853056,
+   "f2_dev": 0.09471823639177346,
+   "recall": 0.9089259796806968,
+   "precision": 0.9341619887730553,
+   "fn_tot": 23,
+   "fp_tot": 17
+  },
+  "YOLOv8": {
+   "run": "rf_A3_L45_cam1_yolo",
+   "k_integrali": null,
+   "feature_set": "A3",
+   "n_fold": 5,
+   "f2": 0.6820660037060146,
+   "f2_dev": 0.04392995984006758,
+   "recall": 0.7748067707973367,
+   "precision": 0.6332961577029373,
+   "fn_tot": 59,
+   "fp_tot": 225
+  },
+  "YOLOv8 in esercizio": {
+   "run": "rf_A3_L22_cam1_yolo_deploy",
+   "k_integrali": null,
+   "feature_set": "A3",
+   "n_fold": 5,
+   "f2": 0.621449072935227,
+   "f2_dev": 0.14868209692838422,
+   "recall": 0.6984192702842563,
+   "precision": 0.5587358060082629,
+   "fn_tot": 117,
+   "fp_tot": 368
+  },
+  "MediaPipe a 9 fps": {
+   "run": "rf_A3_L22_cam1_arch50",
+   "k_integrali": null,
+   "feature_set": "A3",
+   "n_fold": 5,
+   "f2": 0.8565312453594507,
+   "f2_dev": 0.08784071777697566,
+   "recall": 0.8664281400678211,
+   "precision": 0.8724669047840348,
+   "fn_tot": 49,
+   "fp_tot": 57
+  }
+ },
+ "nota_campo": "Le colonne di campo della tabella della scansione (falsi allarmi/ora e cadute rilevate) NON stanno qui: vengono da scripts/out/valutazione_reale_k*.json del progetto storico, e per K=31 da risultati/campo/valutazione_10sog_k31.json."
+}

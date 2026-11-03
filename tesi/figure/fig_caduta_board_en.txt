@@ -1,0 +1,28 @@
+FIGURA — fig_caduta_board_en.png
+================================
+
+CHE COSA MOSTRA
+---------------
+Un fotogramma reale della sessione del 9 settembre 2026, con lo
+scheletro e il punteggio sovrapposti dal registratore della board.
+E' il picco della prima delle quattro cadute simulate (punteggio
+0,760, quarta finestra della raffica di cinque che porta al primo
+allarme). Descritta in tesi/Cap5.tex, sec:campo.
+
+PERSONE E RISERVATEZZA
+-----------------------
+La persona a terra e' la candidata, nella propria abitazione.
+Inserita SOLO dopo richiesta esplicita della candidata, che ha
+chiesto di oscurare la faccia. La faccia e' pixelata a blocchi di
+12 pixel (non sfocata): la pixelazione distrugge l'informazione,
+uno sfocamento gaussiano e' in alcuni casi parzialmente invertibile.
+Il riquadro rosso in figura mostra dove.
+
+PROVENIENZA
+-----------
+deploy_board/sessioni/20260909_v5/clip/f00856.0.jpg
+  uno dei 2.254 fotogrammi annotati dalla board durante la sessione
+
+PRODOTTA DA
+-----------
+pipeline/figura_caduta_board.py --lingua en

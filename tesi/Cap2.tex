@@ -1,334 +1,302 @@
-\chapter{Stato dell'arte nel rilevamento automatico delle cadute}
+\chapter{The state of the art in automatic fall detection}
 \label{cap:stato_arte}
 
-% ---------------------------------------------------------------------
-% QUARTA STESURA, 2026-08-26. Riscritta sulla nuova versione del Cap. 1.
-%
-% Il Capitolo 1, riscritto dalla candidata, assorbe ora tre argomenti che
-% nelle stesure precedenti stavano qui: la scelta della visione contro gli
-% indossabili, la scelta della posa con la motivazione di riservatezza, e
-% il conto sulla frequenza di base. Questa stesura li TOGLIE e vi rimanda:
-% dirli due volte in due capitoli consecutivi e' la ragione per cui la
-% versione precedente non reggeva alla rilettura.
-%
-% CRITERIO DI RILEVANZA. Restano le famiglie che il lavoro confronta e
-% quelle che dichiara di non confrontare. Le reti a grafo compaiono come
-% menzione dentro l'elenco delle famiglie, non come sottosezione: non sono
-% mai state provate. Sono fuori anche optical flow, CNN 3D e i singoli
-% classificatori tradizionali (SVM, k-NN): il lavoro non li impiega.
-%
-% ATTENZIONE AI DUE NUMERI. OmniFall: quindicimila riprese, ottanta ore,
-% sedici classi -- VERIFICATO 2026-08-25 sull'abstract. Una stesura
-% precedente riportava «quattordici ore, 101 soggetti, 29 viste»: non
-% corrisponde, non reintrodurlo. La rassegna skeleton-based e' Nguyen
-% 2023 (Sensors 23(11):5121), non una «review del 2024 con oltre cento
-% metodi».
-%
-% GERARCHIA. Cinque sezioni, zero sottosezioni. I blocchi da centocinquanta
-% parole sono \paragraph: hanno un nome, non una voce nell'indice.
-% ---------------------------------------------------------------------
+A fall detection system can be analysed by following a logical series of decisions. The first concerns the type of sensor to be used, which affects the information available.
+The second concerns instead the choice of how to represent this information and supply it to the classifier. Once the form of representation has been chosen, it is then necessary to establish how to follow its evolution over time and which model to adopt in order to distinguish a fall from ordinary daily activities. Finally, performance also depends on the data available and on the protocol by which the system is evaluated.
+In this chapter we shall limit our attention to these main aspects and to the solutions proposed in the literature.
 
-Il Capitolo~\ref{cap:contesto} ha definito il problema applicativo, i requisiti
-di un sistema destinato a un'abitazione e le difficoltà che il passaggio dal
-dato controllato all'uso reale introduce. Questo capitolo colloca il lavoro
-rispetto alla letteratura e fissa i termini impiegati nel resto della
-trattazione.
+\section{Technologies for fall detection}
 
-L'ordine seguito è quello delle scelte da compiere: il sensore, che determina
-quale informazione sia disponibile; la rappresentazione, che stabilisce quale
-parte di essa raggiunga il classificatore; il modello temporale; infine i dati
-e i protocolli con cui i sistemi vengono valutati. Le motivazioni già date nel
-capitolo precedente non vengono ripetute. Qui si dichiara, per ciascuna scelta,
-quali alternative la letteratura offre e quali fra esse questo lavoro confronta.
+Fall detection systems can be divided into three main categories: wearable devices, sensors installed in the environment, and systems based on computer vision \cite{MU}. All these solutions observe the person's movement through different kinds of information, and therefore present different advantages and disadvantages.
 
-\section{Tecnologie per il rilevamento delle cadute}
-\label{sec:famiglie}
+\subsection{Wearable devices}
 
-Una classificazione consolidata distingue i sistemi di rilevamento in tre
-famiglie: dispositivi indossabili, sensori ambientali e sistemi basati su
-visione artificiale~\cite{mubashir, gutierrez}.
+Wearable systems use sensors applied directly to the body or integrated into everyday devices. Accelerometers and gyroscopes are among the most widespread technologies, because they allow variations in acceleration, orientation and rotational movement of the body to be measured directly.
+Starting from these signals, the recognition of a possible fall can be carried out through threshold rules, or, subsequently, with machine learning and deep learning models.\\
+The main advantage of this family is that the sensor follows the person directly and, unlike a camera, does not depend on the position or the viewpoint from which the movement is observed. Their use requires, however, that the device be worn correctly, kept charged and used consistently.
 
-I sistemi \emph{indossabili} applicano il sensore al corpo. Accelerometri e
-giroscopi sono le tecnologie più diffuse, perché misurano direttamente
-accelerazione, orientamento e velocità angolare; le prime soluzioni
-impiegavano regole a soglia, quelle successive classificatori supervisionati su
-finestre temporali dei segnali inerziali. Il vantaggio è che il sensore segue
-la persona e non dipende dal punto di vista di una telecamera. Il limite è la
-dipendenza dalla \emph{compliance} dell'utente: il dispositivo va indossato
-correttamente, mantenuto carico e usato con continuità.
+\subsection{Environmental sensors}
 
-I sensori \emph{ambientali} --- pressione, acustica, infrarossi, radar ---
-non richiedono nulla all'utente, ma trasferiscono il vincolo all'ambiente: il
-sistema copre soltanto le aree strumentate e richiede installazione o
-calibrazione. Molte di queste tecnologie osservano inoltre il movimento in modo
-indiretto, e forniscono una descrizione più povera di un flusso visivo.
+Sensors can also be installed in the environment rather than on the person. This category includes systems based on pressure, vibration, acoustic signals or infrared.
+In this case the person need not wear anything, but their coverage remains limited to the areas actually instrumented, and the cost of installation grows with the surface to be covered. \\
+Depending on the technology used, a fall can be detected through different signals. Some systems, for example, use the vibrations produced
+by the impact on the floor, distinguishing them from those associated with ordinary daily activities; others instead use microphones to acquire and classify the sound generated by the event \cite{MU}.
 
-I sistemi \emph{vision-based} impiegano telecamere RGB, RGB-D o termiche. Una
-rassegna dedicata a questa famiglia ha analizzato ottantuno sistemi pubblicati
-fra il 2015 e il 2020, documentando la transizione da descrittori geometrici
-progettati a mano verso rappresentazioni apprese~\cite{gutierrez}. La visione
-fornisce più informazione di molti sensori ambientali: da una sequenza si
-stimano posizione, configurazione corporea, dinamica e interazione con
-l'ambiente. Comporta però due costi, entrambi discussi nel
-Capitolo~\ref{cap:contesto}: l'elaborazione di interi fotogrammi richiede
-memoria e capacità di calcolo, e il video contiene informazioni identificative
-del soggetto e dell'abitazione.
+\subsection{Systems based on computer vision}
 
-\section{Rappresentazione del movimento}
-\label{sec:rappresentazioni-sota}
+\emph{Vision-based} systems instead use one or more cameras to observe the movement of the subject. RGB cameras, depth sensors or other acquisition technologies may be employed.
+As with environmental sensors, here too the detection of an event does not require the person to wear a device. From the images, however, it is possible to derive the configuration and the movement of the body directly, obtaining information about shape, posture and their evolution over time in order to recognise a possible fall.
+Its operation depends, however, on the quality of the images, and can be influenced by lighting conditions, occlusions, changes of viewpoint, and problems connected with the presence of sensitive visual data.
+The way in which the information contained in the video is represented and used for fall recognition is examined in the following sections.
 
-Il sensore stabilisce quale informazione esista; la rappresentazione stabilisce
-quale parte di essa raggiunga il classificatore.
+Table \ref{tab:tecnologie} summarises the main differences between these three categories.
 
-I primi metodi vision-based impiegavano caratteristiche geometriche della
-sagoma segmentata: rapporto fra altezza e larghezza del rettangolo di
-contenimento, inclinazione, posizione del baricentro, variazione dell'area
-occupata. Sono descrittori semplici e interpretabili, ma dipendono dalla
-qualità della segmentazione e dal punto di vista: lo stesso movimento produce
-variazioni molto diverse nel piano immagine se osservato di lato, di fronte o
-da una telecamera rialzata. Con la diffusione dell'apprendimento profondo
-l'immagine è diventata essa stessa l'ingresso del modello, e la
-rappresentazione viene appresa dai dati. In entrambi i casi la descrizione
-resta legata all'apparenza della scena, e quindi a sfondo, illuminazione e
-disposizione dell'ambiente.
+\begin{table}[htbp]
+\centering
+\caption{Comparison of the main technologies used for fall detection}
+\label{tab:tecnologie}
+\small
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{3pt}
 
-La stima della posa trasforma invece un'immagine in un insieme di punti
-anatomici: il classificatore riceve una descrizione della configurazione
-corporea e non del contenuto visivo. È la scelta adottata in questo lavoro, per
-le ragioni esposte nel Capitolo~\ref{cap:contesto}.
+\begin{tabular}{
+|>{\centering\arraybackslash}p{2.5cm}
+|>{\centering\arraybackslash}p{1.4cm}
+|>{\centering\arraybackslash}p{2.5cm}
+|>{\centering\arraybackslash}p{1.7cm}
+|>{\centering\arraybackslash}p{2.3cm}
+|>{\centering\arraybackslash}p{2.5cm}|}
+\hline
 
-Gli approcci basati sullo scheletro sono ampiamente studiati nel
-riconoscimento delle azioni umane. Una rassegna del 2023, che raccoglie circa
-duecentocinquanta risultati da oltre settanta studi pubblicati fra il 2019 e il
-marzo 2023, distingue le caratteristiche geometriche progettate a mano dalle
-rappresentazioni apprese~\cite{nguyen}. La distinzione individua due strategie
-alternative: i punti possono essere impiegati direttamente come coordinate,
-lasciando che sia il modello a scoprire quali relazioni contino, oppure
-trasformati in grandezze progettate che descrivano esplicitamente angolo del
-tronco, altezze relative e velocità. Il Capitolo~\ref{cap:metodologia}
-costruisce entrambe e le confronta a parità di protocollo.
+\textbf{Technology} &
+\textbf{Device} \newline \textbf{worn} &
+\textbf{Environment} \newline \textbf{coverage} &
+\textbf{Privacy} \newline \textbf{issue} &
+\textbf{Viewpoint} \newline \textbf{sensitivity} &
+\textbf{Typical} \newline \textbf{limitations} \\
 
-Alla rappresentazione scheletrica vengono attribuite due proprietà utili a un
-sistema destinato a hardware limitato. La prima è la \emph{compattezza}: poche
-decine di valori sostituiscono centinaia di migliaia di componenti RGB. La
-seconda è l'\emph{interpretabilità}: ogni variazione del segnale si riconduce a
-una parte del corpo, il che rende possibile misurare separatamente il
-contributo dei singoli gruppi di punti.
+\hline
 
-La posa non è però una misura ma una stima, e risente di occlusioni,
-illuminazione, risoluzione e scorci prospettici; le coordinate bidimensionali
-dipendono inoltre dal punto di vista. Una catena basata sulla posa sposta
-quindi parte della difficoltà dal classificatore allo stimatore e alla
-geometria costruita sopra di esso --- ed è una difficoltà che questo lavoro
-misura invece di assumere.
+Wearable &
+Yes &
+Person sensor &
+Low--medium &
+No &
+Compliance, \newline charging \\
 
-Nella fall detection questa impostazione è già stata impiegata con modelli
-sequenziali: Lin et al. estraggono la posa con OpenPose e confrontano LSTM e
-GRU per modellarne l'evoluzione temporale~\cite{lin}.
+Environmental &
+No &
+Instrumented area &
+Depends on sensor &
+Low &
+Installation/ \newline coverage \\
 
-\section{Modellazione temporale e classificatori}
-\label{sec:modelli-sota}
+Vision &
+No &
+Camera field \newline of view &
+High if RGB \newline retained &
+Yes &
+Occlusion, \newline illumination \newline and privacy \\
 
-Fissata la rappresentazione, il rilevamento diventa un problema di
-classificazione di sequenze, e la letteratura propone quattro famiglie
-principali: ricorrenti, convoluzionali, a grafo e basate su
-attenzione~\cite{nguyen}.
+\hline
+\end{tabular}
+\end{table}
 
-Le reti \emph{ricorrenti} sono la scelta naturale quando l'ingresso è una
-sequenza. LSTM e GRU introducono meccanismi di memoria e di controllo del
-flusso pensati per conservare informazione nel tempo; GRU adotta una struttura
-più compatta e, a parità di dimensione dello stato, richiede meno parametri.
-Le \emph{convoluzioni temporali} apprendono schemi locali all'interno della
-sequenza e non richiedono uno stato aggiornato campione per campione. Le reti
-\emph{a grafo} sfruttano la struttura naturale dello scheletro, in cui i punti
-sono i nodi e le connessioni anatomiche gli archi. I modelli \emph{ad
-attenzione} assegnano peso differente ai vari istanti e mettono in relazione
-diretta elementi anche distanti nella sequenza.
+\section{Representation of movement}
 
-A queste va aggiunto un termine di paragone non sequenziale. Nei sistemi
-basati su grandezze progettate la conoscenza del fenomeno è incorporata nella
-rappresentazione e non nel modello, e classificatori quali le foreste casuali
-hanno costo ridotto e permettono di esaminare l'importanza delle variabili. Un
-classificatore che non modella l'ordine dei campioni è inoltre necessario per
-stabilire se un modello sequenziale stia effettivamente sfruttando dipendenze
-temporali: è il controllo che rende interpretabile l'intero confronto.
+The choice of sensor establishes what information is available, but does not determine in what form it must be used by the classifier. The same video sequence can be described in very different ways, working directly on the image or extracting a more compact representation of the person's movement.
+In the case of fall detection, this aspect takes on particular importance because a fall is a dynamic event. The useful information is not contained solely in the configuration the body assumes at a given instant, but also in the way this configuration changes over time.
 
-Questo lavoro confronta reti ricorrenti, convoluzioni temporali, un modello ad
-attenzione e un classificatore non sequenziale. \textbf{Le reti a grafo non
-vengono considerate}, e la dichiarazione vale quanto il confronto: non sono
-state provate, quindi su di esse il lavoro non dice nulla.
+A video can be represented mathematically as a spatio-temporal function
+\[
+I(x,y,t),
+\]
+where $x$ and $y$ represent the spatial coordinates of the frame and $t$ represents the temporal dimension. In the problem considered, what is of interest is describing the evolution of the human body within this sequence.
+The representations used in motion analysis can be more or less dense. Some approaches work directly on the entire content of the image or on regions of it, while others describe movement through a limited number of significant points. Pose-based approaches belong to this second category, since they represent the body by means of a set of anatomical \emph{landmarks}.
 
-La progressione verso architetture più espressive rende plausibile attendersi
-un effetto rilevante della scelta del modello. I confronti pubblicati sono
-però difficili da interpretare, perché variano contemporaneamente dati,
-grandezze, pre-elaborazione, divisione degli insiemi e soglia decisionale.
-Isolare l'effetto della sola architettura richiede un protocollo in cui il
-resto della catena resti invariato.
+\subsection{From the image to the pose representation}
 
-\begin{Ques}
-Quanto la scelta dell'architettura influenza il risultato, quando
-rappresentazione, dati e protocollo vengono mantenuti costanti?
-\end{Ques}
+In the earliest vision-based approaches, a fall was often detected using segmentation of the person and analysis of their shape in the image plane. Starting from the silhouette, quantities such as the height-to-width ratio, the inclination of the body, the position of the head or of the centre of mass were derived, and their variations over time were then observed \cite{MU}.\\
+These are simple and readable descriptors: to every number there corresponds something that can be pointed to on the image. Their effectiveness depends, however, on the quality of the segmentation and on the recording geometry. The same physical movement produces very different variations in the image plane depending on whether it is observed from the front, from the side or from above.
 
-\section{Dati e protocolli di valutazione}
-\label{sec:dati-sota}
+With the rise of deep learning, approaches in which the features useful for classification are learnt directly from images or video sequences have also become commonplace. An alternative is to use \emph{pose estimation} as an intermediate step between the image and the classifier. A pose estimator takes as input an image containing a person and estimates the position of a certain number of anatomical points, commonly known as \emph{keypoints} or \emph{landmarks}, associated with the main anatomical parts, such as shoulders, hips, knees and ankles. The content of the image is thus replaced, in the subsequent stages, by a numerical representation that is more compact than the original image.
 
-La qualita' di un risultato non si separa dai dati su cui e' stato ottenuto
-ne' dalla procedura con cui e' stato misurato. Questa sezione tratta i due
-aspetti insieme perche' agiscono insieme: un archivio che non contiene la
-condizione difficile e un protocollo che non separa le persone producono lo
-stesso effetto, cioe' un numero alto che non descrive l'uso reale.
+\subsection{Introduction to MediaPipe Pose}
 
-I paragrafi seguono l'ordine in cui le due cose si incontrano: prima da dove
-vengono i dati e che cosa la simulazione non conserva, poi come si costruiscono
-gli insiemi e che cosa un valore pubblicato significhi davvero.
+MediaPipe is a framework developed by Google which, among various computer vision capabilities, offers human pose estimation via the MediaPipe Pose solution. This solution utilises a lightweight convolutional architecture, known as BlazePose, to represent a person's pose using a topology comprising 33 landmarks. As shown in Figure \ref{fig:landmark}, these points are distributed across the body and also include landmarks relating to the face, hands and feet. For each landmark, information regarding its position and visibility is estimated \cite{BL,MP}.
 
-\paragraph{Le cadute simulate sono un vincolo, non una scorciatoia.} La
-raccolta di cadute reali presenta vincoli etici e pratici evidenti: non è
-possibile provocare deliberatamente incidenti in persone fragili per costruire
-un archivio. Gran parte dei riferimenti pubblici contiene quindi cadute
-simulate da volontari giovani e sani, e la simulazione è l'unica via
-disponibile per ottenere il numero di esempi positivi che un classificatore
-richiede. La domanda pertinente è un'altra: che cosa, di preciso, la
-simulazione non conserva. Per la componente dinamica la risposta è documentata.
-Kangas et al. hanno confrontato cadute accidentali reali di persone anziane,
-raccolte con sensori indossati per sei mesi, con cadute sperimentali eseguite
-da soggetti di mezza età: la grandezza più indicativa risulta essere la
-rapidità di crescita della decelerazione anziché il suo picco, e nelle cadute
-reali compaiono impatti multipli, assenti negli altri
-movimenti~\cite{kangasreali}.
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figure/fig_landmark_mediapipe_en.png}
+    \caption{Diagram of the 33 landmarks used by MediaPipe Pose.}
+    \label{fig:landmark}
+\end{figure}
 
-\paragraph{Quanto costa, misurato.} Bagalà et al. hanno riesaminato tredici
-algoritmi pubblicati su un archivio di ventinove cadute reali: la sensibilità
-media misurata è del $57{,}0\% \pm 27{,}3$, contro il 76--100\% che gli stessi
-algoritmi dichiaravano su cadute simulate~\cite{bagala}. Il divario non è un
-margine di errore: è un cambio di ordine di grandezza nella conclusione.
+The position of a landmark can be represented in the image plane or in three-dimensional space. In the former case, the coordinates $(x,y)$ indicate the position of the point relative to the width and height of the image. A 3D representation also includes information relating to depth. When depth is obtained from a single RGB camera, it is not measured directly but estimated by the model. Consequently, monocular 3D reconstruction suffers from an inherent ambiguity, as different three-dimensional configurations can generate similar two-dimensional projections \cite{NIE3D}. MediaPipe Pose provides both \emph{pose landmarks}, whose $x$ and $y$ coordinates are normalised relative to the image dimensions and to which a relative depth estimate $z$ is associated, and \emph{world landmarks}, which describe the pose using coordinates $(x,y,z) $ expressed in metres relative to a reference system with its origin at the centre of the hips \cite{MP}.
 
-\paragraph{Gli archivi pubblici.} Fra quelli impiegati nella letteratura
-vision-based compaiono UR-Fall~\cite{urfall}, Le2i, Multiple Cameras Fall
-Dataset e UP-Fall.
-Differiscono per numero di soggetti, attività, tipi di caduta, punti di vista,
-frequenza di ripresa e criteri di annotazione, e l'eterogeneità rende privo di
-significato il confronto diretto fra valori di $F$-score ottenuti su archivi
-diversi. UP-Fall, adottato in questo lavoro, comprende diciassette soggetti
-giovani e sani, undici attività, più prove per attività e due telecamere
-sincronizzate~\cite{upfall}: la presenza di due viste consente di studiare
-l'effetto della geometria di ripresa, e la varietà delle attività quotidiane
-permette di costruire negativi più realistici di quelli disponibili in archivi
-composti quasi soltanto da cadute e posture erette.
+As the position of landmarks is the result of an estimate, their reliability may vary. MediaPipe Pose assigns each point a \emph{visibility} value, ranging from 0 to 1, which indicates the extent to which the landmark is considered visible and uncovered in the image. In the presence of occlusions, some landmarks may be covered by other parts of the body or by objects in the scene. The camera's viewpoint can also influence the estimate: as the viewing angle changes, the projection of the body in the image changes and different conditions of self-occlusion may occur. These factors can therefore reduce the reliability of the estimated landmarks \cite{MP,DILL2024}.
 
-\paragraph{I valori riportati, e il protocollo che li produce.} Sui dati
-controllati la letteratura riporta accuratezze elevatissime: un'architettura
-che combina convoluzioni temporali e un \emph{encoder} basato su attenzione
-raggiunge il 99,58\% sulla vista frontale di UP-Fall~\cite{tcnte}, mentre un
-modello a grafo su tre flussi supera il 94\% medio su UR-Fall e
-UP-Fall~\cite{gcn3stream}. Scheurer et al. mostrano però che ottimizzare per
-utenti noti e per utenti sconosciuti sono problemi distinti, con divari che
-superano i venti punti di accuratezza sugli stessi dati~\cite{scheurer}. Un
-valore elevato non è quindi interpretabile senza il protocollo che lo ha
-prodotto.
+Finally, the use of a pose estimator introduces a computational cost into the processing chain, linked to the time required to process each frame. MediaPipe Pose has been designed to operate in \emph{real-time} applications and can run on various platforms and hardware resources, including CPUs and GPUs. The choice of estimator and its configuration therefore represents a trade-off between estimation quality and processing speed \cite{BL,MP}.
 
-\paragraph{Verificabilità.} Fra gli ottantuno sistemi recensiti da Gutiérrez
-et al. la maggioranza è stata valutata su dati propri, per i quali non
-risultava accesso pubblico al momento della revisione~\cite{gutierrez}. Un
-risultato ottenuto su cadute simulate resta confrontabile se l'archivio è
-disponibile; un risultato ottenuto su un archivio privato non è né
-confrontabile né riproducibile.
+\subsection{Skeleton-based representations}
 
-\paragraph{Quali negativi, non quanti.} Il rapporto fra negativi e positivi non
-è il criterio con cui giudicare la composizione di un archivio, perché nessun
-archivio potrebbe riprodurre il rapporto reale: farlo richiederebbe di
-registrare anni di vita ordinaria per ogni caduta osservata. Il criterio
-pertinente riguarda \emph{quali} negativi siano presenti. Diventano allora
-centrali i \emph{negativi difficili}, cioè le attività ordinarie che
-condividono caratteristiche con la classe positiva: sedersi di scatto,
-inginocchiarsi, chinarsi e distendersi volontariamente producono configurazioni
-parzialmente simili a quelle di una caduta. Se tali attività sono assenti o
-sottorappresentate, il modello può apprendere scorciatoie che funzionano
-sull'archivio e generano falsi allarmi in esercizio.
+Starting from the subset of reference points obtained, the movement can be represented in various ways. Among the skeleton-based approaches applied to fall detection, a distinction is made between methods based on the explicit construction of features and methods in which the representation is learnt directly from the skeletal data \cite{HO}.
 
-\paragraph{Azioni e stati.} Un passo recente verso una valutazione uniforme è
-OmniFall, che unifica otto archivi in una tassonomia comune a sedici classi,
-quindicimila riprese per ottanta ore con annotazione per
-fotogramma~\cite{omnifall}. Il vocabolario distingue le azioni
-\emph{transitorie}, come \texttt{fall} e \texttt{lie\_down}, dagli \emph{stati}
-statici, come \texttt{fallen} e \texttt{lying}. Su un insieme di verifica
-costituito da video di incidenti reali gli autori riscontrano che i modelli
-valutati senza adattamento continuano a confondere lo stato \texttt{fallen} con
-\texttt{lying}, mentre quelli addestrati su scene contenenti esplicitamente la
-permanenza a terra ottengono risultati sensibilmente migliori. La confusione
-documentata non riguarda quindi la distinzione fra caduta e attività
-quotidiana, ma quella fra una persona a terra e una persona distesa: è la
-stessa distinzione che il Capitolo~\ref{cap:contesto} ha introdotto discutendo
-la formulazione del compito.
+In the first case, geometric and kinematic quantities are derived from the coordinates of the landmarks. In the literature, angles, distances, relative positions, displacements and velocities are used, for example. The aim is to describe, through a limited number of variables, those aspects of the movement considered most useful for distinguishing a fall from ordinary daily activities.\\
+However, the coordinates of landmarks depend on the reference system used. Differences in body dimensions, distance from the sensor or viewing angle can mean that similar postures are represented by different skeletal coordinates. The skeletal representation is therefore often normalised with respect to both the position and the scale of the body \cite{RA}.
 
-\paragraph{Tre livelli di generalizzazione.} Anche all'interno dello stesso
-archivio il modo in cui si costruiscono gli insiemi determina il significato
-del risultato. Finestre sovrapposte estratte dalla stessa ripresa sono
-fortemente correlate: distribuite a caso fra addestramento e verifica, portano
-a valutare il modello su sequenze quasi identiche a quelle già osservate. La
-divisione \emph{per soggetto} impone invece di generalizzare verso persone
-assenti dall'addestramento, e protocolli come il \emph{leave-one-subject-out}
-rendono visibile la dispersione fra individui che una media aggregata
-nasconde. Per i sistemi vision-based esiste un secondo livello, la
-generalizzazione fra \emph{punti di vista}, poiché una grandezza
-bidimensionale può essere informativa da una vista laterale e degenerare
-quando lo stesso movimento è osservato dall'alto. Il terzo livello, il
-trasferimento fra \emph{archivi}, è il più severo, perché cambiano insieme
-persone, ambiente, telecamera, frequenza di ripresa, annotazione e
-distribuzione delle attività; Alanazi et al. riportano un modello a grafo che
-passa dal 99,81\% sul proprio dominio a circa il 50\%, con un $F_1$ dell'1,38\%,
-su un archivio diverso~\cite{vira}.
+To reduce dependence on absolute position, coordinates can be assigned to an anatomical point on the subject. In some approaches, for example, the centre of the hips is used as the origin of the new system, and the position of the other landmarks is expressed relative to it. This yields \emph{relative coordinates} and a person-centred, or \emph{body-centred}, reference system, which makes the representation invariant with respect to the subject's global translation within the scene.
+Another form of normalisation concerns scale. People with different body dimensions, or those observed at different scales, can be made more comparable by using a body measurement as a reference. Li et al., for example, use the distance between the centre of the hips and the spine as a reference, whilst other approaches normalise the lengths of body parts relative to a reference skeleton. A representation constructed in this way may therefore be invariant, or less sensitive, to variations in scale introduced by the subject's build or by the representation used \cite{RL,RA}.
 
-\paragraph{Dalla finestra all'evento.} La maggior parte dei classificatori
-temporali produce una decisione per ogni finestra, mentre un sistema installato
-deve produrre \emph{eventi} di allarme, e le due quantità non coincidono: una
-situazione che genera dieci finestre positive consecutive può essere aggregata
-in un unico evento, e una finestra isolata può essere soppressa da una regola
-di persistenza. La rassegna di Broadley et al. sui metodi di valutazione in
-condizioni reali rileva che le prove sul campo sono intrinsecamente difficili,
-che gli studi disponibili impiegano insiemi piccoli, e che manca accordo su
-come quantificare la capacità di evitare i falsi allarmi e su che cosa
-costituisca un non-evento~\cite{broadley}. Precisione, richiamo e $F$-score
-calcolati sulla finestra restano perciò necessari ma non sufficienti.
+Normalisation with respect to translation and scale does not, however, automatically make the representation camera-independent. The same action observed from different angles can produce different projections of the landmarks, particularly in the case of two-dimensional representations, where depth information is lacking. The viewpoint therefore remains one of the factors that can alter the representation of the same movement \cite{SK}.
+The choice of reference frame also determines which information is retained. Relative coordinates primarily describe the configuration of body parts in relation to one another, whilst absolute coordinates also preserve information about the person's overall position within the scene. The different representations may therefore emphasise different aspects of the movement, a point that will be revisited in Chapter \ref{cap:metodologia} when defining the representations used.
 
-\paragraph{Esecuzione su dispositivo.} Molti lavori riportano accuratezza e
-complessità del classificatore senza misurare l'intera catena su hardware
-reale, benché il costo comprenda acquisizione, decodifica, stima della posa,
-costruzione delle grandezze, classificazione e logica temporale. Una mappatura
-sistematica del 2026 raccoglie quattrocentotrentatré studi primari pubblicati
-fino al 2025 e vi dedica una parte specifica: fotogrammi al secondo, latenza e
-piattaforma hardware effettivamente impiegata~\cite{gomes}. La velocità di
-esecuzione non è quindi una proprietà dell'architettura, ma una misura da
-compiere sul dispositivo di destinazione e sulla catena completa.
+In the second case, by contrast, the coordinates of the skeleton are supplied directly to the model, which learns, during training, representations useful for classification. Recurrent networks, Transformers and graph-based networks are used for this purpose.
+The trade-off is the opposite in the two cases. Designed features are simpler to interpret because they retain a geometric meaning, but their effectiveness depends on the quantities chosen. Learnt representations, on the other hand, require fewer assumptions about the form of the movement, but the meaning of the resulting features is generally less immediate.
+The choice of the quantities used to describe the skeleton therefore becomes a fundamental step in identifying which of them are most useful for fall detection.
 
-\begin{Ques}
-Che cosa un archivio di laboratorio non riesce a misurare, e con quali
-conseguenze per chi lo impiega per scegliere fra alternative?
-\end{Ques}
+\subsection{Temporal dimension of movement}
 
-\section{Posizionamento del lavoro}
-\label{sec:posizionamento}
+The configuration of the skeleton at a single instant is not always enough to distinguish a fall from an ordinary daily activity. Someone lying on the floor after a fall and someone who has lain down on the sofa may assume, at that instant, the same shape. What distinguishes them lies in what happened before.\\
+The difference emerges by observing the sequence that precedes the final posture. This is why, besides geometric features, many approaches also measure displacements, velocities, angular variations and trajectories of the different parts of the body. The use of these quantities introduces, however, a further problem. The landmarks supplied by a pose estimator are not exact measurements of the position of the anatomical points, but estimates derived from the image. Any instabilities in the coordinates may have a limited effect on the pose observed in a single frame, but become far more evident when variations between successive instants are computed.
 
-Le due domande appena poste delimitano il perimetro dell'elaborato.
+A pose-based representation thus simplifies the complexity of the original image, but does not eliminate the difficulties bound up with the quality of the measurement. A good part of the result depends on the stability with which the landmarks are estimated and on the way these coordinates are converted into a representation of movement. What remains to be decided, then, is how to use the temporal sequence so obtained in order to distinguish the events.
 
-Viene adottata una rappresentazione basata sulla posa, sulla quale sono
-costruite e confrontate diverse descrizioni geometriche e temporali del
-movimento; più famiglie di classificatori vengono valutate mantenendo
-invariati, per quanto possibile, dati e protocollo. La valutazione non si
-limita al comportamento su un singolo archivio, ma considera la
-generalizzazione verso soggetti assenti dall'addestramento, la variazione del
-punto di vista, il trasferimento verso un archivio esterno e il comportamento
-della catena in condizioni più vicine a quelle d'uso. Il sistema viene infine
-considerato nella sua interezza, includendo il passaggio dalle singole
-decisioni agli eventi di allarme e la verifica dell'esecuzione sul dispositivo
-impiegato.
+\section{Temporal modelling and classifiers}
 
-Restano fuori, e vanno dichiarate: le reti a grafo, mai provate; la sintesi di
-punti di vista, discussa fra gli sviluppi; e il rilevamento multi-persona, che
-è stato realizzato ma che nessun archivio pubblico permette di valutare.
+Once the representation of movement has been chosen, the problem consists in classifying the temporal sequence obtained. In the literature there are very different solutions, ranging from traditional machine learning methods to neural networks designed specifically to process sequences.
+Various solutions have been proposed in the literature, ranging from traditional machine learning methods to neural networks designed specifically to process sequences.
 
-Il Capitolo~\ref{cap:metodologia} descrive il modo in cui il video viene
-trasformato nella rappresentazione utilizzata dal sistema; il
-Capitolo~\ref{cap:protocollo} definisce il protocollo con cui le diverse
-scelte vengono confrontate.
+\subsection{Traditional classifiers}
+
+When movement is described through geometric and kinematic features, part of the information useful for classification is already present in the representation. The model receives angles, distances, relative heights, velocities and other temporal variations, and its task is to learn which combinations of these values are more associated with a fall and which, instead, with a daily activity.
+
+On representations of this kind, non-sequential models such as Support Vector Machines, $k$-Nearest Neighbors, decision trees and Random Forests have also been used \cite{HO}. These are approaches that do not explicitly respect the temporal sequence, unlike what happens in a recurrent network. They can nevertheless use information about the dynamics once this has already been made available through the features.
+
+\subsection{Recurrent networks}
+
+Recurrent networks represent a widely used choice when the input is a sequence. Unlike a classifier that treats the input as a set of values, these networks maintain an internal state that is updated over the course of the sequence, and can therefore exploit the order in which the quantities vary.
+
+Among the most common architectures we find LSTM and GRU. Both control the flow of information with \emph{gating} mechanisms, which at each step decide how much of the past to retain. The LSTM does so with a memory cell and several control gates; the GRU with a more compact structure which, for the same hidden state size, requires a smaller number of parameters. Both have already been used in pose-based fall detection systems. Lin et al., for example, extract the person's skeleton through OpenPose and use the resulting sequences as input for LSTM and GRU models \cite{LN}.
+
+\subsection{Temporal convolutions, graphs and attention mechanisms}
+
+Temporal information can also be modelled without using a recurrent structure. A 1D CNN, for example, can be applied along the temporal axis to recognise local configurations of the signal. By increasing the receptive field of the network it is possible to relate information coming from wider temporal intervals. Compared with recurrent networks, processing can be carried out in a more parallel fashion and does not require a step-by-step update of the state.
+Graph-based approaches typically exploit the anatomical structure of the skeleton by representing joints as nodes and anatomical connections as edges, so as to model the spatial relations between the different parts of the body and, in their temporal extensions, to follow their evolution over the course of the sequence \cite{HO}. 
+
+A further alternative is offered by attention-based models such as Transformers, which tackle the problem from another side, assigning a different weight to the individual instants of the sequence and relating temporally distant elements. In this case, information observed at the beginning of the window can be associated with information observed later, without being transmitted through all the intermediate steps, as happens in a recurrent structure.
+The surveys devoted to skeleton-based approaches indicate this set of networks as the principal strategies for analysing skeletal sequences \cite{HO}.
+
+\section{Data and evaluation protocols}
+
+The performance of a fall detection system depends not only on the model employed, but also on the data on which it is built: the subjects filmed, the activities performed, the position of the camera and, in general, the conditions under which the collection took place.
+Building a genuinely representative dataset is, however, difficult, because falls are rare events and cannot be deliberately induced in elderly or frail people merely to collect data. For this reason, most of the public benchmarks in use contain falls simulated by young and healthy volunteers, recorded in controlled environments.
+These datasets are nonetheless essential for developing and comparing algorithms. It is, however, necessary to understand which aspects of a real fall they manage to represent and which, instead, remain excluded.
+
+\subsection{Simulated versus real falls}
+
+Simulated falls and real ones do not generally behave in the same way.
+Kangas et al., for example, compared accidental falls recorded in elderly people with experimental falls performed by middle-aged subjects. The authors show that certain dynamic characteristics differ between the two situations: in real falls, for instance, several successive impacts may appear, and the rapidity with which the deceleration grows proves more informative than the maximum value reached alone \cite{KR}.
+
+The difference between the laboratory and real use can be reflected in the performance of the algorithms. As reported in \cite{BA}, the authors applied thirteen fall detection algorithms, evaluated mainly on simulated falls, to a set of twenty-nine real falls. The average sensitivity obtained was \(57{,}0\% \pm 27{,}3\%\), appreciably lower than the values reported in the experimental evaluations. The study concerns systems based on accelerometers, so the comparison is not directly transferable to a vision-based system, but it brings out the fact that good performance on simulated falls nevertheless does not guarantee that the same behaviour will be maintained during an accidental fall.
+Controlled datasets must therefore be used as instruments for development and comparison, without automatically interpreting them as a measure of how the system will behave once installed.
+
+\subsection{Public datasets}
+
+Among the most widely used datasets in the field of computer vision for fall detection are UR-Fall, Le2i, the Multiple Cameras Fall Dataset and UP-Fall \cite{HO}. These datasets differ in terms of the number of subjects, recorded activities, viewpoints, types of falls, acquisition frequency and annotation criteria. This heterogeneity makes it difficult to directly compare accuracy or \(F\)-score values reported in different studies, as similar performance achieved on different datasets does not necessarily correspond to the same experimental conditions.
+
+UP-Fall is the dataset that was used as the main domain in this work. It comprises 17 subjects aged between 18 and 24, who perform three repetitions of each of the 11 activities provided for: five correspond to different types of fall, six to ordinary daily activities. Acquisition is multimodal and comprises sensors of different kinds, among them two synchronised cameras, one lateral and one frontal \cite{MV}.
+The presence of several daily activities makes it possible to construct more realistic negative examples than benchmarks composed almost exclusively of falls and upright postures, while the two views make it possible to study the effect of the recording geometry. It nevertheless remains a controlled dataset, the falls being simulated and performed in the laboratory. The result obtained on UP-Fall must therefore be interpreted as a measure for the development and comparison of methods, not as a direct verification of domestic operation.
+
+At the level of the recordings, UP-Fall turns out to be almost balanced: 255 falls as against 306 daily activities. The real imbalance the classifier has to face is seen later, when each recording is divided into temporal windows, because the fall occupies only a few frames within a sequence that contains many. This is a significant distinction, since it determines which metric it makes sense to use.
+UP-Fall is reported as being acquired at 18 frames per second \cite{MV}.
+The analyses carried out on the actual timings of the recordings and their use in subsequent processing stages are, however, described in Chapter \ref{cap:metodologia}.
+
+\subsection{The result depends on the protocol}
+
+Even using the same dataset, the result obtained by a model depends on the way the training and test sets are constructed. In the literature, the performance reported is very high: in the survey by Hoang et al., for example, several studies report accuracy, sensitivity and specificity above 98\% \cite{HO}. The same authors ask whether the problem of skeleton-based fall detection can be considered solved, and conclude that it cannot. They give two reasons:
+\begin{itemize}
+    \item the datasets used for the tests are limited and simple: comprising a single person in the scene, simulated falls and a controlled environment;
+    \item there is no shared evaluation protocol, since the public archives do not offer official divisions between training and test, and each study ends up constructing the samples and dividing the data independently.
+\end{itemize}
+
+One of the main differences is the separation of subjects. In a \emph{subject-dependent} evaluation the same individual may appear both in the training data and in the test data, albeit through different recordings: the model is evaluated on new observations of people it has already encountered. In a \emph{subject-independent} evaluation, by contrast, the test subjects are excluded from training, and the model must work on people never observed.
+The two protocols answer different questions. Studies in the field of Human Activity Recognition show that evaluation on subjects not present during training generally proves more difficult than that carried out on users already represented \cite{SC}. A high accuracy value, taken on its own, is therefore not enough to describe the generalisation capability of a system: it must be read together with the way the data were separated.
+
+A further problem occurs when windows extracted from the same recording are distributed at random between training and test. If the windows are overlapping, very similar sequences may be found in both sets, which carries the risk that the model is evaluated on data it has already seen. This form of \emph{data leakage} can lead to an overly optimistic assessment of the model's performance.
+
+To avoid this risk, the literature employs separation at the recording or subject level, keeping samples from the same sequence within the same set \cite{SC}. A subject-independent separation, such as that achieved using \emph{Leave-One-Subject-Out} protocols, allows the subjects used for training to be kept distinct from those involved in the evaluation phase.
+
+\subsection{Negative activities and the definition of the classes}
+
+A further important element concerns the activities used as negative examples.
+In a real application, falls are much rarer than ordinary daily activities. Reproducing the same ratio between positive and negative examples within a dataset would, however, be impractical.
+More than the absolute number of negative examples, what counts is the type of activities included. Movements such as sitting down quickly, kneeling, bending over or lying down deliberately can be particularly difficult to distinguish from certain phases of a fall. The problem is also highlighted by OmniFall, a recent benchmark that brings together eight public archives through a common taxonomy: about fifteen thousand recordings, for a total of about eighty hours, organised into sixteen classes \cite{SN}.
+
+The distinction that makes that taxonomy useful is the one between transitory actions, such as \texttt{fall} and \texttt{lie\_down}, and static states, such as \texttt{fallen} and \texttt{lying}. The authors observe that it is precisely on the \texttt{fallen} state that models become confused, mistaking it for a person who has lain down deliberately. The definition of the positive class and the choice of negative activities are therefore not a detail of the annotation, but part of the evaluation problem. In the following chapter it is described how the UP-Fall recordings were referred to this taxonomy in order to keep the event distinct from the state that follows it.
+
+\section{Evaluation beyond benchmark classification}
+
+Once it has been established that the evaluation protocol influences the result, the analysis can be extended beyond the performance achieved on a single benchmark. Various aspects can be considered, including the separation of training and test data, the level at which the predictions are evaluated, and the overall behaviour of the system whilst operating in real time.
+
+\subsection{Generalisation across subjects, viewpoints and datasets}
+
+In addition to separation by subject, a model's generalisation ability can be assessed by considering other differences between the training and test data, such as the camera angle or the use of a different dataset.
+
+In the first case, we refer to \emph{cross-view} evaluation: the model is trained on one recording geometry and evaluated on another, in order to determine to what extent what it has learnt is influenced by the camera's position. It is precisely these cross-subject and cross-view evaluations that Hoang et al. consider particularly useful for improving the validation of skeleton-based systems \cite{HO}.
+In the second case, validation involves transferring the model to a dataset other than the one used for development. At this stage, the subjects, environment, camera, frame rate, annotation criteria and task distribution may all change simultaneously.
+
+Table \ref{tab:generalizzazione} summarises these cases. It is not a fixed scale, but a list of approaches for verifying how far the model goes beyond the data on which it was trained.
+
+\begin{table}[htbp]
+\centering
+\caption{Main levels of separation between training and evaluation.}
+\label{tab:generalizzazione}
+
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{
+@{}
+>{\centering\arraybackslash}p{0.13\textwidth}
+>{\hsize=1.2\hsize\centering\arraybackslash}X
+>{\hsize=0.8\hsize\centering\arraybackslash}X
+@{}
+}
+\toprule
+
+\textbf{Level} &
+\textbf{What changes between training and test} &
+\textbf{How it is obtained} \\
+
+\midrule
+
+Window
+& Almost nothing, if it comes from the same recording
+& Random split \\
+
+Subject
+& The person
+& Leave-One-Subject-Out (LOSO) \\
+
+View
+& The recording geometry
+& Training and testing on different views \\
+
+Dataset
+& The acquisition domain
+& Evaluation on an external dataset \\
+
+\bottomrule
+\end{tabularx}
+
+\end{table}
+
+\subsection{From window-level predictions to event-level evaluation}
+
+Most temporal classifiers produce one decision for each window of the sequence analysed. In an installed system, however, these decisions are not shown to the user individually, but must become alarm events.
+The two quantities do not coincide. Several consecutive windows classified as positive may belong to the same episode and generate a single event; conversely, a single positive prediction can be ignored by a persistence rule. The number of positive windows therefore describes the behaviour of the classifier, but does not correspond to the number of alarms produced by the system.
+
+Continuous operation introduces, however, a different question, one that cannot be reduced to a simple division of the dataset. A fall detection benchmark contains a sufficient number of falls to allow models to be trained and compared; during prolonged use, by contrast, most of the time is taken up by ordinary daily activities and falls are far rarer. That proportion cannot be reproduced merely by modifying the split of an already collected archive.
+
+In real-world evaluation there is as yet no criterion for defining non-events within a continuous stream and quantifying false alarms, because it would be necessary to establish a division of time into distinct events \cite{BR}. For this reason, in field trials the frequency of false alarms over time is often used, for example as the number of false positives per hour or per day. This measure too depends, however, on how one defines the time during which the system is genuinely active and the period during which the person is within the monitored area.
+
+Window-level metrics and event-level metrics therefore answer different questions: the former describe the behaviour of the classifier, the latter reflect what is actually perceived during continuous operation, where daily activities dominate and falls are rare events.
+
+\subsection{System-level and device-level evaluation}
+
+A final element concerns the platform on which the system is actually run. An algorithm that obtains good results offline is not necessarily suited to real-time use, above all when all the processing must take place on a device with limited resources.
+
+In a vision-based system, the computational cost does not depend on the classifier alone. Before arriving at the decision it is necessary to acquire the image, estimate the pose, build the features and finally apply the model: measuring only the inference time of the classifier therefore gives a partial picture of the actual cost. This aspect also emerges from the survey by Hoang et al.: in the skeleton-based systems examined, pose estimation generally proves to be the most expensive part of the pipeline, whereas feature extraction and classification require much shorter times. The authors further observe that speed performance is often neglected or reported according to non-uniform criteria, making comparison between different solutions difficult \cite{HO}.
+
+For a system intended to run on an edge device, the pipeline must be evaluated as a whole, considering both the quality of the classification and the rate at which the system actually manages to analyse the video stream. 
+
+\section{Positioning of the work}
+
+From what has been discussed in the preceding sections, one of the main aims of this work is to investigate the relative contribution of classifier architecture to the overall system performance.
+The first question to ask is therefore: \textbf{how much does the choice of architecture really matter when representation, data and protocol are kept constant?}
+To answer this, the models are compared by changing the classifier alone and leaving the rest of the pipeline unchanged. The differences observed can thus be attributed, as far as possible, to the model employed, ruling out the effects of a different representation of movement or of a different evaluation procedure.
+
+A second question concerns the meaning of the performance obtained in the laboratory. Analysis on subjects not observed before, the change of perspective and the move to another dataset introduce forms of variability that are not present in the domain used for development.
+The second question then becomes: \textbf{how far does the performance obtained on the benchmark remain representative when the system is tested under conditions closer to real use?}
+
+The two questions are addressed in two ways. On the one hand, different ways of representing the geometry and the dynamics of the body are explored, comparing several families of classifiers through a common protocol. On the other hand, the analysis is extended to conditions different from those used during the training phase: subjects never seen, a different viewpoint, an external dataset and, finally, the operation of the entire pipeline on an edge device in a domestic setting. The aim, therefore, is not only to identify the model with the best performance, but to understand which aspects of the pipeline weigh most on the behaviour of the system when moving from a controlled evaluation to situations closer to real use.

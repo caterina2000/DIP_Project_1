@@ -1,0 +1,88 @@
+{
+ "AVVISO": "Tutte le misure di questo file vengono dall impianto a CINQUE soggetti, non a dieci. Non sono confrontabili con i valori di risultati/addestramento/, che sono a dieci fold. Copiate da DIP_PROJECT/training_results_baseline il 2026-09-01 per dare un artefatto ai numeri del Capitolo 4 (ISS-126, ISS-129).",
+ "protocollo": "foresta casuale a 50 alberi, feature A3, finestra 22 campioni, passo 2, 9 fps, LOSO a 5 fold, soglia 0,5",
+ "trasferimento_fra_viste": {
+  "cam1_su_cam1": {
+   "run": "rf_A3_L22_cam1_arch50",
+   "modello": "rf",
+   "n_alberi": 50,
+   "feature_set": "A3",
+   "lunghezza_finestra": 22,
+   "camera_addestramento": 1,
+   "camera_verifica": 1,
+   "n_fold": 5,
+   "f2": 0.8565312453594507,
+   "f2_dev": 0.08784071777697566,
+   "recall": 0.8664281400678211,
+   "precision": 0.8724669047840348,
+   "tp_tot": 295,
+   "fp_tot": 57,
+   "fn_tot": 49,
+   "specificita": 0.9903221030662133,
+   "f2_per_fold": [
+    0.8610271903323263,
+    0.9263959390862944,
+    0.8873239436619719,
+    0.9205776173285198,
+    0.6873315363881402
+   ]
+  },
+  "cam1_su_cam2": {
+   "run": "rf_A3_L22_cam1to2_ds_cam1to2",
+   "modello": "rf",
+   "n_alberi": 50,
+   "feature_set": "A3",
+   "lunghezza_finestra": 22,
+   "camera_addestramento": 1,
+   "camera_verifica": 2,
+   "n_fold": 5,
+   "f2": 0.4341287937158008,
+   "f2_dev": 0.18189781517296147,
+   "recall": 0.6492509453086592,
+   "precision": 0.21563161057670296,
+   "tp_tot": 227,
+   "fp_tot": 1113,
+   "fn_tot": 122,
+   "specificita": 0.8104521585700271,
+   "f2_per_fold": [
+    0.4195804195804196,
+    0.2796610169491525,
+    0.773955773955774,
+    0.27358490566037735,
+    0.423861852433281
+   ]
+  },
+  "cam1e2_su_cam2": {
+   "run": "rf_A3_L22to2_ds_both",
+   "modello": "rf",
+   "n_alberi": 50,
+   "feature_set": "A3",
+   "lunghezza_finestra": 22,
+   "camera_addestramento": null,
+   "camera_verifica": 2,
+   "n_fold": 5,
+   "f2": 0.678374278818467,
+   "f2_dev": 0.12337523562427685,
+   "recall": 0.8138280903854674,
+   "precision": 0.5427982017937887,
+   "tp_tot": 281,
+   "fp_tot": 460,
+   "fn_tot": 68,
+   "specificita": 0.9206852418868247,
+   "f2_per_fold": [
+    0.7142857142857143,
+    0.47904191616766467,
+    0.6392294220665499,
+    0.8603896103896104,
+    0.6989247311827957
+   ]
+  }
+ },
+ "derivati": {
+  "divario_cam1_cam2": 0.4224,
+  "recupero_con_due_viste": 0.5782,
+  "divario_residuo": 0.1782,
+  "rapporto_trasferire_contro_addestrare_su_cam2": null,
+  "nota": "Il divario si calcola FRA RIGHE DELLO STESSO MODELLO. Il testo riportava 0,872 per la prima riga, che e un valore di una run GRU e non della foresta: vedi ISS-129."
+ }
+}

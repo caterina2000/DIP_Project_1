@@ -1,0 +1,66 @@
+{
+  "origine": "DIP_PROJECT/training_results_baseline — ambiente storico",
+  "nota": "LOSO su 10 soggetti, camera 1, foresta a 50 alberi, finestra 22, passo 2, frame_step 2, K integrali 31",
+  "run": [
+    {
+      "run": "rf_A3_L22_cam1_deploy9fps",
+      "feature_set": "A3",
+      "controesempi": false,
+      "n_fold": 10,
+      "f2": 0.8982474043386315,
+      "f2_std": 0.0749202708640206,
+      "recall": 0.9287013072156067,
+      "fn": 45,
+      "fp": 172,
+      "data": "2026-08-21T11:07:51"
+    },
+    {
+      "run": "rf_A3h_L22_cam1_h_pav",
+      "feature_set": "A3h",
+      "controesempi": false,
+      "n_fold": 10,
+      "f2": 0.9310565153656005,
+      "f2_std": 0.05131723662082163,
+      "recall": 0.9617355758663958,
+      "fn": 22,
+      "fp": 137,
+      "data": "2026-08-21T11:09:11"
+    },
+    {
+      "run": "rf_A3h_L22_cam1_h_neg",
+      "feature_set": "A3h",
+      "controesempi": true,
+      "n_fold": 10,
+      "f2": 0.941981082345605,
+      "f2_std": 0.06034710811324976,
+      "recall": 0.9648169976482872,
+      "fn": 22,
+      "fp": 129,
+      "data": "2026-08-21T11:10:43"
+    },
+    {
+      "run": "rf_A3i_L22_cam1_integrali",
+      "feature_set": "A3i",
+      "controesempi": false,
+      "n_fold": 10,
+      "f2": 0.9427375124108343,
+      "f2_std": 0.06359861666246223,
+      "recall": 0.9770743072858071,
+      "fn": 14,
+      "fp": 150,
+      "data": "2026-08-21T11:11:55"
+    },
+    {
+      "run": "rf_A3i_L22_cam1_int_neg",
+      "feature_set": "A3i",
+      "controesempi": true,
+      "n_fold": 10,
+      "f2": 0.9525473184525304,
+      "f2_std": 0.055281841049864035,
+      "recall": 0.980355355490447,
+      "fn": 14,
+      "fp": 124,
+      "data": "2026-08-21T11:13:32"
+    }
+  ]
+}

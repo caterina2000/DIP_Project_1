@@ -1,0 +1,323 @@
+{
+ "csv": "feature_v5.csv",
+ "top": 12,
+ "max_corr": 0.85,
+ "backend_dtw": "dtaidistance",
+ "adottate": [
+  "A2_testa_rel_y",
+  "A2_discesa",
+  "A2_percorso",
+  "A1_discesa",
+  "A3_discesa",
+  "A3_escursione",
+  "A3_caviglie_rel_y",
+  "A3_percorso",
+  "A3_hip_vel",
+  "A3_testa_vel_rel",
+  "A1_percorso",
+  "A1_escursione"
+ ],
+ "controllo_intero_insieme_riproduce": true,
+ "fold": [
+  {
+   "uguali": false,
+   "in_comune": 10,
+   "mancanti": [
+    "A2_percorso",
+    "A3_escursione"
+   ],
+   "aggiunte": [
+    "A1_asse_mag",
+    "A2_escursione"
+   ],
+   "jaccard": 0.7142857142857143,
+   "soggetto_escluso": "Subject_01",
+   "scelte": [
+    "A2_testa_rel_y",
+    "A2_discesa",
+    "A3_caviglie_rel_y",
+    "A1_discesa",
+    "A3_discesa",
+    "A2_escursione",
+    "A3_hip_vel",
+    "A3_percorso",
+    "A3_testa_vel_rel",
+    "A1_percorso",
+    "A1_escursione",
+    "A1_asse_mag"
+   ],
+   "secondi": 28.6
+  },
+  {
+   "uguali": false,
+   "in_comune": 11,
+   "mancanti": [
+    "A2_testa_rel_y"
+   ],
+   "aggiunte": [
+    "A2_angolo_tronco"
+   ],
+   "jaccard": 0.8461538461538461,
+   "soggetto_escluso": "Subject_02",
+   "scelte": [
+    "A2_angolo_tronco",
+    "A2_discesa",
+    "A1_discesa",
+    "A2_percorso",
+    "A3_discesa",
+    "A3_caviglie_rel_y",
+    "A3_escursione",
+    "A3_percorso",
+    "A1_percorso",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_escursione"
+   ],
+   "secondi": 26.5
+  },
+  {
+   "uguali": false,
+   "in_comune": 10,
+   "mancanti": [
+    "A2_testa_rel_y",
+    "A3_caviglie_rel_y"
+   ],
+   "aggiunte": [
+    "A2_angolo_tronco",
+    "A3_ginocchia_rel_y"
+   ],
+   "jaccard": 0.7142857142857143,
+   "soggetto_escluso": "Subject_03",
+   "scelte": [
+    "A2_angolo_tronco",
+    "A2_discesa",
+    "A2_percorso",
+    "A1_discesa",
+    "A3_escursione",
+    "A3_discesa",
+    "A3_ginocchia_rel_y",
+    "A3_percorso",
+    "A3_hip_vel",
+    "A1_percorso",
+    "A1_escursione",
+    "A3_testa_vel_rel"
+   ],
+   "secondi": 25.4
+  },
+  {
+   "uguali": false,
+   "in_comune": 11,
+   "mancanti": [
+    "A2_testa_rel_y"
+   ],
+   "aggiunte": [
+    "A2_angolo_tronco"
+   ],
+   "jaccard": 0.8461538461538461,
+   "soggetto_escluso": "Subject_04",
+   "scelte": [
+    "A2_angolo_tronco",
+    "A2_discesa",
+    "A2_percorso",
+    "A1_discesa",
+    "A3_escursione",
+    "A3_discesa",
+    "A3_percorso",
+    "A3_caviglie_rel_y",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_percorso",
+    "A1_escursione"
+   ],
+   "secondi": 25.3
+  },
+  {
+   "uguali": false,
+   "in_comune": 11,
+   "mancanti": [
+    "A1_escursione"
+   ],
+   "aggiunte": [
+    "A1_asse_mag"
+   ],
+   "jaccard": 0.8461538461538461,
+   "soggetto_escluso": "Subject_05",
+   "scelte": [
+    "A2_testa_rel_y",
+    "A2_discesa",
+    "A1_discesa",
+    "A2_percorso",
+    "A3_caviglie_rel_y",
+    "A3_escursione",
+    "A3_discesa",
+    "A3_percorso",
+    "A1_asse_mag",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_percorso"
+   ],
+   "secondi": 26.4
+  },
+  {
+   "uguali": false,
+   "in_comune": 11,
+   "mancanti": [
+    "A1_escursione"
+   ],
+   "aggiunte": [
+    "A1_asse_mag"
+   ],
+   "jaccard": 0.8461538461538461,
+   "soggetto_escluso": "Subject_06",
+   "scelte": [
+    "A2_testa_rel_y",
+    "A2_discesa",
+    "A2_percorso",
+    "A1_discesa",
+    "A3_caviglie_rel_y",
+    "A3_discesa",
+    "A3_escursione",
+    "A3_percorso",
+    "A3_hip_vel",
+    "A1_percorso",
+    "A3_testa_vel_rel",
+    "A1_asse_mag"
+   ],
+   "secondi": 21.5
+  },
+  {
+   "uguali": false,
+   "in_comune": 10,
+   "mancanti": [
+    "A1_escursione",
+    "A2_testa_rel_y"
+   ],
+   "aggiunte": [
+    "A2_angolo_tronco",
+    "A2_escursione"
+   ],
+   "jaccard": 0.7142857142857143,
+   "soggetto_escluso": "Subject_07",
+   "scelte": [
+    "A2_angolo_tronco",
+    "A2_discesa",
+    "A1_discesa",
+    "A2_percorso",
+    "A3_discesa",
+    "A3_testa_vel_rel",
+    "A3_escursione",
+    "A3_caviglie_rel_y",
+    "A3_percorso",
+    "A2_escursione",
+    "A3_hip_vel",
+    "A1_percorso"
+   ],
+   "secondi": 20.7
+  },
+  {
+   "uguali": false,
+   "in_comune": 11,
+   "mancanti": [
+    "A1_escursione"
+   ],
+   "aggiunte": [
+    "A2_escursione"
+   ],
+   "jaccard": 0.8461538461538461,
+   "soggetto_escluso": "Subject_08",
+   "scelte": [
+    "A2_testa_rel_y",
+    "A2_discesa",
+    "A2_percorso",
+    "A1_discesa",
+    "A2_escursione",
+    "A3_discesa",
+    "A3_escursione",
+    "A3_caviglie_rel_y",
+    "A3_percorso",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_percorso"
+   ],
+   "secondi": 20.5
+  },
+  {
+   "uguali": false,
+   "in_comune": 9,
+   "mancanti": [
+    "A1_escursione",
+    "A2_testa_rel_y",
+    "A3_caviglie_rel_y"
+   ],
+   "aggiunte": [
+    "A1_vy",
+    "A2_angolo_tronco",
+    "A3_ginocchia_rel_y"
+   ],
+   "jaccard": 0.6,
+   "soggetto_escluso": "Subject_09",
+   "scelte": [
+    "A2_angolo_tronco",
+    "A2_discesa",
+    "A1_discesa",
+    "A2_percorso",
+    "A3_discesa",
+    "A3_escursione",
+    "A3_percorso",
+    "A3_ginocchia_rel_y",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_percorso",
+    "A1_vy"
+   ],
+   "secondi": 20.8
+  },
+  {
+   "uguali": false,
+   "in_comune": 10,
+   "mancanti": [
+    "A1_percorso",
+    "A3_caviglie_rel_y"
+   ],
+   "aggiunte": [
+    "A1_asse_mag",
+    "A3_ginocchia_rel_y"
+   ],
+   "jaccard": 0.7142857142857143,
+   "soggetto_escluso": "Subject_10",
+   "scelte": [
+    "A2_testa_rel_y",
+    "A2_discesa",
+    "A2_percorso",
+    "A1_discesa",
+    "A3_escursione",
+    "A3_ginocchia_rel_y",
+    "A3_discesa",
+    "A3_percorso",
+    "A3_hip_vel",
+    "A3_testa_vel_rel",
+    "A1_escursione",
+    "A1_asse_mag"
+   ],
+   "secondi": 21.8
+  }
+ ],
+ "fold_identici": 0,
+ "fold_totali": 10,
+ "jaccard_medio": 0.7688,
+ "stabili_in_tutti_i_fold": [
+  "A1_discesa",
+  "A2_discesa",
+  "A3_discesa",
+  "A3_hip_vel",
+  "A3_percorso",
+  "A3_testa_vel_rel"
+ ],
+ "mai_adottate_ma_scelte_da_qualche_fold": [
+  "A1_asse_mag",
+  "A1_vy",
+  "A2_angolo_tronco",
+  "A2_escursione",
+  "A3_ginocchia_rel_y"
+ ]
+}

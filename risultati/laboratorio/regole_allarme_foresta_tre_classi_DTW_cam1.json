@@ -1,0 +1,298 @@
+{
+ "run": "foresta_tre_classi_DTW_cam1",
+ "csv": "feature_v2.csv",
+ "camera": 1,
+ "soglia": 0.5,
+ "sospensione_s": 60.0,
+ "n_cadute_laboratorio": 50,
+ "n_sessioni_casa": 13,
+ "riferimento": "consecutive 5",
+ "regole": [
+  {
+   "regola": "consecutive 1",
+   "riprese": 49,
+   "con_allarme": 48,
+   "richiamo": 0.9795918367346939,
+   "latenza_mediana_s": 1.5,
+   "latenza_p90_s": 3.383333333333334,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 156,
+    "eventi_ora": 10.4161977660486
+   }
+  },
+  {
+   "regola": "consecutive 3",
+   "riprese": 49,
+   "con_allarme": 47,
+   "richiamo": 0.9591836734693877,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.188888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 121,
+    "eventi_ora": 8.079230318537695
+   }
+  },
+  {
+   "regola": "consecutive 5",
+   "riprese": 49,
+   "con_allarme": 44,
+   "richiamo": 0.8979591836734694,
+   "latenza_mediana_s": 2.5277777777777777,
+   "latenza_p90_s": 4.594444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 109,
+    "eventi_ora": 7.277984336533957
+   }
+  },
+  {
+   "regola": "consecutive 7",
+   "riprese": 49,
+   "con_allarme": 41,
+   "richiamo": 0.8367346938775511,
+   "latenza_mediana_s": 2.9444444444444446,
+   "latenza_p90_s": 5.055555555555555,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 99,
+    "eventi_ora": 6.610279351530841
+   }
+  },
+  {
+   "regola": "consecutive 10",
+   "riprese": 49,
+   "con_allarme": 41,
+   "richiamo": 0.8367346938775511,
+   "latenza_mediana_s": 3.611111111111111,
+   "latenza_p90_s": 5.722222222222222,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 86,
+    "eventi_ora": 5.742262871026791
+   }
+  },
+  {
+   "regola": "3 su 5",
+   "riprese": 49,
+   "con_allarme": 47,
+   "richiamo": 0.9591836734693877,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.188888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 124,
+    "eventi_ora": 8.27954181403863
+   }
+  },
+  {
+   "regola": "3 su 6",
+   "riprese": 49,
+   "con_allarme": 47,
+   "richiamo": 0.9591836734693877,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.188888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 124,
+    "eventi_ora": 8.27954181403863
+   }
+  },
+  {
+   "regola": "4 su 6",
+   "riprese": 49,
+   "con_allarme": 44,
+   "richiamo": 0.8979591836734694,
+   "latenza_mediana_s": 2.25,
+   "latenza_p90_s": 4.372222222222223,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 118,
+    "eventi_ora": 7.87891882303676
+   }
+  },
+  {
+   "regola": "4 su 8",
+   "riprese": 49,
+   "con_allarme": 44,
+   "richiamo": 0.8979591836734694,
+   "latenza_mediana_s": 2.25,
+   "latenza_p90_s": 4.372222222222223,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 119,
+    "eventi_ora": 7.945689321537072
+   }
+  },
+  {
+   "regola": "5 su 8",
+   "riprese": 49,
+   "con_allarme": 44,
+   "richiamo": 0.8979591836734694,
+   "latenza_mediana_s": 2.4722222222222223,
+   "latenza_p90_s": 4.594444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 113,
+    "eventi_ora": 7.545066330535203
+   }
+  },
+  {
+   "regola": "5 su 10",
+   "riprese": 49,
+   "con_allarme": 44,
+   "richiamo": 0.8979591836734694,
+   "latenza_mediana_s": 2.4722222222222223,
+   "latenza_p90_s": 4.594444444444444,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 115,
+    "eventi_ora": 7.678607327535826
+   }
+  },
+  {
+   "regola": "6 su 10",
+   "riprese": 49,
+   "con_allarme": 43,
+   "richiamo": 0.8775510204081632,
+   "latenza_mediana_s": 2.7222222222222223,
+   "latenza_p90_s": 4.822222222222222,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 110,
+    "eventi_ora": 7.344754835034268
+   }
+  },
+  {
+   "regola": "cumulata 0,5",
+   "riprese": 49,
+   "con_allarme": 48,
+   "richiamo": 0.9795918367346939,
+   "latenza_mediana_s": 1.6388888888888888,
+   "latenza_p90_s": 3.905555555555556,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 94,
+    "eventi_ora": 6.276426859029284
+   }
+  },
+  {
+   "regola": "cumulata 1,0",
+   "riprese": 49,
+   "con_allarme": 45,
+   "richiamo": 0.9183673469387755,
+   "latenza_mediana_s": 1.9444444444444444,
+   "latenza_p90_s": 4.388888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 86,
+    "eventi_ora": 5.742262871026791
+   }
+  },
+  {
+   "regola": "cumulata 1,5",
+   "riprese": 49,
+   "con_allarme": 42,
+   "richiamo": 0.8571428571428571,
+   "latenza_mediana_s": 2.2222222222222223,
+   "latenza_p90_s": 4.611111111111111,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 74,
+    "eventi_ora": 4.941016889023053
+   }
+  },
+  {
+   "regola": "cumulata 2,0",
+   "riprese": 49,
+   "con_allarme": 42,
+   "richiamo": 0.8571428571428571,
+   "latenza_mediana_s": 2.5277777777777777,
+   "latenza_p90_s": 5.033333333333333,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 69,
+    "eventi_ora": 4.607164396521496
+   }
+  },
+  {
+   "regola": "cumulata 2,5",
+   "riprese": 49,
+   "con_allarme": 41,
+   "richiamo": 0.8367346938775511,
+   "latenza_mediana_s": 2.7777777777777777,
+   "latenza_p90_s": 5.5,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 63,
+    "eventi_ora": 4.206541405519626
+   }
+  },
+  {
+   "regola": "isteresi 0,70/0,40/3",
+   "riprese": 49,
+   "con_allarme": 46,
+   "richiamo": 0.9387755102040817,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.361111111111111,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 78,
+    "eventi_ora": 5.2080988830243
+   }
+  },
+  {
+   "regola": "isteresi 0,70/0,40/5",
+   "riprese": 49,
+   "con_allarme": 43,
+   "richiamo": 0.8775510204081632,
+   "latenza_mediana_s": 2.4444444444444446,
+   "latenza_p90_s": 4.6,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 73,
+    "eventi_ora": 4.874246390522742
+   }
+  },
+  {
+   "regola": "isteresi 0,80/0,45/3",
+   "riprese": 49,
+   "con_allarme": 45,
+   "richiamo": 0.9183673469387755,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.388888888888889,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 55,
+    "eventi_ora": 3.672377417517134
+   }
+  },
+  {
+   "regola": "isteresi 0,90/0,50/3",
+   "riprese": 49,
+   "con_allarme": 41,
+   "richiamo": 0.8367346938775511,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.833333333333333,
+   "casa": {
+    "ore": 14.976674166890252,
+    "eventi": 31,
+    "eventi_ora": 2.0698854535096576
+   }
+  }
+ ],
+ "_provenienza": {
+  "commit": "34ece3b9266b15c9ee08a8e1a970f55bdf699e7a",
+  "commit_breve": "34ece3b9",
+  "albero_pulito": false,
+  "data": "2026-09-10T13:41:24",
+  "comando": "pipeline/regole_allarme.py --csv feature_v2.csv --run foresta_tre_classi_DTW_cam1 --punteggi risultati/addestramento/v2 --sospensione 60",
+  "python": "3.12.10",
+  "macchina": "LAPTOP-OO4676OI",
+  "sistema": "Windows",
+  "numpy": "2.2.6",
+  "pandas": "2.2.2",
+  "sklearn": "1.6.0"
+ }
+}

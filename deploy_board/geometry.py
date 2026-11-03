@@ -55,10 +55,25 @@ stesse grandezze si calcolano identiche fuori linea e in tempo reale. E'
 questa la differenza fra un risultato e un sistema installabile.
 
 Perche' accumulare invece di derivare: una derivata divide la differenza fra
-due stime rumorose per un dt piccolo, e amplifica il rumore; un accumulo lo
-cancella, perche' il rumore a media nulla si somma a zero mentre il movimento
-vero si somma. E una caduta E' un'escursione: misurare quanto il tronco ha
-ruotato in tutto e' piu' fedele al fenomeno di quanto ruota adesso.
+due stime rumorose per un dt piccolo, e amplifica il rumore.
+
+CIO' CHE L'ACCUMULO DA' IN CAMBIO NON E' LA ROBUSTEZZA, E' LA REGOLARITA'.
+L'argomento intuitivo -- «accumulando, il rumore a media nulla si somma a
+zero» -- vale per una somma di incrementi CON SEGNO, e queste tre grandezze
+non lo sono: il percorso somma valori assoluti, che non si cancellano mai;
+l'escursione e' max - min, e il rumore allarga l'intervallo; la discesa e'
+uno scarto dal massimo recente, e il rumore abbassa il minimo. Tutte e tre
+sono quindi funzioni MONOTONE CRESCENTI del rumore. Sono preferibili alle
+derivate perche' variano lentamente per costruzione -- autocorrelazione a un
+passo 0,91-0,94 contro 0,18-0,44 -- e non perche' siano piu' robuste.
+Misurato in pipeline/rumore.py: il rumore indipendente non degrada
+apprezzabilmente nessuno dei tre insiemi (perdita massima 0,031 di F2, sotto
+la dispersione fra soggetti), mentre l'AMBIGUITA' di posa si', ed e' la
+vulnerabilita' vera -- una persona ferma su un divano produce un'escursione
+massima di 93,5 gradi contro i 60,7 di una caduta reale.
+
+E una caduta E' un'escursione: misurare quanto il tronco ha ruotato in tutto
+e' piu' fedele al fenomeno di quanto ruota adesso.
 
 Le pose mancanti
 ----------------
@@ -105,7 +120,24 @@ NOMI_A2 = ['A2_angolo_tronco', 'A2_d_angolo_tronco', 'A2_vel_ang_tronco',
            'A2_testa_vel', 'A2_testa_rel_y']
 NOMI_A3 = ['A3_torso_len', 'A3_angolo_tronco', 'A3_d_angolo_tronco',
            'A3_testa_rel_y', 'A3_ginocchia_rel_y', 'A3_caviglie_rel_y',
-           'A3_larghezza', 'A3_hip_vel', 'A3_testa_vel_rel']
+           'A3_larghezza', 'A3_hip_vel', 'A3_testa_vel_rel',
+           'A3_h_pavimento']
+
+# A3_h_pavimento --- l'altezza del bacino sul pavimento, in lunghezze di torso.
+#
+# E' l'unica grandezza che dice DOVE si trova il corpo nella stanza. Tutte le
+# altre `rel_y` sono altezze rispetto all'anca, cioe' descrivono la POSA: una
+# persona distesa sul pavimento e una distesa su un divano le producono quasi
+# identiche, perche' la posa del corpo *e'* la stessa. Senza questa grandezza
+# il classificatore non ha modo di distinguere i due casi, e sui dati di
+# laboratorio non se ne accorge perche' su UP-Fall nessuno si sdraia mai su un
+# divano: «tronco orizzontale» implica sempre «caduto». E' una scorciatoia
+# legittima li' e sbagliata in una casa.
+#
+# Reintrodotta il 2026-09-06 (ISS-139). Era gia' stata misurata nel primo
+# impianto, dove dimezzava i falsi negativi --- da 45 a 22 --- ed era il
+# guadagno singolo piu' grande della tabella delle configurazioni; poi il
+# motore a 32 grandezze fu scritto senza, e il DTW non poteva sceglierla.
 
 # Grandezze integrali, una terna per bacino. Accumulate su finestra mobile,
 # mai divise per dt.
@@ -166,20 +198,159 @@ class MotoreGeometrico:
     # configurazione del progetto per avere un valore di ripiego. Chi lo usa
     # dal progetto passa comunque `k_integrali` esplicitamente.
     K_PREDEFINITO = 31
+    FPS_RIFERIMENTO = 18.0
 
-    def __init__(self, k_integrali: int = None):
-        self.K = int(k_integrali or self.K_PREDEFINITO)
+    # La finestra degli integrali e' una DURATA, non un conteggio di
+    # fotogrammi (ISS-148). Il conteggio resta scritto qui sopra perche' e'
+    # il numero con cui il lavoro e' stato scritto, ma cio' che il buffer
+    # conserva e' il tempo.
+    #
+    # A 18 fps costanti le due formulazioni COINCIDONO ESATTAMENTE: 31
+    # campioni da 1/18 s sommano a 1,7222 s, che e' la durata predefinita.
+    # Su una telecamera vera, dove la cadenza scende a 7 fps e salta, il
+    # conteggio fisso coprirebbe 4,27 s --- due volte e mezzo cio' su cui
+    # il modello e' stato addestrato --- mentre la durata copre 1,72 s
+    # comunque vada. E' la stessa grandezza fisica ai due lati, che e'
+    # l'unica condizione perche' il modello riceva in esercizio le
+    # grandezze che ha imparato.
+    DURATA_PREDEFINITA = K_PREDEFINITO / FPS_RIFERIMENTO      # 1,7222 s
+
+    # Tetto sui campioni, perche' una cadenza molto alta non faccia crescere
+    # il buffer senza limite. Seicento campioni sono 1,72 s a 350 fps: non
+    # e' un caso che si presenta, e' una difesa.
+    K_MASSIMO = 600
+
+    # Quante osservazioni di persona eretta servono prima di fidarsi della
+    # retta del pavimento, e ogni quante rifarla. Cinquanta e' la soglia del
+    # primo impianto; il riadattamento periodico serve perche' le prime
+    # osservazioni coprono una fascia stretta di immagine e la prospettiva si
+    # stima male su una base corta.
+    PAV_MINIME = 50
+    PAV_RIADATTA = 50
+
+    def __init__(self, k_integrali: int = None,
+                 durata_integrali: float = None,
+                 fps_riferimento: float = None):
+        """
+        `durata_integrali` e' il parametro vero: i secondi di storia su cui
+        le grandezze integrali si accumulano.
+
+        `k_integrali` resta accettato perche' e' come lo chiamano i punti
+        gia' scritti, e viene convertito in durata dividendolo per
+        `fps_riferimento` --- 18 fps, la cadenza del dataset. Passare 31
+        equivale quindi a passare 1,7222 s, e a 18 fps produce esattamente
+        gli stessi valori di prima: la conversione non e' un adattamento,
+        e' un'identita'.
+        """
+        fps_rif = float(fps_riferimento or self.FPS_RIFERIMENTO)
+        if durata_integrali is not None:
+            self.DURATA = float(durata_integrali)
+        elif k_integrali:
+            self.DURATA = int(k_integrali) / max(fps_rif, 1e-6)
+        else:
+            self.DURATA = self.DURATA_PREDEFINITA
+        # Conservato per i metadati e per chi stampa la configurazione: e' il
+        # conteggio EQUIVALENTE alla cadenza di riferimento, non cio' che
+        # governa il buffer.
+        self.K = int(round(self.DURATA * fps_rif))
+        self.FPS_RIF = fps_rif
+        self.reset_pavimento()
         self.reset()
 
     def reset(self):
         self._a1 = None      # (inclinazione, allungamento, asse_mag, cx, cy)
         self._a2 = None      # (angolo, mid_hip, naso)
         self._a3 = None      # (angolo, hip_norm, testa_rel)
-        # Buffer circolari per le grandezze integrali: per ogni bacino la
-        # storia recente di (angolo, posizione_x, posizione_y, scala).
+        # Buffer per le grandezze integrali: per ogni bacino la storia
+        # recente di (angolo, posizione_x, posizione_y, scala, dt).
         # Azzerarli a ogni posa mancante e' voluto: un accumulo che
         # attraversa un buco misurerebbe uno spostamento mai avvenuto.
-        self._buf = {b: deque(maxlen=self.K) for b in ('A1', 'A2', 'A3')}
+        #
+        # Senza `maxlen`: la lunghezza la decide la DURATA, e a cadenza
+        # variabile non e' un numero fisso. Lo scarto dei campioni vecchi
+        # avviene in `_integrali`.
+        self._buf = {b: deque() for b in ('A1', 'A2', 'A3')}
+
+    def reset_pavimento(self):
+        """
+        Dimentica la retta del pavimento e le osservazioni che la sostengono.
+
+        NON viene chiamata da `reset()`, ed e' la scelta che conta: il
+        pavimento e' una proprieta' della TELECAMERA, non della ripresa. Una
+        ripresa di caduta dura duecento fotogrammi e la persona sta in piedi
+        per pochi: stimarlo da li' dentro non riuscirebbe quasi mai. Si stima
+        invece accumulando lungo tutte le riprese della stessa telecamera --
+        e sul dispositivo, lungo la sessione.
+
+        Va chiamata quando cambia l'inquadratura: altra telecamera, altro
+        pavimento.
+        """
+        self._pav_oss = []      # (hip_x, y_piedi) di persone erette
+        self._pav_retta = None  # (a, c) di y = a*x + c
+        self._pav_ultimo = 0    # quante osservazioni all'ultimo adattamento
+
+    def _pavimento(self, punti, hip_x, hip_y, torso_px,
+                   raccogli=True):
+        """
+        L'altezza del bacino sul pavimento, adimensionale.
+
+        Auto-calibrazione, non calibrazione: nessuno misura la stanza. Quando
+        una persona e' in piedi, il bordo inferiore del suo ingombro **e'** il
+        pavimento a quella distanza; raccogliendo molte osservazioni si adatta
+        una retta nel piano immagine, che tiene conto della prospettiva.
+
+        E' CAUSALE: usa solo le osservazioni gia' viste, mai quelle future.
+        Finche' non ce ne sono abbastanza restituisce 0,0 e lo stato lo dice.
+        L'implementazione precedente adattava la retta sull'intero archivio a
+        posteriori, che sul dispositivo non e' possibile.
+        """
+        x = punti[:, 0]
+        y = punti[:, 1]
+        x0, x1 = float(x.min()), float(x.max())
+        y0, y1 = float(y.min()), float(y.max())
+        larg = x1 - x0
+        if larg <= 1e-6 or torso_px <= 1e-6:
+            return 0.0
+
+        # in piedi: ingombro piu' alto che largo. Il tronco lo controlla chi
+        # chiama, che l'angolo ce l'ha gia'.
+        if raccogli and (y1 - y0) / larg > 1.6:
+            self._pav_oss.append((hip_x, y1))
+
+        n = len(self._pav_oss)
+        if n >= self.PAV_MINIME and n - self._pav_ultimo >= self.PAV_RIADATTA:
+            o = np.asarray(self._pav_oss, dtype=np.float64)
+            # una retta, non una costante: il pavimento in prospettiva sale
+            # verso il fondo dell'immagine
+            self._pav_retta = tuple(np.polyfit(o[:, 0], o[:, 1], 1))
+            self._pav_ultimo = n
+
+        return self.altezza_su_pavimento(hip_x, hip_y, torso_px)
+
+    def altezza_su_pavimento(self, hip_x, hip_y, torso_px):
+        """
+        L'altezza sul pavimento con la retta ATTUALMENTE stimata.
+
+        Separata da `_pavimento` perche' serve anche fuori dal ciclo: chi
+        estrae un archivio elabora tutte le riprese di una telecamera, ottiene
+        alla fine la retta migliore, e ricalcola l'altezza su tutte le righe
+        con quella. Senza, le prime riprese elaborate resterebbero senza
+        stima e il valore dipenderebbe dall'ORDINE, che e' il difetto di
+        ISS-138 reintrodotto da un'altra porta.
+
+        Sul dispositivo la stessa funzione viene chiamata con la retta
+        accumulata fino a quel momento, che e' causale. **L'asimmetria e'
+        voluta e va dichiarata**: in addestramento il pavimento e' stimato su
+        tutta la telecamera, in esercizio su cio' che si e' visto finora.
+        """
+        if self._pav_retta is None or torso_px <= 1e-6:
+            return 0.0
+        a, c = self._pav_retta
+        return float((a * hip_x + c - hip_y) / torso_px)
+
+    def pavimento_pronto(self):
+        """Se la retta e' stata stimata, e su quante osservazioni."""
+        return self._pav_retta is not None, len(self._pav_oss)
 
     # ---------------------------------------------------------------- A1
     def _ellisse(self, punti: np.ndarray):
@@ -304,6 +475,17 @@ class MotoreGeometrico:
             f['A3_testa_vel_rel'] = float(np.linalg.norm(testa_rel - p_testa) / dt)
         self._a3 = (ang, hip_norm, testa_rel)
 
+        # L'altezza dal pavimento. Le osservazioni per stimarlo si prendono
+        # solo da chi e' ERETTO, e la verticalita' si controlla qui perche'
+        # l'angolo del tronco e' gia' calcolato: nella convenzione A3 la
+        # verticale e' |ang| ~ 90 gradi, non 0, perche' l'angolo nasce da
+        # arctan2 fra spalle e anche nel piano immagine.
+        eretto = 70.0 < abs(ang) < 110.0
+        tutti = np.array([[landmarks[i].x * w, landmarks[i].y * h]
+                          for i in range(len(landmarks))], np.float32)
+        f['A3_h_pavimento'] = self._pavimento(
+            tutti, float(hip[0]), float(hip[1]), L, raccogli=eretto)
+
         f.update({
             'A3_torso_len': L,
             'A3_angolo_tronco': ang,
@@ -316,7 +498,7 @@ class MotoreGeometrico:
 
     # ------------------------------------------------------- INTEGRALI
     def _integrali(self, bacino: str, angolo: float, x: float, y: float,
-                   scala: float) -> dict:
+                   scala: float, dt: float) -> dict:
         """
         Aggiorna il buffer del bacino e restituisce le tre grandezze accumulate.
 
@@ -328,7 +510,23 @@ class MotoreGeometrico:
         quindi scendere significa y crescente e la discesa e' y - min(y).
         """
         b = self._buf[bacino]
-        b.append((angolo, x, y, max(scala, 1e-6)))
+        b.append((angolo, x, y, max(scala, 1e-6), max(dt, 0.0)))
+
+        # Scarto per anzianita': restano i campioni piu' recenti la cui
+        # durata complessiva non supera DURATA. A 18 fps ne restano 31,
+        # esattamente come il vecchio `maxlen`; a 7,26 fps ne restano 13, che
+        # sono sempre 1,72 s di storia.
+        #
+        # La tolleranza relativa non e' un dettaglio: 31 somme di 1/18
+        # sporgono dall'ultimo bit rispetto a 31/18, e senza di essa lo
+        # stesso video darebbe 30 o 31 campioni a seconda
+        # dell'arrotondamento.
+        limite = self.DURATA * (1.0 + 1e-9)
+        while len(b) > 1 and math.fsum(v[4] for v in b) > limite:
+            b.popleft()
+        while len(b) > self.K_MASSIMO:
+            b.popleft()
+
         if len(b) < 2:
             return {f'{bacino}_escursione': 0.0, f'{bacino}_percorso': 0.0,
                     f'{bacino}_discesa': 0.0}
@@ -367,7 +565,7 @@ class MotoreGeometrico:
         # ciascun bacino e li accumulano sul buffer.
         if self._a1 is not None:
             incl, _all, mag, cx, cy = self._a1
-            f.update(self._integrali('A1', incl, cx, cy, mag / max(w, h)))
+            f.update(self._integrali('A1', incl, cx, cy, mag / max(w, h), dt))
         if self._a2 is not None:
             # Il naso, non il bacino: in coordinate world il bacino e'
             # l'origine. La y si passa cosi' com'e': nei world landmark
@@ -378,11 +576,11 @@ class MotoreGeometrico:
             # come negli altri due bacini.
             ang, naso, L = self._a2
             f.update(self._integrali('A2', ang, float(naso[0]),
-                                     float(naso[1]), L))
+                                     float(naso[1]), L, dt))
         if self._a3 is not None:
             ang, hipn, _tr = self._a3
             f.update(self._integrali('A3', ang, float(hipn[0]), float(hipn[1]),
-                                     f['A3_torso_len'] / max(w, h)))
+                                     f['A3_torso_len'] / max(w, h), dt))
 
         for k in NOMI:
             f.setdefault(k, 0.0)

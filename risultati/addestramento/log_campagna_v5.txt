@@ -1,0 +1,424 @@
+SELEZIONE USATA:
+A2_testa_rel_y A2_discesa A2_percorso A1_discesa A3_discesa A3_escursione A3_caviglie_rel_y A3_percorso A3_hip_vel A3_testa_vel_rel A1_percorso A1_escursione
+
+############ gru / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- gru · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788968374.358635   53012 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788968378.336504   53012 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.751   0.984   0.385   127   203     2
+Subject_02            0.50   0.778   1.000   0.412   157   224     0
+Subject_03            0.50   0.763   0.806   0.630   133    78    32
+Subject_04            0.50   0.967   1.000   0.852   104    18     0
+Subject_05            0.50   0.986   0.986   0.986   142     2     2
+Subject_06            0.50   0.977   0.993   0.918   134    12     1
+Subject_07            0.50   0.777   0.988   0.419   166   230     2
+Subject_08            0.50   0.808   0.857   0.658   144    75    24
+Subject_09            0.50   0.874   0.860   0.936   147    10    24
+Subject_10            0.50   0.887   0.987   0.632   148    86     2
+--------------------------------------------------------------------
+media +- dev                 0.857   0.946   0.683  1402   938    89
+                           +-0.089
+parametri: 24,483 · durata 1245 s
+salvato: risultati\addestramento\run_gru_tre_classi_DTW_cam1_L22.json
+
+
+############ lstm / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- lstm · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788969627.411713   55316 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788969632.231154   55316 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.736   0.977   0.371   126   214     3
+Subject_02            0.50   0.757   1.000   0.384   157   252     0
+Subject_03            0.50   0.746   0.812   0.563   134   104    31
+Subject_04            0.50   0.922   0.952   0.818    99    22     5
+Subject_05            0.50   0.939   0.938   0.944   135     8     9
+Subject_06            0.50   0.950   0.948   0.955   128     6     7
+Subject_07            0.50   0.800   0.976   0.465   164   189     4
+Subject_08            0.50   0.722   1.000   0.342   168   323     0
+Subject_09            0.50   0.871   0.865   0.892   148    18    23
+Subject_10            0.50   0.852   1.000   0.536   150   130     0
+--------------------------------------------------------------------
+media +- dev                 0.829   0.947   0.627  1409  1266    82
+                           +-0.084
+parametri: 32,227 · durata 934 s
+salvato: risultati\addestramento\run_lstm_tre_classi_DTW_cam1_L22.json
+
+
+############ cnn / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- cnn · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788970569.063408   55352 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788970573.545631   55352 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.740   0.992   0.367   128   221     1
+Subject_02            0.50   0.763   1.000   0.392   157   244     0
+Subject_03            0.50   0.752   0.812   0.580   134    97    31
+Subject_04            0.50   0.920   0.933   0.874    97    14     7
+Subject_05            0.50   0.957   0.958   0.952   138     7     6
+Subject_06            0.50   0.932   1.000   0.734   135    49     0
+Subject_07            0.50   0.776   0.905   0.494   152   156    16
+Subject_08            0.50   0.677   0.887   0.347   149   280    19
+Subject_09            0.50   0.909   0.930   0.832   159    32    12
+Subject_10            0.50   0.951   0.993   0.814   149    34     1
+--------------------------------------------------------------------
+media +- dev                 0.838   0.941   0.639  1398  1134    93
+                           +-0.100
+parametri: 46,147 · durata 602 s
+salvato: risultati\addestramento\run_cnn_tre_classi_DTW_cam1_L22.json
+
+
+############ transformer / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- transformer · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788971177.846862   22816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788971181.644983   22816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.766   0.984   0.406   127   186     2
+Subject_02            0.50   0.851   0.981   0.556   154   123     3
+Subject_03            0.50   0.735   0.782   0.594   129    88    36
+Subject_04            0.50   0.959   0.981   0.879   102    14     2
+Subject_05            0.50   0.945   0.938   0.978   135     3     9
+Subject_06            0.50   0.878   1.000   0.590   135    94     0
+Subject_07            0.50   0.773   0.946   0.447   159   197     9
+Subject_08            0.50   0.715   0.857   0.430   144   191    24
+Subject_09            0.50   0.841   0.825   0.916   141    13    30
+Subject_10            0.50   0.906   0.973   0.709   146    60     4
+--------------------------------------------------------------------
+media +- dev                 0.837   0.927   0.650  1372   969   119
+                           +-0.082
+parametri: 34,499 · durata 711 s
+salvato: risultati\addestramento\run_transformer_tre_classi_DTW_cam1_L22.json
+
+
+############ grafo / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- grafo · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788971896.933753   57584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788971901.136694   57584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:From C:\Users\39366\anaconda3\envs\fall_training\lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.740   0.969   0.380   125   204     4
+Subject_02            0.50   0.760   0.834   0.560   131   103    26
+Subject_03            0.50   0.697   0.752   0.541   124   105    41
+Subject_04            0.50   0.953   0.942   1.000    98     0     6
+Subject_05            0.50   0.779   0.771   0.816   111    25    33
+Subject_06            0.50   0.925   0.933   0.894   126    15     9
+Subject_07            0.50   0.659   0.714   0.504   120   118    48
+Subject_08            0.50   0.810   0.982   0.476   165   182     3
+Subject_09            0.50   0.787   0.901   0.522   154   141    17
+Subject_10            0.50   0.832   0.853   0.757   128    41    22
+--------------------------------------------------------------------
+media +- dev                 0.794   0.865   0.645  1282   934   209
+                           +-0.087
+parametri: 12,323 · durata 2162 s
+salvato: risultati\addestramento\run_grafo_tre_classi_DTW_cam1_L22.json
+
+
+############ foresta / DTW ############
+==========================================================================
+DTW: 12 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- foresta · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788974076.194684   41504 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788974081.252329   41504 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.863   0.984   0.577   127    93     2
+Subject_02            0.50   0.751   0.904   0.447   142   176    15
+Subject_03            0.50   0.676   0.655   0.777   108    31    57
+Subject_04            0.50   0.873   0.846   1.000    88     0    16
+Subject_05            0.50   0.874   0.847   1.000   122     0    22
+Subject_06            0.50   0.952   0.941   1.000   127     0     8
+Subject_07            0.50   0.819   0.929   0.557   156   124    12
+Subject_08            0.50   0.882   0.863   0.967   145     5    23
+Subject_09            0.50   0.773   0.731   1.000   125     0    46
+Subject_10            0.50   0.785   0.793   0.753   119    39    31
+--------------------------------------------------------------------
+media +- dev                 0.825   0.849   0.808  1259   468   232
+                           +-0.076
+parametri: 12,928 · durata 10 s
+salvato: risultati\addestramento\run_foresta_tre_classi_DTW_cam1_L22.json
+
+
+############ gru / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- gru · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788974090.787352   32892 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788974094.646443   32892 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.792   0.969   0.458   125   148     4
+Subject_02            0.50   0.775   0.987   0.417   155   217     2
+Subject_03            0.50   0.735   0.812   0.532   134   118    31
+Subject_04            0.50   0.947   0.971   0.863   101    16     3
+Subject_05            0.50   0.999   1.000   0.993   144     1     0
+Subject_06            0.50   0.875   1.000   0.584   135    96     0
+Subject_07            0.50   0.748   0.917   0.431   154   203    14
+Subject_08            0.50   0.834   0.857   0.754   144    47    24
+Subject_09            0.50   0.834   0.813   0.933   139    10    32
+Subject_10            0.50   0.904   1.000   0.652   150    80     0
+--------------------------------------------------------------------
+media +- dev                 0.844   0.933   0.662  1381   936   110
+                           +-0.082
+parametri: 24,675 · durata 1138 s
+salvato: risultati\addestramento\run_gru_tre_classi_DTWH_cam1_L22.json
+
+
+############ lstm / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- lstm · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788975237.207671   41768 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788975242.064584   41768 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.907   0.992   0.674   128    62     1
+Subject_02            0.50   0.759   1.000   0.387   157   249     0
+Subject_03            0.50   0.731   0.830   0.495   137   140    28
+Subject_04            0.50   0.924   0.913   0.969    95     3     9
+Subject_05            0.50   0.948   0.944   0.965   136     5     8
+Subject_06            0.50   0.947   0.956   0.915   129    12     6
+Subject_07            0.50   0.778   0.827   0.629   139    82    29
+Subject_08            0.50   0.747   1.000   0.372   168   284     0
+Subject_09            0.50   0.865   0.883   0.799   151    38    20
+Subject_10            0.50   0.854   1.000   0.540   150   128     0
+--------------------------------------------------------------------
+media +- dev                 0.846   0.935   0.674  1390  1003   101
+                           +-0.081
+parametri: 32,483 · durata 942 s
+salvato: risultati\addestramento\run_lstm_tre_classi_DTWH_cam1_L22.json
+
+
+############ cnn / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- cnn · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788976187.175161   56516 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788976191.975432   56516 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.726   0.969   0.362   125   220     4
+Subject_02            0.50   0.740   0.975   0.377   153   253     4
+Subject_03            0.50   0.732   0.788   0.570   130    98    35
+Subject_04            0.50   0.836   0.990   0.515   103    97     1
+Subject_05            0.50   0.990   1.000   0.954   144     7     0
+Subject_06            0.50   0.887   0.993   0.623   134    81     1
+Subject_07            0.50   0.823   0.911   0.593   153   105    15
+Subject_08            0.50   0.720   0.881   0.416   148   208    20
+Subject_09            0.50   0.913   0.942   0.813   161    37    10
+Subject_10            0.50   0.931   0.987   0.759   148    47     2
+--------------------------------------------------------------------
+media +- dev                 0.830   0.943   0.598  1399  1153    92
+                           +-0.093
+parametri: 46,467 · durata 644 s
+salvato: risultati\addestramento\run_cnn_tre_classi_DTWH_cam1_L22.json
+
+
+############ transformer / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- transformer · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788976838.100214   42288 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788976841.967532   42288 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.743   0.984   0.375   127   212     2
+Subject_02            0.50   0.814   0.968   0.497   152   154     5
+Subject_03            0.50   0.726   0.764   0.606   126    82    39
+Subject_04            0.50   0.974   1.000   0.881   104    14     0
+Subject_05            0.50   0.965   0.958   0.993   138     1     6
+Subject_06            0.50   0.880   0.941   0.698   127    55     8
+Subject_07            0.50   0.761   0.946   0.427   159   213     9
+Subject_08            0.50   0.764   0.851   0.542   143   121    25
+Subject_09            0.50   0.836   0.825   0.887   141    18    30
+Subject_10            0.50   0.936   0.993   0.760   149    47     1
+--------------------------------------------------------------------
+media +- dev                 0.840   0.923   0.667  1366   917   125
+                           +-0.089
+parametri: 34,563 · durata 573 s
+salvato: risultati\addestramento\run_transformer_tre_classi_DTWH_cam1_L22.json
+
+
+############ grafo / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- grafo · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788977419.753337   53588 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788977424.929360   53588 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:From C:\Users\39366\anaconda3\envs\fall_training\lib\site-packages\keras\src\backend\tensorflow\core.py:232: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.813   0.984   0.479   127   138     2
+Subject_02            0.50   0.744   0.994   0.371   156   265     1
+Subject_03            0.50   0.607   0.697   0.401   115   172    50
+Subject_04            0.50   0.940   0.933   0.970    97     3     7
+Subject_05            0.50   0.896   0.896   0.896   129    15    15
+Subject_06            0.50   0.853   0.837   0.926   113     9    22
+Subject_07            0.50   0.761   0.946   0.427   159   213     9
+Subject_08            0.50   0.714   0.881   0.405   148   217    20
+Subject_09            0.50   0.759   0.977   0.401   167   249     4
+Subject_10            0.50   0.810   0.907   0.569   136   103    14
+--------------------------------------------------------------------
+media +- dev                 0.790   0.905   0.585  1347  1384   144
+                           +-0.090
+parametri: 12,373 · durata 2781 s
+salvato: risultati\addestramento\run_grafo_tre_classi_DTWH_cam1_L22.json
+
+
+############ foresta / DTWH ############
+==========================================================================
+DTWH: 13 grandezze · camera 1 · 10 soggetti · 110 riprese
+==========================================================================
+finestre: 11,719
+  y_train  0 (normale  )  10,228   87.3%
+  y_train  1 (caduta   )     474    4.0%
+  y_train  2 (a terra  )   1,017    8.7%
+  allarme atteso          1,491   12.7%
+
+--- foresta · tre_classi
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788980217.550145   29788 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1788980222.519550   29788 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+fold (verifica)     soglia      F2  recall   prec.    TP    FP    FN
+--------------------------------------------------------------------
+Subject_01            0.50   0.891   0.977   0.660   126    65     3
+Subject_02            0.50   0.761   0.968   0.410   152   219     5
+Subject_03            0.50   0.695   0.667   0.840   110    21    55
+Subject_04            0.50   0.906   0.885   1.000    92     0    12
+Subject_05            0.50   0.850   0.819   1.000   118     0    26
+Subject_06            0.50   0.952   0.941   1.000   127     0     8
+Subject_07            0.50   0.841   0.929   0.609   156   100    12
+Subject_08            0.50   0.884   0.863   0.980   145     3    23
+Subject_09            0.50   0.804   0.766   1.000   131     0    40
+Subject_10            0.50   0.860   0.893   0.749   134    45    16
+--------------------------------------------------------------------
+media +- dev                 0.844   0.871   0.825  1291   453   200
+                           +-0.071
+parametri: 11,946 · durata 10 s
+salvato: risultati\addestramento\run_foresta_tre_classi_DTWH_cam1_L22.json
+

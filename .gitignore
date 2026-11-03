@@ -48,3 +48,47 @@ __pycache__/
 # diverse e' il modo piu' rapido per lavorare su quello sbagliato.
 # ---------------------------------------------------------------------
 _superato/
+
+# ---------------------------------------------------------------------
+# Le copie di sicurezza prese prima di un tentativo rischioso.
+#
+# `_ripiego_20260908/` e' una copia del codice piu' `feature_v3.csv`, che da
+# solo pesa **75 MB**: senza questa riga git lo proporrebbe, ed e' esattamente
+# il file che la regola sui dataset esiste per tenere fuori. Il codice e' gia'
+# in git (il commit sta in `_git_HEAD.txt`); il CSV e i punteggi per fold NON
+# lo sono, e questa e' l'unica copia -- quindi la cartella si ignora, non si
+# cancella.
+# ---------------------------------------------------------------------
+_ripiego_*/
+
+# ---------------------------------------------------------------------
+# I fotogrammi ANNOTATI prodotti da rendi_clip.py e da mostra_web.py.
+#
+# Sono le stesse immagini delle clip con lo scheletro e il punteggio
+# sopra: ritraggono le stesse persone. Le loro cartelle NON si chiamano
+# `clip`, quindi la regola `**/clip/` non le prendeva. Trovato il
+# 2026-09-09 con `git check-ignore` prima di committare, che e' l'unico
+# momento in cui ci si accorge in tempo.
+#
+# Delle sessioni restano tracciati il registro dei punteggi e il LEGGIMI:
+# sono testo, e sono cio' da cui si ricalcola qualunque regola.
+# ---------------------------------------------------------------------
+deploy_board/resa_clip*/
+deploy_board/sessioni/**/clip/
+
+# ---------------------------------------------------------------------
+# E la regola che vale comunque vada: NESSUN JPEG.
+#
+# Le due righe qui sopra elencano le cartelle note al 9 settembre. Il
+# 10 settembre `deploy_board/riletture/` non c'era ancora, e le sue
+# 2.842 immagini annotate -- le stesse persone -- NON erano coperte da
+# nessuna regola: `git status` le proponeva tutte.
+#
+# Elencare le cartelle e' una difesa che invecchia: ogni cartella nuova
+# ricomincia da capo. L'estensione no. In questo repository non esiste un
+# solo .jpg che sia un risultato: `git ls-files | grep -c jpg` -> 0. I
+# JPEG sono fotogrammi di telecamera, sempre. I risultati sono PNG, e
+# quelli restano tracciati.
+# ---------------------------------------------------------------------
+*.jpg
+*.jpeg

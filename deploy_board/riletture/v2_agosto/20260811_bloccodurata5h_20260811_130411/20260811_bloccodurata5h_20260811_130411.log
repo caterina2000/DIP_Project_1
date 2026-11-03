@@ -1,0 +1,48 @@
+sessione   : 20260811/bloccodurata5h_20260811_130411
+clip       : 30
+pacchetto  : deploy_board/pacchetto_v2  (DTW 12 colonne, feature_v2_omnifall.csv,
+             selezione scelte_prima_di_v5.txt, 12.140 finestre / 569 positive)
+ambiente   : fall_processing, MediaPipe 0.10.9
+cadenza    : 10 fps dichiarata (le clip furono salvate a 10 fps)
+avvio      : 2026-09-10 14:07:53
+----------------------------------------------------------------------
+  evt_0001_132012          100%   0.340       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0010_132657           99%   0.380       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0014_132711          100%   0.120       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0022_134246          100%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0029_134319           99%   0.420       0       1   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0032_134425           99%   0.240       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0039_134435          100%   0.380       0       0   installata=0  0,50=0  0,40=0  0,30=1
+  evt_0040_134503           99%   0.320       0       0   installata=0  0,50=0  0,40=0  0,30=1
+  evt_0045_134514           99%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0048_134605           99%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0056_134616           99%   0.100       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0060_140303           90%   0.460       0       2   installata=0  0,50=0  0,40=0  0,30=1
+  evt_0068_142026          100%   0.380       0       0   installata=0  0,50=0  0,40=0  0,30=1
+  evt_0088_142236          100%   0.160       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0098_142251          100%   0.200       0       0   installata=0  0,50=0  0,40=0  0,30=0
+    installata 0,50 5cons    0 allarmi
+    0,50 5su7                0 allarmi
+    0,40 2cons               0 allarmi
+    0,30 3su5                4 allarmi
+  evt_0102_142314           99%   0.100       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0103_142341           98%   0.080       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0116_142353          100%   0.140       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0130_142404          100%   0.100       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0132_145904           99%   0.400       0       1   installata=0  0,50=0  0,40=0  0,30=1
+  evt_0137_145946           98%   0.280       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0158_145957           99%   0.280       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0159_152247            0%   0.000       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0165_174244            1%   0.080       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0173_174324           10%   0.460       0       2   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0186_182632           94%   0.220       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0188_182734           97%   0.020       0       0   installata=0  0,50=0  0,40=0  0,30=0
+  evt_0196_183923           61%   0.420       0       2   installata=0  0,50=0  0,40=1  0,30=1
+  evt_0206_183939           91%   0.820      11      12   installata=1  0,50=1  0,40=1  0,30=1
+  evt_0207_190529           81%   0.740       1       2   installata=0  0,50=0  0,40=0  0,30=1
+    installata 0,50 5cons    1 allarmi
+    0,50 5su7                1 allarmi
+    0,40 2cons               2 allarmi
+    0,30 3su5                4 allarmi
+fine       : 2026-09-10 14:12:54
+csv scritti: 30 su 30

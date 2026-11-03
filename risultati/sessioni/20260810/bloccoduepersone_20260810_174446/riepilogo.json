@@ -1,0 +1,19 @@
+{
+  "blocco": "duepersone",
+  "inizio": "2026-08-10T17:44:46",
+  "fine": "2026-08-10T18:06:10",
+  "durata_h": 0.23,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.45,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 3830,
+  "pose_valide": 196,
+  "quota_pose": 0.0512,
+  "fps_medio": 4.62,
+  "allarmi": 0,
+  "allarmi_per_ora": 0.0,
+  "clip_salvate": 0,
+  "cambi_di_persona_sospetti": 0,
+  "interrotta_da_utente": true
+}

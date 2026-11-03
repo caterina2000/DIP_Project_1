@@ -1,24 +1,122 @@
+% =================================================================
+% Tesi di laurea magistrale — Università di Siena, DIISM
+% Ingegneria Informatica e dell'Informazione
+%
+% NOTA SUL FORMATO
+% Il DIISM non pubblica specifiche tipografiche vincolanti (margini,
+% carattere, interlinea): le linee guida di dipartimento riguardano
+% la procedura, le scadenze e la lingua. L'unico elemento con un
+% formato atteso e' il frontespizio. I valori qui sotto sono quindi
+% una scelta consapevole, non un obbligo — ma sono coerenti fra loro,
+% che e' cio' che il preambolo precedente non era.
+% =================================================================
 \documentclass[12pt,a4paper,oneside]{report}
 
 % ---------------------------------------------------------------
 % CODIFICA E LINGUA
-% Un solo inputenc: il preambolo ne caricava due con codifiche
-% opposte (utf8 e poi latin1). Vinceva il secondo, e su file salvati
-% in UTF-8 -- come fa Overleaf -- le lettere accentate risultavano
-% corrotte: "perche'" diventava "perchA©".
+% Un solo inputenc. Il preambolo precedente ne caricava due con
+% codifiche opposte (utf8 e poi latin1) e vinceva il secondo: su file
+% salvati in UTF-8 -- come sono tutti i .tex di questa tesi, verificato
+% -- i circa 3.500 caratteri accentati risultavano corrotti.
 % ---------------------------------------------------------------
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[italian]{babel}
+\usepackage{lmodern}          % font vettoriale: niente bitmap nel PDF
+\usepackage[british]{babel}
+\usepackage{microtype}        % giustificazione piu' uniforme
 
 % ---------------------------------------------------------------
-% LAYOUT
+% LAYOUT DI PAGINA
+% Un solo posto in cui e' definito. Il preambolo precedente fissava i
+% margini con geometry e poi li riscriveva a mano con \oddsidemargin,
+% \textheight e \topmargin: il risultato effettivo era 4,02 cm a
+% sinistra contro 2,98 a destra, e 3,54 cm sopra contro 3,66 sotto,
+% non i 3,5 e i 2 che geometry dichiarava.
+%
+% Sinistra > destra e' voluto: il documento e' oneside e va rilegato.
 % ---------------------------------------------------------------
 \usepackage{geometry}
-\geometry{top=2cm, bottom=2cm, left=3.5cm, right=3.5cm}
+\geometry{a4paper,
+          top=3cm, bottom=3cm, left=3.5cm, right=3cm,
+          headheight=15pt, headsep=1cm, footskip=1.2cm}
+
+% ---------------------------------------------------------------
+% INTERLINEA
+% \onehalfspacing di setspace corrisponde all'interlinea 1,5 di Word.
+% Il valore precedente era ambiguo: \baselinestretch{1.5} veniva
+% annullato da \linespread{1.3} venti righe dopo, quindi l'interlinea
+% reale era 1,3. Scrivere \linespread{1.5} sarebbe comunque troppo:
+% darebbe 21,8 pt su un corpo di 12, cioe' 1,8 volte il corpo.
+% ---------------------------------------------------------------
+\usepackage{setspace}
+\onehalfspacing
+
+% Paragrafi allineati al margine, senza rientro, separati da uno spazio
+% bianco. E' una scelta, non un difetto: NON caricare indentfirst
+% insieme a questo, perche' i due si annullano a vicenda.
 \usepackage{parskip}
-\usepackage{indentfirst}
+
+% ---------------------------------------------------------------
+% TESTATA DEI CAPITOLI
+% La classe report lascia 50 pt di bianco sopra il numero del capitolo
+% e altri 40 sotto il titolo: il testo comincia a circa un terzo della
+% pagina. Qui il bianco sopra scende a 10 pt, cioe' il titolo si alza
+% di circa 1,4 cm, e quello sotto a 30 pt.
+%
+% La forma del titolo non cambia: si tocca solo la spaziatura. Per
+% alzarlo ancora, ridurre il primo \vspace* (anche a 0 pt); per
+% abbassarlo, aumentarlo verso i 50 pt originali.
+% ---------------------------------------------------------------
+% \AtBeginDocument: la redefinizione viene applicata all'apertura del
+% documento, quindi vale anche se un pacchetto caricato piu' sotto
+% ridefinisse a sua volta la testata. Senza, l'ordine conta.
+\makeatletter
+\AtBeginDocument{%
+\renewcommand{\@makechapterhead}[1]{%
+  \vspace*{-20\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \huge\bfseries \@chapapp\space \thechapter
+      \par\nobreak
+      \vskip 12\p@
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 30\p@
+  }}
+% Stessa cosa per i capitoli non numerati: Introduzione, Ringraziamenti,
+% Bibliografia. Senza questa seconda definizione resterebbero in basso.
+\renewcommand{\@makeschapterhead}[1]{%
+  \vspace*{-20\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 30\p@
+  }}
+}
+\makeatother
+
+% ---------------------------------------------------------------
+% INTESTAZIONI
+% Sintassi fancyhdr moderna. Quella precedente (\rhead[..]{..} con
+% \fancyplain) e' della versione 1 del pacchetto, deprecata da anni.
+% Soprattutto: la configurazione era inerte, perche' nel corpo del
+% documento un \pagestyle{myheadings} la sostituiva prima del primo
+% capitolo.
+% ---------------------------------------------------------------
 \usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}{}}
+\fancyhead[L]{\bfseries\nouppercase{\leftmark}}
+\fancyhead[R]{\bfseries\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Prima pagina di ogni capitolo: solo il numero, in basso
+\fancypagestyle{plain}{%
+  \fancyhf{}\fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}}
 
 % ---------------------------------------------------------------
 % MATEMATICA
@@ -27,47 +125,34 @@
 \usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{amsthm}
-\usepackage{amscd}
 \usepackage{mathtools}
-\usepackage{latexsym}
 \usepackage{bm}
 
 % ---------------------------------------------------------------
 % FIGURE E TABELLE
+% subfig e' stato tolto: non e' usato in nessun capitolo (zero
+% \subfloat) ed entra in conflitto con caption e hyperref. Se
+% servissero sottofigure, il pacchetto da caricare e' subcaption.
 % ---------------------------------------------------------------
 \usepackage{graphicx}
-\usepackage{subfig}
+\graphicspath{{figure/}}
+\usepackage{booktabs}     % \toprule \midrule \bottomrule
+\usepackage{multirow}
 \usepackage{adjustbox}
 \usepackage{placeins}
-\usepackage{booktabs}   % \toprule \midrule \bottomrule: tabelle senza righe verticali
-\usepackage{siunitx}    % \SI{33.34}{\milli\second}, allineamento sui decimali
-\usepackage{multirow}
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf, width=.92\textwidth}
+
+% Cifre decimali con la virgola, come da uso italiano
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,}, group-separator={.},
+         group-minimum-digits=4}
 
 % ---------------------------------------------------------------
-% VARIE
+% CODICE
 % ---------------------------------------------------------------
-\usepackage{url}
 \usepackage{xcolor}
 \usepackage{listings}
-\usepackage{chngcntr}
-\usepackage{tikz}
-\usetikzlibrary{topaths,calc}
-
-% Impostazioni dell'interlinea
-\renewcommand{\baselinestretch}{1.5}
-
-\oddsidemargin=42pt \evensidemargin=20pt
-
-\pagestyle{fancy}\addtolength{\headwidth}{20pt}
-\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\thesection \ #1}{}}
-\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
-\cfoot{}
-
-\linespread{1.3}
-\textheight 22.5cm
-\topmargin -0.3cm
-
 \lstset{basicstyle=\ttfamily\small,
   showstringspaces=false,
   commentstyle=\color{red},
@@ -76,53 +161,59 @@
   escapeinside={(*@}{@*)}
 }
 
-% Cifre decimali con la virgola, come da uso italiano
-\sisetup{output-decimal-marker={,}, group-separator={.}}
-\newtheorem{Thm}{Teorema}[section]
+% ---------------------------------------------------------------
+% RIFERIMENTI INCROCIATI
+% La tesi contiene 101 \ref e 38 \cite: senza hyperref il PDF non e'
+% navigabile. Va caricato per ultimo, dopo tutto il resto.
+% hidelinks toglie i riquadri colorati, che in stampa sono un difetto.
+% ---------------------------------------------------------------
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Evaluation of a Pose-Based Fall Detection System: From Controlled Environments to Real-World Edge Deployment},
+  pdfauthor={Caterina Cerretani},
+  bookmarksnumbered=true,
+  linktoc=all
+}
+
+% ---------------------------------------------------------------
+% AMBIENTI E ABBREVIAZIONI
+% ---------------------------------------------------------------
+\newtheorem{Thm}{Theorem}[section]
 \newtheorem{Lem}[Thm]{Lemma}
-\newtheorem{Prop}[Thm]{Proposizione}
-\newtheorem{Cor}[Thm]{Corollario}
-
-
-\newtheorem{Exer}[Thm]{Esercizio} %comando abbreviato per scrivere Esercizio, basta scrivere Exer
-\newtheorem{Def}[Thm]{Definizione}
-\newtheorem{Conj}[Thm]{Congettura}
-\newtheorem{ST}[Thm]{Stato Terminale}
-\newtheorem{Ques}{Domanda}[chapter]
-\newtheorem{Rmk}[Thm]{Osservazione}
+\newtheorem{Prop}[Thm]{Proposition}
+\newtheorem{Cor}[Thm]{Corollary}
+\newtheorem{Exer}[Thm]{Exercise}
+\newtheorem{Def}[Thm]{Definition}
+\newtheorem{Conj}[Thm]{Conjecture}
+\newtheorem{ST}[Thm]{Terminal State}
+\newtheorem{Ques}{Question}[chapter]
+\newtheorem{Rmk}[Thm]{Remark}
 
 \theoremstyle{definition}
-\newtheorem{Ex}{Esempio}[section]
-\newtheorem{Oss}[Thm]{Osservazione}
-\newtheorem{Not}[Thm]{Notazione}
+\newtheorem{Ex}{Example}[section]
+\newtheorem{Oss}[Thm]{Observation}
+\newtheorem{Not}[Thm]{Notation}
 
-\newcommand{\RR}{{\mathbb{R}}} %comando abbreviato per scrivere R nel formato numeri reali, basta scrivere \RR
+\newcommand{\RR}{{\mathbb{R}}}
 \newcommand{\ZZ}{{\mathbb{Z}}}
 \newcommand{\NN}{{\mathbb{N}}}
-\newcommand{\HH}{{\mathcal{H}}} %comando abbreviato per scrivere H in corsivo, basta scrivere \HH
+\newcommand{\HH}{{\mathcal{H}}}
 \newcommand{\MM}{{\mathcal{M}}}
 \newcommand{\VV}{{\mathcal{V}}}
 \newcommand{\PP}{{\mathbb{P}}}
-%\newcommand{\TT}{{\mathcal{T}}}
 \newcommand{\FF}{{\mathcal{F}}}
 \newcommand{\CC}{{\mathcal{C}}}
 \newcommand{\PPP}{{\mathbb{P}}}
-     \newcommand{\CCC}{{\mathbb{C}}}
-     
+\newcommand{\CCC}{{\mathbb{C}}}
 \newcommand{\BB}{{\mathcal B}}
-%\newcommand{\TT}{{\mathbb T}}
-
-
-
 
 \def\cA{\mathcal A}
 \def\cR{\mathcal R}
 \def\cG{\mathcal G}
 \def\cT{\mathcal T}
 
-
 \newcommand{\bx}{{\mathbf x}}
-\newcommand{\by}{{\mathbf y}}%comando abbreviato per scrivere la lettera x in grassetto, basta scrivere \bx
+\newcommand{\by}{{\mathbf y}}
 \newcommand{\bp}{{\mathbf p}}
 \newcommand{\bq}{{\mathbf q}}
 \newcommand{\bb}{{\mathbf b}}
@@ -131,43 +222,57 @@
 \newcommand{\bv}{{\mathbf v}}
 \newcommand{\bt}{{\mathbf t}}
 
+\hyphenation{re-pre-sen-ta-tion}
+\hyphenation{ge-ne-ra-li-sa-tion}
 
-
-\hyphenation{sot-to-in-sie-me}
-\hyphenation{proiet-ti-vi}
-
+% =================================================================
 \begin{document}
 
-\newpage
 \pagestyle{empty}
 \input{Frontespizio}
 
-\newpage
-\pagestyle{plain}\pagenumbering{roman}
+\cleardoublepage
+\pagestyle{plain}
+\pagenumbering{roman}
 \tableofcontents
+\listoffigures
+\listoftables
 
-\input Introduzione
-\newpage
-\pagestyle{myheadings}
-
-
-
+% ---------------------------------------------------------------
+% Da qui in poi numerazione araba e intestazioni correnti.
+% L'Introduzione entra nel corpo: nel preambolo precedente restava
+% nella numerazione romana insieme all'indice.
+% ---------------------------------------------------------------
+\cleardoublepage
 \pagenumbering{arabic}
+\pagestyle{fancy}
+
+\input{Introduzione}
+
 \include{Cap1}
 \include{Cap2}
 \include{Cap3}
 \include{Cap4}
 \include{Cap5}
-\include{Conclusioni}
+\include{Cap6}
 
-
-\addcontentsline{toc}{chapter}{\textit{\bibname}}
-
-% Il file si chiama Bibliografia.tex con la B maiuscola. Su Overleaf, che
-% compila su Linux, \include{bibliografia} in minuscolo NON trova il file:
-% i nomi sono sensibili alle maiuscole. Su Windows funzionava per caso.
+% ---------------------------------------------------------------
+% \clearpage prima di \addcontentsline: senza, la voce dell'indice
+% prende il numero della pagina corrente, che e' l'ultima del
+% capitolo precedente, e non quella su cui \include fa cominciare la
+% bibliografia. Errore di una pagina, su entrambe le voci.
+%
+% I nomi dei file rispettano le maiuscole: Overleaf compila su Linux,
+% dove \include{bibliografia} non trova Bibliografia.tex.
+% ---------------------------------------------------------------
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
 \include{Bibliografia}
-\addcontentsline{toc}{chapter}{Ringraziamenti}
-\include{Ringraziamenti}
-\end{document}
 
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Acknowledgements}
+\include{Ringraziamenti}
+
+\end{document}

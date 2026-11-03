@@ -1,0 +1,31 @@
+FIGURA — LA STESSA CADUTA DALLE DUE TELECAMERE
+File: fig_due_camere.png
+Prodotta da: pipeline/figura_due_camere.py  (ambiente fall_processing)
+Ripresa: sub09_act05_trial01   istanti (indici di campione): 3, 41
+
+GLI ANGOLI DEL TRONCO NEI QUATTRO PANNELLI
+  inclinazione nel piano immagine, 90 = verticale, 0 = orizzontale
+
+  Camera 1 — laterale               cam01
+    in piedi       88.79 gradi
+    a terra         3.87 gradi
+    escursione     84.92 gradi
+    escursione     87.31 gradi   (intera sequenza)
+
+  Camera 2 — frontale rialzata      cam02
+    in piedi       86.49 gradi
+    a terra        73.03 gradi
+    escursione     13.46 gradi
+    escursione     31.33 gradi   (intera sequenza)
+
+PERCHE' QUESTA RIPRESA E QUESTI ISTANTI
+  La ripresa ha il rapporto MEDIANO fra le 19 in cui entrambe le
+  viste seguono il soggetto per l'intera sequenza (le altre 6 di
+  Camera2 hanno un cambio di persona, ISS-134). Gli istanti sono il
+  centro dei blocchi annotati «in piedi» e «a terra»: scelti quindi
+  senza guardare l'angolo, e uguali sulle due telecamere.
+
+PROVENIENZA
+  Ten subjects, come tab:escursione e fig_viewpoint_dist.
+  Escursioni di sequenza verificate contro
+  risultati/cinque_soggetti/exp013_camera_viewpoint_indipendente.csv.

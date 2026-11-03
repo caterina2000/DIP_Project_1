@@ -1,0 +1,31 @@
+FIGURA — fig_dtw.png
+====================
+
+CHE COSA MOSTRA
+---------------
+Ogni punto e' una delle trentadue grandezze geometriche. In ascissa quanto
+quella grandezza separa le cadute dal resto sulla telecamera laterale, in
+ordinata sulla frontale rialzata. Sono evidenziate le dodici scelte.
+
+COME SI LEGGE
+-------------
+La diagonale e' il luogo delle grandezze che si comportano allo stesso modo
+dalle due viste. I punti SOTTO la diagonale funzionano di profilo e non
+dall'alto: sono quelli che renderebbero il sistema dipendente da come e'
+installata la telecamera.
+
+I NUMERI
+--------
+Il criterio di selezione e' il MINIMO fra le due telecamere, non la media.
+Una grandezza che separa benissimo da un punto di vista e per niente
+dall'altro non serve a un sistema che verra' montato in una stanza
+qualunque, e la media la premierebbe.
+
+PROVENIENZA
+-----------
+Dieci soggetti.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su dtw/classifica_dtw.csv, dtw/scelte.txt

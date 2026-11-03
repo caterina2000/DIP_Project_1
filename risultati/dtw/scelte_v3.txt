@@ -1,0 +1,12 @@
+A2_angolo_tronco
+A2_discesa
+A2_percorso
+A1_discesa
+A3_discesa
+A3_ginocchia_rel_y
+A3_escursione
+A3_percorso
+A3_hip_vel
+A1_escursione
+A1_percorso
+A3_testa_vel_rel

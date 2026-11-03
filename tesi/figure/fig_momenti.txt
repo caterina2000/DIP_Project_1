@@ -1,0 +1,20 @@
+la stessa rappresentazione in due momenti
+
+ripresa    sub09_act04_trial01_cam01
+in piedi   fotogramma 17 (alto/largo 4.03)
+a terra    fotogramma 53 (alto/largo 0.19)
+
+A1  fig_momenti_a1.png
+    A1_allungamento    in piedi 4.3125   a terra 8.8190
+    A1_asse_mag        in piedi 99.0580   a terra 104.0383
+    A1_asse_min        in piedi 22.9699   a terra 11.7970
+    A1_inclinazione    in piedi 90.1051   a terra -175.9028
+
+A2  fig_momenti_a2.png
+    A2_angolo_tronco   in piedi 8.9606   a terra -79.1296
+
+A3  fig_momenti_a3.png
+    A3_h_pavimento     in piedi 1.0217   a terra -0.1208
+
+pavimento y = 0.028278 x + 433.655, da MotoreGeometrico._pavimento
+          su 394 osservazioni in 500 fotogrammi.

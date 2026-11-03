@@ -1,0 +1,19 @@
+{
+  "blocco": "solo",
+  "inizio": "2026-08-10T17:21:24",
+  "fine": "2026-08-10T17:44:37",
+  "durata_h": 0.25,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.45,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 3612,
+  "pose_valide": 1436,
+  "quota_pose": 0.3976,
+  "fps_medio": 4.01,
+  "allarmi": 78,
+  "allarmi_per_ora": 311.89,
+  "clip_salvate": 8,
+  "cambi_di_persona_sospetti": 0,
+  "interrotta_da_utente": false
+}

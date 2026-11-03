@@ -1,0 +1,33 @@
+FIGURA — fig_stanza_en.png
+==========================
+
+CHE COSA MOSTRA
+---------------
+Come va messa la telecamera nella stanza: a sinistra la pianta vista
+dall'alto, a destra l'alzato visto di lato. Non e' una misura: e' la resa
+grafica del protocollo di ripresa, che il capitolo descrive altrimenti in
+mezza pagina di prosa.
+
+COME SI LEGGE
+-------------
+Nella pianta contano due cose: il cono del campo visivo contiene sia il
+divano sia l'area libera, e il lato lungo dell'area di caduta e'
+PERPENDICOLARE all'asse ottico, cosi' che una caduta attraversi
+l'inquadratura invece di allontanarsi. Nell'alzato conta l'altezza, 1,2-1,5
+m, e l'asse ottico orizzontale: una telecamera a picco vede una persona in
+piedi e una distesa quasi allo stesso modo.
+
+I NUMERI
+--------
+Altezza 1,2-1,5 m; distanza 3-4 m dal centro dell'area; finestra alle spalle
+o di lato, mai di fronte.
+
+PROVENIENZA
+-----------
+Nessun file di risultato: la sorgente e' il protocollo di ripresa. E'
+l'unica figura del capitolo che non legge da risultati/, ed e' dichiarato.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su protocollo di ripresa (schema, non dati)

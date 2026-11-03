@@ -1,0 +1,23 @@
+{
+  "blocco": "durata5h",
+  "inizio": "2026-08-11T13:04:11",
+  "fine": "2026-08-11T19:11:11",
+  "durata_h": 4.991,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.5,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 109814,
+  "pose_valide": 91093,
+  "quota_pose": 0.8295,
+  "fps_medio": 6.11,
+  "allarmi": 208,
+  "allarmi_per_ora": 41.67,
+  "clip_salvate": 30,
+  "cambi_di_persona_sospetti": 14,
+  "interrotta_da_utente": true,
+  "stalli": 1,
+  "stallo_totale_s": 20.0,
+  "stallo_massimo_s": 20.0,
+  "tempo_effettivo_h": 4.986
+}

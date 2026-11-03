@@ -1,0 +1,41 @@
+FIGURA A3 — RIFERITA ALLA GEOMETRIA DEL CORPO
+File: fig_rappr_a3.png
+Prodotta da: pipeline/figura_rappresentazioni.py  (ambiente fall_processing)
+Stesso fotogramma di A1 e A2.
+
+CHE COSA SI VEDE
+  - in giallo i nove landmark che A3 impiega: naso, spalle, anche, ginocchia,
+    caviglie
+  - la crocetta: l'origine del riferimento locale, nel centro del bacino
+  - il segmento color sabbia: la lunghezza del tronco, che normalizza tutto
+  - la linea punteggiata orizzontale: il livello del bacino
+  - le tre quote a sinistra: altezze relative di testa, ginocchia e caviglie
+
+DA METTERE IN LATEX
+-------------------
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.52\textwidth]{figure/fig_rappr_a3.png}
+\caption{A3 sui nove \emph{landmark} impiegati --- naso, spalle, anche,
+ginocchia e caviglie. La crocetta e' l'origine del riferimento locale, posta nel
+centro del bacino, e il segmento che sale verso le spalle e' la lunghezza del
+tronco, che normalizza tutte le altre grandezze. Le tre quote a sinistra sono le
+altezze relative di testa, ginocchia e caviglie rispetto al bacino, espresse in
+lunghezze di tronco e quindi adimensionali.}
+\label{fig:rappr-a3}
+\end{figure}
+
+DOVE
+  Dopo l'elenco delle grandezze, accanto al paragrafo sulla normalizzazione.
+
+FRASE DA AGGIUNGERE NEL TESTO
+  Nella Figura~\ref{fig:rappr-a3} il segmento del tronco e' l'unita' di misura
+  di tutte le quote riportate a sinistra: raddoppiando la distanza dalla
+  telecamera raddoppierebbero sia le quote sia il segmento, e i loro rapporti
+  resterebbero invariati.
+
+VALORI DI QUESTO FOTOGRAMMA
+  lunghezza del tronco   94,6 pixel  = 1,00 (unita' di misura)
+  testa                   0,83
+  ginocchia              -0,48
+  caviglie               -0,90

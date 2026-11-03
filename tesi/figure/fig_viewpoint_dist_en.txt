@@ -1,0 +1,39 @@
+FIGURA — fig_viewpoint_dist_en.png
+==================================
+
+CHE COSA MOSTRA
+---------------
+Una linea per ogni caduta, che unisce quanto la telecamera laterale ha visto
+ruotare il tronco (a sinistra) a quanto ne ha visto la frontale rialzata (a
+destra), sulla STESSA caduta, nello stesso istante. In blu la linea delle
+medie.
+
+COME SI LEGGE
+-------------
+Ogni linea che scende da sinistra a destra e' una caduta in cui la vista
+rialzata ha osservato MENO di quella laterale: sono quasi tutte. In rosso
+l'unica in cui non accade. Le linee tratteggiate con la croce sono le
+riprese in cui lo stimatore di posa ha perso il soggetto e si e' agganciato
+a un'altra persona: non misurano l'escursione di chi cade e sono escluse
+dalle medie, ma restano disegnate perche' toglierle in silenzio
+nasconderebbe che esistono. La riga orizzontale a 60 gradi e' il criterio
+con cui il testo conta le sequenze informative.
+
+I NUMERI
+--------
+La media da sola descrive male questo fenomeno, ed e' il motivo per cui la
+figura mostra tutte le linee invece di due barre: le deviazioni valgono
+circa un terzo del valore medio sulla vista laterale e piu' di due terzi su
+quella rialzata, e il rapporto calcolato sequenza per sequenza va da 0,98 a
+7,37.
+
+PROVENIENZA
+-----------
+Dieci soggetti, cinquanta riprese per due telecamere, uno stimatore di posa
+per ripresa. E' una grandezza DESCRITTIVA: non entra in alcun addestramento,
+e i valori di F2 del capitolo non ne dipendono.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/escursione_viste_10sog.csv

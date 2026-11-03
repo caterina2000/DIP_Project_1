@@ -1,0 +1,97 @@
+{
+ "run": "foresta_tre_classi_DTW_cam1_L22",
+ "csv": "feature_v3.csv",
+ "camera": 1,
+ "soglia": 0.5,
+ "fps_dataset": 18.0,
+ "lunghezza_finestra": 22,
+ "passo_finestra": 2,
+ "frame_step": 2,
+ "definizione": "latenza = fine della finestra che fa scattare l allarme - primo fotogramma etichettato caduta in corso",
+ "n_riprese_con_caduta": 50,
+ "per_persistenza": [
+  {
+   "persistenza": 1,
+   "riprese": 50,
+   "con_allarme": 49,
+   "richiamo": 0.98,
+   "latenza_mediana_s": 1.4444444444444444,
+   "latenza_p90_s": 3.1666666666666674,
+   "latenza_max_s": 4.0,
+   "latenza_min_s": 0.16666666666666666
+  },
+  {
+   "persistenza": 2,
+   "riprese": 50,
+   "con_allarme": 49,
+   "richiamo": 0.98,
+   "latenza_mediana_s": 1.7222222222222223,
+   "latenza_p90_s": 3.688888888888889,
+   "latenza_max_s": 4.222222222222222,
+   "latenza_min_s": 0.3888888888888889
+  },
+  {
+   "persistenza": 3,
+   "riprese": 50,
+   "con_allarme": 47,
+   "richiamo": 0.94,
+   "latenza_mediana_s": 2.0,
+   "latenza_p90_s": 4.044444444444444,
+   "latenza_max_s": 4.555555555555555,
+   "latenza_min_s": 0.6111111111111112
+  },
+  {
+   "persistenza": 4,
+   "riprese": 50,
+   "con_allarme": 45,
+   "richiamo": 0.9,
+   "latenza_mediana_s": 2.2222222222222223,
+   "latenza_p90_s": 4.288888888888889,
+   "latenza_max_s": 4.777777777777778,
+   "latenza_min_s": 0.8333333333333334
+  },
+  {
+   "persistenza": 5,
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.4722222222222223,
+   "latenza_p90_s": 4.522222222222222,
+   "latenza_max_s": 5.0,
+   "latenza_min_s": 1.0555555555555556
+  },
+  {
+   "persistenza": 7,
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 2.916666666666667,
+   "latenza_p90_s": 4.966666666666667,
+   "latenza_max_s": 5.444444444444445,
+   "latenza_min_s": 1.5
+  },
+  {
+   "persistenza": 10,
+   "riprese": 50,
+   "con_allarme": 44,
+   "richiamo": 0.88,
+   "latenza_mediana_s": 3.583333333333333,
+   "latenza_p90_s": 5.633333333333334,
+   "latenza_max_s": 6.111111111111111,
+   "latenza_min_s": 2.1666666666666665
+  }
+ ],
+ "_provenienza": {
+  "commit": "34ece3b9266b15c9ee08a8e1a970f55bdf699e7a",
+  "commit_breve": "34ece3b9",
+  "albero_pulito": false,
+  "data": "2026-09-07T16:51:45",
+  "comando": "pipeline/latenza_laboratorio.py --run foresta_tre_classi_DTW_cam1_L22",
+  "python": "3.12.10",
+  "macchina": "LAPTOP-OO4676OI",
+  "sistema": "Windows",
+  "numpy": "2.2.6",
+  "pandas": "2.2.2",
+  "sklearn": "1.6.0"
+ }
+}

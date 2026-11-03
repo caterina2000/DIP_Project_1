@@ -1,0 +1,312 @@
+==============================================================================
+   I VALORI DELLA TESI
+   La fonte e la mail al relatore dell 8 settembre 2026 e la sua risposta.
+   Questi sono i numeri che il relatore ha letto: sono quelli da usare.
+   Compilato il 2026-09-12.
+==============================================================================
+
+COME E ORGANIZZATO
+  Seguo i dieci punti della tua mail. Per ciascuno:
+    COMUNICATO   il valore che gli hai scritto
+    LUI CHIEDE   la prescrizione della sua risposta
+    STATO        se oggi il numero regge ancora
+
+------------------------------------------------------------------------------
+1.  CONFRONTO FRA ARCHITETTURE                      figura: fig_architetture
+------------------------------------------------------------------------------
+COMUNICATO
+    LSTM            0,858
+    GRU             0,847
+    Transformer     0,846
+    CNN 1D          0,833
+    Random Forest   0,792
+    grafo           0,779
+    differenza LSTM - GRU        0,011
+    dispersione fra soggetti     0,08 - 0,10
+
+LUI CHIEDE
+  - NON dire "architetture equivalenti". Dire: con questo protocollo e dieci
+    soggetti non emerge evidenza sufficiente per attribuire un ruolo dominante
+    alla scelta dell architettura.
+  - Nella figura E nel testo dire CHE COSA SONO le barre di errore.
+  - La colonna "parametri" -> "numero di parametri addestrabili".
+  - La Random Forest giustificata come SCELTA INGEGNERISTICA, non come modello
+    migliore.
+
+STATO
+  Reggono. Sono le run del 20 e 27 agosto su feature_v2.csv, conservate in
+  risultati/addestramento/v2/. Verificate una per una il 10 settembre.
+  ATTENZIONE: le run in risultati/addestramento/ (senza /v2/) sono state
+  riscritte il 9 settembre su feature_v5 e danno altri valori (GRU 0,857 in
+  testa, LSTM 0,829). Rigenerando le figure da li NON escono i numeri della
+  mail.
+
+------------------------------------------------------------------------------
+2.  DERIVATE E GRANDEZZE INTEGRALI                  figura: fig_striscia
+------------------------------------------------------------------------------
+COMUNICATO
+  Nessun numero nuovo. L interpretazione: le derivate istantanee sono sensibili
+  al rumore dello stimatore, le grandezze integrate accumulano su un intervallo
+  e risultano piu stabili. L autocorrelazione descrive la regolarita, non
+  dimostra la superiorita.
+
+LUI CHIEDE
+  - Mantenere l interpretazione.
+  - NON dire che LSTM e GRU "ricostruiscono autonomamente" l integrale. Dire:
+    i modelli sequenziali possono apprendere dipendenze temporali dalla
+    sequenza, mentre un modello non sequenziale beneficia di informazione
+    temporale gia resa esplicita.
+  - La figura e ESPLICATIVA DEL MECCANISMO, non prova sperimentale.
+
+STATO  Regge, e non e un numero: e una formulazione.
+
+------------------------------------------------------------------------------
+3.  LABORATORIO E AMBIENTE DOMESTICO                figura: fig_configurazioni
+------------------------------------------------------------------------------
+COMUNICATO
+    F2 da A3 alla configurazione finale      0,898 -> 0,953   (+0,055)
+    finestre positive in casa            da ~140/ora a <3/ora
+
+LUI CHIEDE
+  - La conclusione NON e piu il rovesciamento dell ordine.
+  - Il messaggio solido: il benchmark comprime in pochi centesimi di F2
+    differenze che in esercizio sono enormi.
+  - Confrontare sempre configurazioni con LA STESSA SOGLIA e LA STESSA REGOLA.
+  - Nel Cap. 5: eventi/ora come misura PRIMARIA, finestre/ora come diagnostica.
+
+STATO  Regge. Vedi pero il punto 5 qui sotto per la provenienza di questi F2.
+
+------------------------------------------------------------------------------
+4.  CONTROESEMPI DOMESTICI E TRASFERIBILITA
+------------------------------------------------------------------------------
+COMUNICATO
+    controesempi nonni    -> test casa studente    0,342 -> 0,171 eventi/ora
+    controesempi studente -> test casa nonni       1,781 -> 0,890 eventi/ora
+    beneficio circa un fattore due in entrambe le direzioni
+
+LUI CHIEDE
+  - NON chiamarla "generalizzazione". Dire: adattamento al dominio mediante
+    hard negatives, con evidenza di trasferimento cross-home.
+  - Riportare i NUMERI ASSOLUTI (4 cadute su 5), non la percentuale.
+  - Con due abitazioni non si puo andare oltre.
+
+STATO  Reggono.  risultati/campo/valutazione_incrociata_10sog.json
+
+------------------------------------------------------------------------------
+5.  FALSI POSITIVI E FALSI NEGATIVI SEPARATI        figura: fig_errori
+------------------------------------------------------------------------------
+COMUNICATO
+    da A3 alla configurazione finale
+      falsi negativi      45 -> 14
+      falsi positivi     172 -> 124
+    in laboratorio nessuno scambio fra i due errori: migliorano entrambi
+    il problema principale non e il movimento rapido ma l azione di sdraiarsi
+
+  la tabella completa delle cinque configurazioni
+    configurazione            F2       recall   FN    FP
+    A3                        0,898    0,929    45   172
+    A3h  (+ h_pavimento)      0,931    0,962    22   137
+    A3h + controesempi        0,942    0,965    22   129
+    A3i  (+ integrali)        0,943    0,977    14   150
+    A3i + controesempi        0,953    0,980    14   124
+
+LUI CHIEDE
+  - NON generalizzare il "nessuno scambio": riferirlo a QUEL confronto e a
+    QUELLA soglia.
+  - Aggiungere recall/precision o tassi normalizzati accanto ai conteggi.
+  - DISTINGUERE la configurazione portata in casa da quella rivista dopo aver
+    osservato gli errori domestici.
+
+STATO  [!]  ATTENZIONE, DA DICHIARARE
+  Queste cinque righe NON vengono da feature_v2.csv. Vengono da una campagna
+  separata del 21 agosto nell ambiente storico:
+      risultati/laboratorio/run_10soggetti.json
+      "origine": "DIP_PROJECT/training_results_baseline"
+  Il motivo e tecnico e non aggirabile: feature_v2.csv NON contiene la colonna
+  A3_h_pavimento, aggiunta al motore geometrico il 6 settembre. Le righe A3h
+  non possono quindi esistere su v2.
+  Non e un errore, sono due esperimenti diversi. Va pero scritto in didascalia,
+  altrimenti chi prova a ricalcolare l A3h da v2 non trova nemmeno la colonna.
+
+------------------------------------------------------------------------------
+6.  CAMBIO DI TELECAMERA E CAMBIO DI DOMINIO
+        figure: fig_due_camere, fig_viewpoint_dist, fig_dominio
+------------------------------------------------------------------------------
+COMUNICATO
+    Camera 1 -> Camera 1               F2  0,822
+    Camera 1 -> Camera 2               F2  0,488
+    Camera 1 + Camera 2 -> Camera 2    F2  0,731
+    Camera 2 -> Camera 2               F2  0,753
+    costo del cambio di vista               0,334 di F2
+    recupero addestrando su due viste       circa il 73 % della perdita
+
+    escursione media dell angolo del tronco   74,0 gradi -> 33,2 gradi
+    rapporto                                  2,23 volte
+    riprese in cui lo stimatore cambia persona su Camera 2   11 su 50
+
+  UR-Fall
+    rapporto PR-AUC / prevalenza    18,7x in dominio -> 1,79x su UR-Fall
+    F2 con soglia di deployment     0,034
+    F2 con soglia oracolo           0,492
+    F2 in dominio                   0,971
+    divario totale                  0,937,  di cui circa il 49 % recuperabile
+                                    ricalibrando la soglia
+
+LUI CHIEDE
+  - NON dire "ho dimostrato che la geometria e la causa". Dire: i risultati
+    sono COERENTI CON la geometria della vista come principale spiegazione.
+  - La perdita di tracking in 11 riprese e un SECONDO fenomeno; il fatto che il
+    divario resti anche togliendole rafforza l interpretazione.
+  - Chiamare esplicitamente "soglia oracolo" quella ottimizzata sul dominio
+    target.
+  - REFUSO NELLA FIGURA: "recuperabile ritirando la soglia" ->
+    "recuperabile mediante ricalibrazione della soglia".
+    E dentro fig_dominio.png: va RIGENERATA, non basta correggere il testo.
+  - Tre figure da tenere in evidenza: le due telecamere, la scomposizione del
+    domain shift, il confronto finestre/eventi.
+
+STATO  Reggono.  risultati/esterno/urfall_foresta_caduta.json
+
+------------------------------------------------------------------------------
+7.  OCCLUSIONI                                      figura: fig_occlusioni
+------------------------------------------------------------------------------
+COMUNICATO
+    configurazione di riferimento        F2  0,853
+    peggioramento massimo (spalle)           0,037
+    dispersione fra soggetti                 0,071
+    correzione sul naso: il calo di confidenza apparteneva a YOLOv8, non a
+    MediaPipe
+
+LUI CHIEDE
+  - NON parlare di "robustezza alle occlusioni". Scrivere: nella simulazione
+    controllata non emerge un singolo gruppo di landmark la cui perdita
+    determini da sola il collasso del sistema. E fermarsi li.
+  - I +0,001 e +0,003 sono FLUTTUAZIONI, non miglioramenti.
+  - Controllare l etichetta dell ultima barra della figura.
+
+STATO  Reggono.  risultati/occlusioni/foresta_DTW.json
+
+------------------------------------------------------------------------------
+8.  DEPLOYMENT EDGE E COSTO COMPUTAZIONALE
+------------------------------------------------------------------------------
+COMUNICATO
+    misurato durante 4,59 ore di funzionamento
+      percezione                      116,38 ms     circa 85 %
+      classificazione, ammortizzata    19,51 ms
+      TOTALE                          136,65 ms per fotogramma
+      frequenza reale                  circa 7,3 fps
+
+    il vecchio valore 26,5 fps era troppo ottimistico
+    costo per finestra:  board 39,04 ms   calcolatore 4,85 ms
+      il vecchio 4,47 ms era una misura del PC attribuita alla board
+
+    NPU:  YOLOv8-pose costa 0,216 di F2
+          ridurre il frame rate di MediaPipe costa 0,041
+
+LUI CHIEDE
+  - Usare ESCLUSIVAMENTE le misure nuove. Togliere dal testo principale i
+    vecchi valori non riproducibili.
+  - Descrivere COME e stata fatta la misura: durata, numero di fotogrammi,
+    warm-up, I/O incluso o escluso, condizioni della board.
+  - SPIEGARE la differenza fra 116,38 + 19,51 e 136,65.
+    (sono 0,76 ms: overhead di ciclo -- lettura del fotogramma, conversione,
+     buffer, scrittura del registro)
+  - La conclusione che regge: il collo di bottiglia e la percezione, non il
+    classificatore.
+
+STATO  Reggono. E la misura piu solida del capitolo perche viene dalla
+  strumentazione interna e non da una trascrizione di terminale.
+
+------------------------------------------------------------------------------
+9.  METRICHE DI CAMPO A LIVELLO DI EVENTO           figura: fig_sessione
+------------------------------------------------------------------------------
+COMUNICATO
+    finestre positive / ora         circa 496
+    EVENTI / ora                          11,1
+    rapporto fra le due contabilita       44,8
+    nella figura                    208 finestre contro 14 eventi  = 14,9
+    latenza mediana in laboratorio        2,44 s
+    regola installata: cinque finestre consecutive, poi 30 s di sospensione
+
+LUI CHIEDE
+  - Tenere ENTRAMBE le misure: eventi/ora primaria, tempo o finestre sopra
+    soglia come indicatore di quanto persiste lo stato erroneo.
+  - ATTENZIONE all apparente incoerenza 14,9 contro 44,8: scrivere NELLA
+    DIDASCALIA a che cosa si riferisce ciascuno. Il primo e quella sessione,
+    il secondo e l insieme.
+  - Per il richiamo domestico: riportare numero di eventi, tolleranza e
+    criterio di associazione. Non la seconda cifra decimale di una percentuale.
+  - La latenza 2,44 s va dichiarata come misura di BENCHMARK, non domestica.
+  - NON cambiare la regola delle cinque finestre nel deployment. Cumulativa e
+    isteresi restano ANALISI FUORI LINEA: altrimenti si sceglie la regola sugli
+    stessi dati con cui la si dimostra.
+
+STATO  Il 44,8 e stato riverificato il 10 settembre: 496 finestre/ora, 11,1
+  eventi/ora su 14,98 ore e nove sessioni.  python pipeline/eventi_sessioni.py
+
+  DA AGGIUNGERE, scoperto dopo l invio: delle 14,98 ore, 1,41 sono ore in cui
+  il sistema NON stava decidendo e che finiscono lo stesso al denominatore. Il
+  buco maggiore va dalle 16:03:30 alle 17:11:12 dell 11 agosto, 4.062 secondi:
+  e la sospensione del sistema operativo, vista dal lato dei dati. Sulle ore
+  attive il tasso e 12,2 eventi/ora invece di 11,1. Il fattore 44,8 NON cambia
+  perche e un rapporto.
+
+------------------------------------------------------------------------------
+10. PROVA LUNGA                                     figura: fig_stanza
+------------------------------------------------------------------------------
+COMUNICATO
+    durata                                4,59 ore
+    sospensioni rilevate                  nessuna
+    interruzioni USB                      due, circa 5 s complessivi,
+                                          recuperate automaticamente
+    eventi prodotti                       14
+    la prova non raggiunge le 12 ore richieste
+    le clip attorno agli allarmi non venivano salvate
+
+LUI CHIEDE
+  - Chiamarli "eventi / allarmi GENERATI DAL SISTEMA", non falsi positivi:
+    senza verifica visiva non si puo sapere che cosa sia accaduto.
+
+STATO  Regge. Il difetto del salvataggio e stato corretto nelle sessioni
+  successive, ma i 14 eventi del 6 settembre restano non verificabili.
+
+==============================================================================
+   LE TRE DECISIONI CHE TI HA DATO
+==============================================================================
+  1. GRANDEZZE INTEGRALI
+     Mantenere l interpretazione, con la cautela del punto 2. Il risultato
+     interessante non e che l integrale sia migliore, ma che l accumulo
+     temporale rende piu robusta una misura derivata da pose rumorose.
+
+  2. ALTEZZA DEL BACINO RISPETTO AL PAVIMENTO
+     Mantenerla. Ma essere molto chiari: e stata REINTRODOTTA DOPO aver
+     osservato gli errori domestici. Distinguere la configurazione
+     inizialmente schierata da quella rivista. Non farla apparire come scelta
+     a priori.
+
+  3. REGOLA DELLE CINQUE FINESTRE CONSECUTIVE
+     Per ora NON sostituirla nella configurazione dichiarata come schierata.
+     Cumulativa e isteresi si presentano come miglioramenti emersi dall analisi
+     successiva, non come nuova configurazione validata.
+
+  E in chiusura: il lavoro va CONSOLIDATO E SCRITTO, non allargato. Niente
+  nuove architetture, nuovi dataset, nuove analisi.
+
+==============================================================================
+   NUMERI CHE NON DEVONO PIU COMPARIRE
+==============================================================================
+  26,5 fps come frequenza del sistema
+        e la catena accelerata su banco, non quella installata. Sono 7,3 fps.
+  4,47 ms attribuiti alla board
+        e la misura del calcolatore. Sulla board sono 39,04 ms.
+  47,8 come fattore finestre/eventi
+        e 44,8.
+  "fra 14 e 125 falsi allarmi/ora"
+        sono FINESTRE, non allarmi, e l intervallo corretto e 14-156.
+  "0,4 allarmi/ora" come riferimento di letteratura
+        nessuna fonte lo produce. Il riferimento e 0,049/ora di Kangas.
+  AIDE-MOI "da 0,049 a 0,025 allarmi/ora"
+        la fonte dice 0,43 -> 0,17 PER SETTIMANA E PER SOGGETTO. Lo 0,049 era
+        il numero di Kangas ripreso dalla riga sopra e dimezzato.
+  le run in risultati/addestramento/ senza /v2/
+        sono state riscritte il 9 settembre su feature_v5.

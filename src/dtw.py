@@ -104,10 +104,30 @@ def dtw(a: np.ndarray, b: np.ndarray, finestra: int = FINESTRA_WARPING) -> float
     if n == 0 or m == 0:
         return float('inf')
     if _HA_DTAI:
+        # use_pruning=False, e NON e' una scelta di prestazione.
+        #
+        # Con use_pruning=True dtaidistance ricava il limite di potatura dalla
+        # distanza euclidea, che pero' e' un maggiorante del DTW *libero* e non
+        # di quello *vincolato da una finestra*: un cammino costretto in una
+        # banda stretta puo' costare PIU' dell'allineamento uno-a-uno. Quando
+        # succede, la funzione pota l'intera matrice e restituisce `inf`.
+        #
+        # L'infinito non arriva mai a chi legge, ed e' questo il punto. Se
+        # cade fra le distanze intra-classe, `intra.mean()` diventa infinita e
+        # il punteggio della grandezza collassa a ESATTAMENTE 0: la grandezza
+        # sparisce dalla selezione. Se cade fra quelle incrociate, il punteggio
+        # diventa `inf` e la grandezza schizza in testa. Nessuno dei due casi
+        # produce un errore o un avviso.
+        #
+        # Misurato su feature_v5.csv con dtaidistance 2.5.1: tre grandezze su
+        # 33 ne erano colpite --- A3_angolo_tronco, A3_testa_rel_y,
+        # A3_larghezza --- e la selezione che ne risultava non era quella
+        # adottata. Su una coppia reale di curve, tutte finite, use_pruning=True
+        # da' `inf` dove use_pruning=False da' 27,54.
         d = _dtai.distance_fast(np.ascontiguousarray(a, dtype=np.double),
                                 np.ascontiguousarray(b, dtype=np.double),
                                 window=max(finestra, abs(n - m)),
-                                use_pruning=True)
+                                use_pruning=False)
         # dtaidistance restituisce la radice della somma dei quadrati; la
         # versione Python somma i valori assoluti. Si normalizzano entrambe
         # sulla lunghezza, quindi la classifica non cambia -- ma il valore

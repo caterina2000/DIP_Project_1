@@ -1,0 +1,141 @@
+{
+ "csv": "feature_v2.csv",
+ "camera": 1,
+ "fps_dataset": 18.0,
+ "fotogrammi": 57786,
+ "fotogrammi_posa_valida": 52938,
+ "quota_posa_valida": 0.9161,
+ "riprese": 109,
+ "riprese_con_caduta": 50,
+ "soggetti": 10,
+ "durate_fasi": {
+  "in piedi / attivita ordinaria": {
+   "n_riprese": 49,
+   "mediana_s": 0.9444444444444444,
+   "decile_10_s": 0.5444444444444445,
+   "decile_90_s": 1.4777777777777783
+  },
+  "transizione (caduta in corso)": {
+   "n_riprese": 50,
+   "mediana_s": 3.111111111111111,
+   "decile_10_s": 2.05,
+   "decile_90_s": 3.9444444444444446
+  },
+  "stato post-caduta (a terra)": {
+   "n_riprese": 50,
+   "mediana_s": 5.888888888888889,
+   "decile_10_s": 4.822222222222222,
+   "decile_90_s": 6.894444444444445
+  }
+ },
+ "autocorrelazione_1_passo": {
+  "dinamiche": {
+   "A3_d_angolo_tronco": 0.3289,
+   "A2_vel_ang_tronco": 0.3518,
+   "A3_hip_vel": 0.3702,
+   "A2_testa_vel": 0.42,
+   "A3_testa_vel_rel": 0.4662,
+   "A1_d_inclinazione": 0.4053
+  },
+  "integrali": {
+   "A3_escursione": 0.9799,
+   "A3_percorso": 0.971,
+   "A3_discesa": 0.9479,
+   "A1_escursione": 0.9699,
+   "A2_percorso": 0.976
+  }
+ },
+ "rapporti_mediane": {
+  "A3_d_angolo_tronco": {
+   "mediana_adl": 1.240944312040213,
+   "mediana_transizione": 18.540391654483585,
+   "mediana_a_terra": 1.335009224017199,
+   "rapporto_transizione": 14.94,
+   "rapporto_a_terra": 1.08
+  },
+  "A2_vel_ang_tronco": {
+   "mediana_adl": 2.8651092322476632,
+   "mediana_transizione": 14.934831824324649,
+   "mediana_a_terra": 1.0322717815292322,
+   "rapporto_transizione": 5.21,
+   "rapporto_a_terra": 0.36
+  },
+  "A3_hip_vel": {
+   "mediana_adl": 0.04163669981062405,
+   "mediana_transizione": 0.669196605682373,
+   "mediana_a_terra": 0.028242141008377,
+   "rapporto_transizione": 16.07,
+   "rapporto_a_terra": 0.68
+  },
+  "A2_testa_vel": {
+   "mediana_adl": 0.06818600371479985,
+   "mediana_transizione": 0.4157734215259552,
+   "mediana_a_terra": 0.0552813597023487,
+   "rapporto_transizione": 6.1,
+   "rapporto_a_terra": 0.81
+  },
+  "A3_testa_vel_rel": {
+   "mediana_adl": 0.0622510407119989,
+   "mediana_transizione": 0.5768212080001831,
+   "mediana_a_terra": 0.0466102510690689,
+   "rapporto_transizione": 9.27,
+   "rapporto_a_terra": 0.75
+  },
+  "A1_d_inclinazione": {
+   "mediana_adl": 0.7967530788757102,
+   "mediana_transizione": 20.909182136619563,
+   "mediana_a_terra": 1.2923478636658956,
+   "rapporto_transizione": 26.24,
+   "rapporto_a_terra": 1.62
+  },
+  "A3_escursione": {
+   "mediana_adl": 1.5759035265553862,
+   "mediana_transizione": 29.398742912427565,
+   "mediana_a_terra": 1.966294201163436,
+   "rapporto_transizione": 18.66,
+   "rapporto_a_terra": 1.25
+  },
+  "A3_percorso": {
+   "mediana_adl": 0.07662537057298785,
+   "mediana_transizione": 1.7238316832265446,
+   "mediana_a_terra": 0.0701817124521352,
+   "rapporto_transizione": 22.5,
+   "rapporto_a_terra": 0.92
+  },
+  "A3_discesa": {
+   "mediana_adl": 0.0076628493347461,
+   "mediana_transizione": 0.6923869654367206,
+   "mediana_a_terra": 0.0101967019355362,
+   "rapporto_transizione": 90.36,
+   "rapporto_a_terra": 1.33
+  },
+  "A1_escursione": {
+   "mediana_adl": 1.0997928056963389,
+   "mediana_transizione": 41.46259933424935,
+   "mediana_a_terra": 1.245569170832141,
+   "rapporto_transizione": 37.7,
+   "rapporto_a_terra": 1.13
+  },
+  "A2_percorso": {
+   "mediana_adl": 0.1632057658194199,
+   "mediana_transizione": 1.1726884297070042,
+   "mediana_a_terra": 0.1126444590169953,
+   "rapporto_transizione": 7.19,
+   "rapporto_a_terra": 0.69
+  }
+ },
+ "nota": "Le tre definizioni sono nella docstring dello script. La durata e la CORSA PIU LUNGA della fase dentro la ripresa, non la somma dei frammenti; l autocorrelazione e calcolata dentro ciascuna ripresa e mediata pesando per i fotogrammi.",
+ "_provenienza": {
+  "commit": "34ece3b9266b15c9ee08a8e1a970f55bdf699e7a",
+  "commit_breve": "34ece3b9",
+  "albero_pulito": false,
+  "data": "2026-09-01T15:55:52",
+  "comando": "pipeline/statistiche_cap3.py",
+  "python": "3.12.10",
+  "macchina": "LAPTOP-OO4676OI",
+  "sistema": "Windows",
+  "numpy": "2.2.6",
+  "pandas": "2.2.2",
+  "sklearn": "1.6.0"
+ }
+}

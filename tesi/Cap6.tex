@@ -1,0 +1,94 @@
+\chapter{Discussion of the results and conclusions}
+\label{cap:discussion}
+
+The results of Chapters~\ref{cap:sperimentale} and~\ref{cap:edge} allow the main questions of the work to be answered. The aim of this chapter is not to repeat the individual experiments, but to relate them to one another in order to understand which factors affect the behaviour of the system most and which conclusions can be drawn from the results obtained.
+
+\section{How much the architecture matters with respect to the representation}
+
+In the comparison with data, representation and protocol held equal, the differences between the architectures are small with respect to the variability between subjects. The GRU obtains the highest mean value of $F_2$, but the paired comparison does not show a clear difference after correction for multiple comparisons.
+
+The different representations also turn out to be very close when they are evaluated on UP-Fall. A3 without integral quantities, A3 with integral quantities and the subset selected by means of DTW differ by at most $0{,}007$ of $F_2$.
+The difference emerges above all when the domain changes. Between A3 and A3i with counter-examples, for example, the value of $F_2$ changes by $0{,}055$ in the laboratory, whereas in the domestic recordings the positive windows go from 139,9 to 2,7 per hour.
+
+In the conditions considered, therefore, the choice of the classifier matters less than other elements of the pipeline. The representation, by contrast, becomes more important when it has to describe situations that the benchmark does not contain. The comparison between architectures was carried out only on the dataset and was not repeated in the domestic recordings. The conclusion therefore concerns the experimental conditions considered and does not imply that the architectures remain equivalent outside the training domain as well.
+
+\section{How much the variability between subjects weighs}
+
+The main experiments use the LOSO protocol, so each model is evaluated on a person excluded from the training.
+The standard deviation of $F_2$ between the subjects is generally between about $0{,}05$ and $0{,}14$. Many of the differences observed between configurations fall within the same range. This means that a gap of a few hundredths in the mean value is not enough, on its own, to establish that one configuration is better than another. The variability between people is an important part of the problem and must be considered together with the mean of the performance.
+
+\section{How much the viewpoint weighs}
+
+The viewpoint produces one of the largest effects observed in the work.
+A model trained and evaluated on Camera~1 reaches $F_2=0{,}822$. Applied to Camera~2 it drops to $0{,}488$, with a loss of $0{,}334$.
+
+The difference is already visible in the features. The mean excursion of the trunk angle goes from $74{,}0^\circ$ in the lateral view to $33{,}2^\circ$ in the raised frontal view. $h_{\text{pav}}$ too loses almost all separating capability in the second view. When both cameras are used during training, on Camera~2 $F_2$ rises again to $0{,}731$ and the false positives decrease.
+
+The geometry of the shot therefore directly modifies the information available to the classifier. In this case its effect is much greater than the differences observed between the architectures.
+The frame rate also modifies the behaviour of the system. In the preliminary trial on five subjects, going from 18 to 9~fps increases the share of undetected falls from 6,8\% to 12,4\%. This aspect becomes even more important on the device, where the effective frequency does not remain constant.
+
+\section{How much changes in moving to an external dataset}
+
+The transfer to UR-Fall modifies subjects, environment and acquisition modality at the same time. With the subset selected by means of DTW the system reaches $F_2=0{,}630$ while keeping the same threshold used on UP-Fall. The performance decreases, but the model retains part of its capability to separate the classes.
+
+The experiment carried out on the previous configuration shows, moreover, that the drop does not depend on the classifier alone. Recomputing the threshold directly on UR-Fall, for diagnostic purposes, part of the loss is recovered, while part remains. In moving to a new dataset at least two aspects therefore change: the calibration of the scores and the discriminative capability of the model. A new threshold can correct the first problem, but not the second.
+
+The comparison also shows that differences that are barely visible on UP-Fall can become more evident outside the starting domain. The subset selected by means of DTW reaches on UR-Fall a ratio between PR-AUC and prevalence equal to 5,1, against 3,4 for the configuration without integral quantities. The decomposition between calibration error and loss of discriminative capability was, however, carried out on the previous configuration and was not repeated on the subset selected by means of DTW. It is therefore not possible to establish how much of the improvement observed depends on the two effects separately
+
+\section{What the difference is between positive windows and alarms}
+
+The two quantities describe different levels of the system.
+In the domestic sessions the overall ratio between windows above threshold and events generated is equal to 44,8. Many consecutive windows are grouped into the same event through the persistence rule and the refractory interval.
+
+Over the nine sessions considered, for 14,98~hours in total, the system produces 11,1 events per hour after the aggregation rule has been applied. Counting the windows as if they were alarms would therefore overestimate the number of notifications received by the user. At the same time, the temporal rule does not eliminate the errors of the classifier: a condition can remain positive for a long time even if it is turned into a small number of notifications.
+
+Persistence also introduces a delay. At the mean frequency of 8,02~fps, the time introduced by the configuration of the pipeline is about 3,865~s. The larger part, 2,743~s, depends on the filling of the window, while 0,997~s depend on persistence. For this reason the evaluation of a continuous system must consider both the performance on the windows and the behaviour of the events generated.
+
+\section{What the bottleneck on the edge device is}
+
+The main cost of the pipeline is pose estimation.
+In the configuration installed on the Radxa ROCK 4D, perception takes up 85,2\% of the time per frame, while the classifier takes up 14,3\% of it.
+
+Optimising the classifier alone would therefore have a limited effect on the overall speed. The main margin for improvement lies before classification. The real frequency does not, moreover, remain constant. In the domestic sessions it varies between 1,15 and 8,20~fps and decreases when the number of people present in the scene increases.
+
+This also modifies the real duration of the windows and of the integral quantities, which are defined as a number of samples. The computational limit therefore does not concern only the speed of execution, but also changes the time interval observed by the model.
+
+\section{Which failure modes remain}
+
+The domestic trials showed errors that the benchmark reproduces only in part. A first case concerns people lying on raised surfaces. In the dataset the negative horizontal postures are found above all close to the floor, whereas at home they may be found on a bed or on a sofa. This difference produced false positives and motivated the reintroduction of $h_{\text{pav}}$ and of the domestic counter-examples.
+
+A second problem concerns the quality of the pose. In real recordings the estimator can produce variations of the landmarks which, if they persist for several frames, are interpreted by the temporal features as real movement. This behaviour contributed to the choice of using quantities integrated over longer time intervals instead of the instantaneous derivatives alone.
+
+A third case concerns the logic by which the predictions become events. In the session of 9 September the classifier recognises three of the four simulated falls, but the aggregation rule signals only two of them. The second fall takes place about six seconds after the first and is suppressed by the refractory interval of 30~s. In this case the fall is not lost by the classifier, but by the logic used to generate the alarm. The same mechanism that reduces repeated notifications can therefore suppress two real events that are very close in time.
+
+There then remain problems tied to continuous operation, such as interruptions of the camera, variations of the processing frequency, initial availability of some features and handling of several people at the same time. These errors therefore involve several levels of the pipeline and cannot be traced back to the classifier alone.
+
+\section{How much we can generalise from the domestic trials}
+
+The domestic recordings concern two homes and five simulated falls.
+The counter-examples collected in one home reduce the errors in the other as well. The events go from $0{,}342$ to $0{,}171$ per hour in home~1 and from $1{,}781$ to $0{,}890$ in home~2. Part of the information learnt therefore seems to transfer between the two environments.
+
+Two homes are not, however, enough to establish how far this result remains valid in houses with different geometries and furnishings. The recall on the falls must also be interpreted with caution. Five events are too few to obtain a precise estimate of the performance in service, and all the falls are simulated. The domestic trials therefore bring out problems that do not appear in the benchmark and to check possible corrections. They do not constitute a clinical validation and cannot yet give an estimate of the performance of the system on a real population.
+
+\section{Limitations of the evaluation}
+
+Besides the limited number of domestic trials, some limitations concern the whole experimental protocol. The main experiments use ten subjects and the architectures were not subjected to a systematic search of the hyperparameters. The comparison therefore describes the configurations actually tried, without guaranteeing that each model was evaluated in its own optimal configuration. Some methodological choices, moreover, are not completely independent of the data used for the evaluation. The threshold of $0{,}50$ was adopted after the exploratory comparison of the different rules on the test folds, while the selection of the features by means of DTW was carried out once on the whole dataset before the LOSO validation.
+
+The choice of the accumulation window $K$ was also influenced by the results observed during development.
+Repeating the selection within the individual folds, $K=45$ is chosen in nine cases out of ten and the mean $F_2$ goes from $0{,}825$ to $0{,}851$. The value $K=31$ therefore did not produce an overestimate of the laboratory performance, but its choice is not independent of the data subsequently used in the evaluation.
+A similar limitation concerns $h_{\text{pav}}$ and the domestic counter-examples. Both were introduced after the errors in the domestic recordings had been observed, and their effect was subsequently measured on the same data. New acquisitions are therefore needed in order to verify their benefit independently.
+
+The capability to generalise moreover remains only partly verified. Cross-dataset transfer was evaluated only on UR-Fall and multi-person behaviour was observed on a limited quantity of data. It is therefore not possible to establish how far the results obtained hold on other datasets, other environments or scenes with several people.
+Finally, some limitations concern the deployment directly. In the comparison with YOLOv8-pose only the INT8 quantised version was used, so the effect of quantisation was not isolated from that of the estimator. The most complete prolonged trial on the board reaches, by contrast, 4,59~hours. It is the reference trial because it is the only one that is continuous, verified free of suspensions of the operating system and fully instrumented: the longer session of 11 August covers 6,11~hours of wall clock, but was interrupted by a 68-minute suspension. The 4,59~hours are enough to observe temperature, interruptions of the camera and continuity of the pipeline for a few hours, but they do not replace a check of operation of the order of a full day.
+
+\section{Conclusions}
+
+This thesis work started from the idea of comparing different architectures for fall detection and verifying their execution on an edge device. During the development it emerged, however, that the behaviour of the system depends on a set of factors wider than the choice of the classifier alone.
+
+The differences between the architectures turned out to be small with respect to the variability between subjects, whereas changes in the viewpoint, in the dataset, in the processing frequency and in the conditions of the environment had more evident effects. This means that, in order to evaluate a fall detection system correctly, it is not enough to consider which model is used: one has to look at the whole pipeline and at the conditions in which the system has to work. The domestic trials showed this limitation clearly. Some situations that are poorly represented in the benchmark, such as a person lying on a sofa or on a bed, can modify the behaviour of the system a great deal. In the same way, differences that appear small on the dataset can become much more important when the system is used in a real environment.
+
+The passage from the predictions of the classifier to the behaviour of the system also introduces a further level of design. The final behaviour does not depend on the classifier alone, but also on rules such as persistence, threshold and refractory interval, which make it possible to reduce repeated notifications but can also increase the latency or suppress events very close to one another.
+
+The implementation on the Radxa ROCK 4D moreover confirmed that the whole processing can be carried out locally. The main computational limit turned out to be pose estimation, not classification. From the point of view of deployment too, therefore, improving the classifier alone is not enough to improve the system substantially. Taken together, the main contribution of the work is not the identification of a single best architecture, but the characterisation of the factors that determine the behaviour of the whole system. The results show that subject, geometry of the shot, representation of movement, domain of the data, processing frequency and alarm generation logic must be considered together.
+
+For this reason, a fall detection system should be evaluated progressively at several levels: first under controlled conditions, then with respect to variations of subject and acquisition, then on data coming from different domains and finally during continuous operation in the target environment. The benchmark remains a fundamental instrument for comparing the configurations, but it represents only the first level of the evaluation and is not enough, on its own, to describe the real behaviour of the system.

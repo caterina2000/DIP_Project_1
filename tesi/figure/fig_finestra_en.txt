@@ -1,0 +1,31 @@
+FIGURA — fig_finestra_en.png
+============================
+
+CHE COSA MOSTRA
+---------------
+L'F2 al variare della lunghezza della finestra di decisione: 22, 28, 36 e 44
+campioni, indicati sia in campioni sia in secondi, a parita' di tutto il
+resto.
+
+COME SI LEGGE
+-------------
+L'ipotesi da cui si partiva era che una finestra piu' lunga aiutasse,
+perche' 22 campioni sono 2,44 s mentre una caduta dura in mediana 3,11 s.
+Guardare se l'andamento e' MONOTONO: se non lo e', la lunghezza non e' la
+variabile che conta.
+
+I NUMERI
+--------
+L'ipotesi era sbagliata: nessuna differenza significativa e andamento non
+monotono. La spiegazione probabile e' che la memoria effettiva non sia la
+finestra, perche' ogni campione porta con se' gli integrali accumulati su 31
+fotogrammi.
+
+PROVENIENZA
+-----------
+Dieci soggetti, leave-one-subject-out.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su laboratorio/tabelle_v5.json

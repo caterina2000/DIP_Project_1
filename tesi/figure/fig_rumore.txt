@@ -1,0 +1,27 @@
+FIGURA — fig_rumore.png
+=======================
+
+CHE COSA MOSTRA
+---------------
+Che cosa succede all'F2 iniettando rumore gaussiano sulle coordinate dei
+landmark, a deviazione crescente. In ascissa la deviazione del rumore
+espressa in frazioni della lunghezza del torso, cosi' da essere
+confrontabile fra persone di statura diversa; in ordinata l'F2.
+
+COME SI LEGGE
+-------------
+La banda orizzontale e' la dispersione fra soggetti. Se le curve restano
+dentro la banda, l'effetto del rumore e' piu' piccolo della differenza che
+si osserva cambiando persona, e quindi non e' l'anello debole della catena.
+
+PROVENIENZA
+-----------
+Dieci soggetti. Il rumore e' SIMULATO e indipendente fra landmark: e' un
+modello di rumore, non il rumore vero dello stimatore, che invece e'
+correlato fra punti vicini e nel tempo. La figura dice quindi che il sistema
+regge il rumore indipendente, non che regga qualunque degrado della posa.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su rumore/foresta_cam1.json

@@ -1,0 +1,22 @@
+schema dei 33 landmark di MediaPipe Pose
+
+prodotta da  pipeline/figura_landmark_mediapipe.py
+
+NON E' UNA MISURA. Le posizioni dei punti sono scelte a mano: e'
+una posa di comodo, costruita perche' tutti e 33 i punti
+risultino separabili. Nessun numero della figura viene dai dati.
+
+collegamenti  mp.solutions.pose.POSE_CONNECTIONS (35 archi),
+              trascritti nello script perche' giri anche senza
+              mediapipe installato.
+              mediapipe non installato in questo interprete: collegamenti NON verificati contro POSE_CONNECTIONS
+
+nomi          identificatori dell'API di MediaPipe Pose, in
+              inglese: sono nomi di programma, non prosa.
+
+lato          vista frontale. Il lato SINISTRO della persona
+              (indici dispari) sta a DESTRA nell'immagine.
+
+viso          disegnato in scala maggiorata dentro il richiamo
+              ovale: a scala reale i punti 0-10 si
+              sovrapporrebbero.

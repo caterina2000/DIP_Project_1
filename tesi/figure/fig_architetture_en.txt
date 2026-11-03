@@ -1,0 +1,34 @@
+FIGURA — fig_architetture_en.png
+================================
+
+CHE COSA MOSTRA
+---------------
+Il valore di F2 di sei architetture, misurato con lo stesso identico
+protocollo: stesse finestre, stessi fold, stessa soglia, dieci soggetti in
+leave-one-subject-out. La barra e' la media sui dieci fold, il segmento la
+dispersione fra soggetti. A destra di ciascuna barra e' scritto il numero di
+parametri del modello.
+
+COME SI LEGGE
+-------------
+La banda grigia verticale e' la dispersione fra soggetti della
+configurazione migliore. Serve da metro: un divario fra due architetture
+piu' stretto della banda e' piu' piccolo della variabilita' che si osserva
+cambiando persona, e non e' distinguibile dal caso. Guardare quali barre
+cadono dentro la banda, non quale barra e' la piu' lunga.
+
+I NUMERI
+--------
+La differenza fra la prima e l'ultima architettura va letta insieme a
+EXP-013, che dice quanti soggetti servirebbero per dichiararla: 113 per
+separare GRU da LSTM, 26 per separare GRU da foresta. UP-Fall ne ha 17 in
+tutto.
+
+PROVENIENZA
+-----------
+Dieci soggetti. Le sei run sono in risultati/addestramento/.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su run_gru_tre_classi_DTW_cam1_L22.json, run_lstm_tre_classi_DTW_cam1_L22.json, run_cnn_tre_classi_DTW_cam1_L22.json, run_transformer_tre_classi_DTW_cam1_L22.json, run_grafo_tre_classi_DTW_cam1_L22.json, run_foresta_tre_classi_DTW_cam1_L22.json

@@ -1,126 +1,53 @@
-\chapter*{Introduzione}
-\addcontentsline{toc}{chapter}{Introduzione}
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
 \setcounter{chapter}{0}
 
-% ---------------------------------------------------------------------
-% RISCRITTA IL 2026-08-26 sul modello dell'introduzione della tesi
-% triennale della candidata, che procede per cinque movimenti in prosa
-% continua e SENZA titoli interni:
-%
-%   1. il campo, e perche' e' interessante
-%   2. cio' che non si capisce ancora
-%   3. l'obiettivo di questa tesi
-%   4. il risultato principale, annunciato UNA VOLTA e con il rimando
-%      preciso al capitolo che lo produce
-%   5. «Nel dettaglio la tesi e' cosi' suddivisa. Nel Capitolo 1...»
-%
-% Le tre \section* della versione precedente sono state tolte: in una
-% introduzione da novecento parole erano titoli ogni trecento.
-%
-% ATTENZIONE: la mappa dei capitoli descrive la struttura a CINQUE
-% capitoli. I \ref si risolvono da soli, ma restituiscono la numerazione
-% corretta solo dopo la fusione di Protocollo dentro Risultati e di
-% Deployment dentro Ambiente reale.
-% ---------------------------------------------------------------------
+In recent years, automatic fall detection has become an important research topic in Ambient Assisted Living because falls may have severe consequences, particularly for older adults. Interest has consequently grown in monitoring systems that can be used within healthcare and care
+facilities and in domestic environments.
 
-Il rilevamento automatico delle cadute è uno dei problemi centrali
-dell'\emph{Ambient Assisted Living}, e ha ricevuto negli ultimi anni
-un'attenzione considerevole: una persona anziana su cinque cade almeno una
-volta all'anno, e sei cadute su dieci avvengono in casa~\cite{passi}. Sui
-dataset di riferimento i sistemi pubblicati dichiarano prestazioni molto
-elevate --- il 99,58\% sulla vista frontale di UP-Fall per un'architettura che
-combina convoluzioni temporali e un \emph{encoder} basato su
-attenzione~\cite{tcnte}, oltre il 94\% medio per un modello a grafo su tre
-flussi~\cite{gcn3stream}. È tuttavia noto che quei valori non descrivono il
-comportamento dei sistemi una volta installati.
+The problem nevertheless remains complex, because some daily activities, such
+as sitting down or bending over, may appear visually similar to a fall.
+For this reason it is not sufficient to consider only the person's final
+posture, but also the way in which that posture is reached. It therefore
+becomes important to describe the temporal evolution of the body, taking into
+account information such as changes in orientation, velocity, relative
+displacements of the different anatomical parts and other quantities related
+to the dynamics of the movement.
 
-Sono stati compiuti diversi tentativi di misurare l'entità dello scarto.
-Bagalà e colleghi hanno rieseguito tredici algoritmi pubblicati, che
-dichiaravano sensibilità fra il 76\% e il 100\% su cadute simulate, sopra un
-archivio di ventinove cadute reali: la sensibilità media misurata è stata del
-$57{,}0\%$~\cite{bagala}. Più di recente, il benchmark OmniFall ha mostrato che
-i modelli valutati fuori dal dominio di addestramento continuano a confondere
-la persona caduta con la persona semplicemente distesa~\cite{omnifall}. Le
-cause del divario non sono però una sola, e vengono attribuite ora al
-protocollo di valutazione, ora alla natura simulata delle cadute, ora alla
-differenza fra l'ambiente di sviluppo e quello di installazione. Quale di esse
-pesi di più, e con quali conseguenze per chi deve scegliere fra due alternative
-progettuali, resta una domanda aperta.
+The objective of this thesis is to analyse and verify the possibility of
+detecting a fall and distinguishing it from a normal daily activity by means
+of a system based on \emph{pose estimation} with the aim of enabling earlier detection, supporting timely assistance and reducing the need to transmit identifiable visual information.
 
-L'obiettivo di questa tesi è portare un prototipo di rilevamento cadute basato
-sulla posa da un sistema che \emph{dichiara} prestazioni a un sistema che le
-\emph{misura}, e verificarne l'esecuzione su un dispositivo \emph{edge} da
-circa cento euro dal quale nessuna immagine esce. La rappresentazione impiegata
-è quella scheletrica: ogni fotogramma viene ridotto a un insieme di coordinate
-di giunti, e l'immagine viene scartata alla fonte, cosicché ciò che raggiunge
-il classificatore non contiene volto, abbigliamento né sfondo. È una forma di
-\emph{privacy-by-design} architetturale e non dichiarativa, ed è la condizione
-perché un sistema di questo tipo risulti accettabile in un'abitazione privata.
+Most existing studies report classifier performance on controlled datasets. However, these results do not necessarily indicate how the complete system behaves when the subject, viewpoint, acquisition domain and computational platform change. This thesis therefore investigates both the relative role of movement representation and classifier architecture, and the progressive
+degradation or preservation of performance when the system is moved towards realistic operating conditions.
 
-Il lavoro muove da due ipotesi, entrambe ereditate dal prototipo di partenza:
-che l'intera catena --- stima della posa, costruzione delle grandezze,
-classificazione --- possa essere eseguita in tempo reale su hardware a basso
-costo, e che una rete ricorrente compatta sia la scelta appropriata per il
-classificatore.
-
-La prima ipotesi regge. La catena completa gira su un dispositivo da circa
-cento euro a 26,5 fotogrammi al secondo, senza che alcun dato lasci la
-macchina; il costo per fotogramma si distribuisce però in modo inatteso, con
-l'$88{,}4\%$ speso nella stima della posa e il $5{,}8\%$ nella classificazione.
-La seconda ipotesi non regge, e la ragione è più interessante della smentita:
-cinque architetture confrontate a parità assoluta di protocollo si collocano
-tutte entro $0{,}066$ della metrica di riferimento, contro una dispersione fra
-soggetti compresa fra $0{,}08$ e $0{,}12$, e nessuna coppia risulta
-distinguibile. Il confronto che invece separa nettamente vale $0{,}438$, ed è
-quello fra due posizioni della telecamera.
-
-Il risultato che questo lavoro considera il proprio contributo principale non
-era però fra le domande di partenza, ed è emerso dalla validazione in ambiente
-domestico. Nel Capitolo~\ref{cap:campo} viene misurato che fra la
-configurazione di riferimento e quella adottata corrono $0{,}055$ di $F_2$ in
-laboratorio --- una differenza interna alla dispersione fra soggetti, che
-quindi non si può dichiarare --- e un fattore \textbf{cinquantadue} sui falsi
-allarmi prodotti in un'abitazione reale. La causa è verificabile e non dipende
-dal modello: nei due insiemi le persone orizzontali \emph{che non sono cadute}
-sono di tipo opposto, a terra in laboratorio, dove sdraiarsi sul pavimento è
-una delle attività registrate, e su un divano in casa, un torso e mezzo più in
-alto. Ne segue un enunciato che si ritiene valga oltre il caso particolare:
-
-\begin{quote}
-Un insieme di verifica non può misurare un miglioramento su una condizione che
-non rappresenta. E se lo si impiega ugualmente, non si limita a sovrastimare le
-prestazioni: \textbf{ordina in modo errato le alternative}, indicando la
-direzione sbagliata con la stessa apparente sicurezza con cui indicherebbe
-quella giusta.
-\end{quote}
-
-La forma più forte di questo enunciato è quantitativa, e riguarda quale domanda
-valga la pena porre. Distinguere due definizioni dell'evento da riconoscere
-richiede due soggetti; distinguere una GRU da una LSTM ne richiederebbe
-centotredici.
-
-Nel dettaglio la tesi è così suddivisa. Nel Capitolo~\ref{cap:contesto} viene
-inquadrato il problema clinico, vengono dichiarati i requisiti rispetto ai
-quali il sistema andrà giudicato e viene formulato il problema di
-classificazione. Nel Capitolo~\ref{cap:stato_arte} vengono richiamate le
-soluzioni proposte in letteratura --- sensori, rappresentazioni, modelli
-temporali, dati e protocolli --- allo scopo di fissare i concetti impiegati nel
-seguito e di dichiarare quali alternative il lavoro confronta e quali no. Nel
-Capitolo~\ref{cap:metodologia} viene descritta la catena che porta dal video
-alle grandezze in ingresso al classificatore: la stima della posa, le tre
-rappresentazioni geometriche, le grandezze accumulate, la selezione del
-sottoinsieme e la definizione del compito. Nel Capitolo~\ref{cap:risultati}
-viene costruito il protocollo di misura, dal quale dipende l'interpretabilità
-di ogni numero successivo, e vengono riportati i confronti condotti in
-laboratorio. Infine, nel Capitolo~\ref{cap:campo} il sistema viene portato sul
-dispositivo, ne viene caratterizzato il costo e viene messo in esercizio in due
-abitazioni reali; è il capitolo in cui il problema viene riformulato. Il
-Capitolo~\ref{cap:conclusioni} discute contributi e limiti.
-
-Tre risultati di questo lavoro sono \emph{negativi} rispetto alle scelte che lo
-avevano orientato: l'acceleratore neurale del dispositivo non viene
-utilizzato, l'architettura ricorrente di partenza non è giustificata dai dati,
-e un filtro geometrico progettato per ridurre i falsi allarmi peggiora il
-bilancio complessivo. Sono riportati come tali, perché una scelta verificata e
-smentita è un risultato, mentre una scelta assunta e mai messa alla prova non
-lo è.
+In more detail, the thesis is divided as follows. Chapter \ref{cap:contesto}
+provides an introduction to the field of automatic fall detection, focusing on
+the importance of the problem in the older population and on the consequences
+a fall entails, on the main requirements a system must satisfy in order to be
+genuinely installable, and on the difficulties that arise when it has to
+operate in a real environment.
+Chapter \ref{cap:stato_arte} reviews the main concepts of fall detection
+proposed in the literature, such as the different technologies employed, the
+representations of human movement, the models used for temporal
+classification and the problems related to datasets and evaluation protocols.
+Chapter \ref{cap:metodologia} describes the methodology adopted, following the
+path that leads from pose estimation to the final decision. It presents the
+geometric representations considered, the construction of the temporal
+features, their analysis and selection, and the formation of the sequences
+used by the classifiers.
+Chapter \ref{cap:protocollo} defines the protocol used for the evaluation and
+presents the main experimental results. After class imbalance, subject-wise
+partitioning, normalisation and the choice of the decision threshold, the
+chapter compares the different representations and architectures and studies
+the effect of the viewpoint, the definition of the task and the transfer to an
+external dataset.
+Finally, Chapter \ref{cap:edge} analyses the implementation of the entire
+pipeline on an \emph{edge} device and its validation under conditions closer
+to those of real use. It examines in depth the computational cost of the
+individual stages, the behaviour of the system on the device and the results
+obtained during the sessions recorded in domestic environments, moving from
+the individual predictions of the classifier to the alarm events produced
+during continuous operation.
+Chapter 
+ef{cap:discussion} discusses the results obtained as a whole, relating the individual experiments to one another in order to identify which factors most affect the behaviour of the system, and draws the conclusions of the work together with the limitations of the evaluation.

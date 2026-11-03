@@ -1,0 +1,61 @@
+==============================================================================
+DTW — 33 grandezze, camere [np.int64(1), np.int64(2)], 220 riprese, 10 soggetti
+==============================================================================
+grandezza                    cam1     cam2   ROBUSTO  divario   scelta
+------------------------------------------------------------------------------
+A2_testa_rel_y              1.489    1.355     1.355    0.134   SI
+A2_angolo_tronco            1.610    1.355     1.355    0.255   ridondante con A2_testa_rel_y (r=0,97)
+A3_testa_rel_y              1.399    1.279     1.279    0.120   ridondante con A2_testa_rel_y (r=0,98)
+A2_discesa                  1.305    1.232     1.232    0.073   SI
+A2_percorso                 1.303    1.212     1.212    0.092   SI
+A1_discesa                  1.325    1.211     1.211    0.114   SI
+A3_discesa                  1.343    1.199     1.199    0.144   SI
+A3_escursione               1.262    1.198     1.198    0.064   SI
+A2_escursione               1.259    1.194     1.194    0.065   ridondante con A3_escursione (r=0,86)
+A3_caviglie_rel_y           1.376    1.194     1.194    0.182   SI
+A3_ginocchia_rel_y          1.380    1.190     1.190    0.190   ridondante con A3_caviglie_rel_y (r=0,93)
+A3_percorso                 1.327    1.185     1.185    0.142   SI
+A3_hip_vel                  1.292    1.179     1.179    0.114   SI
+A3_testa_vel_rel            1.204    1.171     1.171    0.033   SI
+A1_percorso                 1.284    1.168     1.168    0.115   
+A1_escursione               1.247    1.157     1.157    0.090   
+A1_vy                       1.186    1.149     1.149    0.037   
+A1_asse_mag                 1.148    1.298     1.148    0.150   
+A2_vel_ang_tronco           1.231    1.132     1.132    0.100   
+A3_angolo_tronco            1.356    1.130     1.130    0.226   
+A3_h_pavimento              1.541    1.124     1.124    0.417   
+A2_testa_vel                1.232    1.114     1.114    0.118   
+A3_d_angolo_tronco          1.162    1.111     1.111    0.051   
+A1_d_asse_mag               1.127    1.107     1.107    0.020   
+A1_asse_min                 1.104    1.145     1.104    0.041   
+A2_d_angolo_tronco          1.167    1.103     1.103    0.064   
+A3_torso_len                1.095    1.208     1.095    0.114   
+A3_larghezza                1.089    1.149     1.089    0.061   
+A1_allungamento             1.083    1.274     1.083    0.191   
+A1_inclinazione             1.218    1.080     1.080    0.138   
+A1_d_inclinazione           1.145    1.077     1.077    0.068   
+A1_vx                       1.274    1.065     1.065    0.209   
+A1_d_allungamento           1.067    1.049     1.049    0.018   
+
+grafico: risultati\dtw/dtw_cam1_vs_cam2.png
+curve: 6 grandezze in risultati\dtw/curve/
+
+SOTTOINSIEME SCELTO (10), correlazione massima ammessa 0,85:
+   1. A2_testa_rel_y           robusto 1,355
+   2. A2_discesa               robusto 1,232
+   3. A2_percorso              robusto 1,212
+   4. A1_discesa               robusto 1,211
+   5. A3_discesa               robusto 1,199
+   6. A3_escursione            robusto 1,198
+   7. A3_caviglie_rel_y        robusto 1,194
+   8. A3_percorso              robusto 1,185
+   9. A3_hip_vel               robusto 1,179
+  10. A3_testa_vel_rel         robusto 1,171
+
+escluse per ridondanza (4):
+  A2_angolo_tronco         ~ A2_testa_rel_y (r=0,97)
+  A3_testa_rel_y           ~ A2_testa_rel_y (r=0,98)
+  A2_escursione            ~ A3_escursione (r=0,86)
+  A3_ginocchia_rel_y       ~ A3_caviglie_rel_y (r=0,93)
+
+correlazione media fra le scelte: 0,417

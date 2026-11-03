@@ -1,0 +1,33 @@
+FIGURA — fig_esterno_en.png
+===========================
+
+CHE COSA MOSTRA
+---------------
+Che cosa succede addestrando su un archivio e verificando su un altro, mai
+visto. A sinistra il guadagno di PR-AUC rispetto alla prevalenza, che e' una
+misura indipendente dalla soglia; a destra l'F2 con la soglia installata e
+con la soglia ritarata.
+
+COME SI LEGGE
+-------------
+Il pannello di sinistra e' quello che decide, perche' non dipende dalla
+soglia: dice se il modello ORDINA ancora le finestre. Se il guadagno crolla,
+non e' un problema di taratura, e' perdita reale della capacita' di
+separare.
+
+I NUMERI
+--------
+PR-AUC 0,990 sull'archivio di addestramento, cioe' 18,7 volte la prevalenza;
+0,169 su quello mai visto, cioe' 1,79 volte. La soglia scelta a posteriori
+sul dominio di destinazione e' chiamata SOGLIA ORACOLO, e non e' una
+prestazione ottenibile da chi installa il sistema, perche' richiede le
+etichette del posto in cui lo si installa.
+
+PROVENIENZA
+-----------
+Addestrato su UP-Fall, verificato su UR-Fall.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su esterno/urfall_foresta_caduta.json

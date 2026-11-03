@@ -1,0 +1,18 @@
+selezione DTW rifatta dentro ogni fold LOSO
+
+CSV        feature_v5.csv
+backend    dtaidistance
+controllo  la selezione sull'intero insieme riproduce esattamente scelte.txt
+
+senza Subject_01  in comune 10/12  -['A2_percorso', 'A3_escursione'] +['A1_asse_mag', 'A2_escursione']
+senza Subject_02  in comune 11/12  -['A2_testa_rel_y'] +['A2_angolo_tronco']
+senza Subject_03  in comune 10/12  -['A2_testa_rel_y', 'A3_caviglie_rel_y'] +['A2_angolo_tronco', 'A3_ginocchia_rel_y']
+senza Subject_04  in comune 11/12  -['A2_testa_rel_y'] +['A2_angolo_tronco']
+senza Subject_05  in comune 11/12  -['A1_escursione'] +['A1_asse_mag']
+senza Subject_06  in comune 11/12  -['A1_escursione'] +['A1_asse_mag']
+senza Subject_07  in comune 10/12  -['A1_escursione', 'A2_testa_rel_y'] +['A2_angolo_tronco', 'A2_escursione']
+senza Subject_08  in comune 11/12  -['A1_escursione'] +['A2_escursione']
+senza Subject_09  in comune  9/12  -['A1_escursione', 'A2_testa_rel_y', 'A3_caviglie_rel_y'] +['A1_vy', 'A2_angolo_tronco', 'A3_ginocchia_rel_y']
+senza Subject_10  in comune 10/12  -['A1_percorso', 'A3_caviglie_rel_y'] +['A1_asse_mag', 'A3_ginocchia_rel_y']
+
+0 fold su 10 identici, Jaccard medio 0.769

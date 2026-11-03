@@ -1,0 +1,18 @@
+/home/rock/fall_env/lib/python3.11/site-packages/sklearn/base.py:525: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeClassifier from version 1.6.0 when using version 1.9.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/home/rock/fall_env/lib/python3.11/site-packages/sklearn/base.py:525: InconsistentVersionWarning: Trying to unpickle estimator RandomForestClassifier from version 1.6.0 when using version 1.9.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/home/rock/fall_env/lib/python3.11/site-packages/sklearn/base.py:525: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.6.0 when using version 1.9.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+visore su http://<indirizzo della board>:8080
+  (le immagini non escono dalla rete locale)
+
+  ALLARME 1 a 743.5 s (punteggio 0.960)
+
+  ALLARME 2 a 856.3 s (punteggio 0.640)
+
+  fine: 6703 fotogrammi, 2 allarmi, 2717 finestre non decise per pavimento, 2254 immagini salvate in clip_20260909_v5

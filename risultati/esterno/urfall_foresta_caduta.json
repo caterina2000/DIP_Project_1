@@ -1,0 +1,53 @@
+{
+  "modello": "foresta",
+  "modo": "caduta",
+  "soglia": 0.5,
+  "frame_step_ur": 3,
+  "config": [
+    {
+      "rappresentazione": "A3base  senza integrali",
+      "n_colonne": 9,
+      "finestre_ur": 884,
+      "prevalenza": 0.13009049773755657,
+      "pr_auc": 0.4400846495072873,
+      "guadagno": 3.3829115666473215,
+      "roc_auc": 0.8112568553174648,
+      "f2": 0.40362438220757824,
+      "recall": 0.4260869565217391,
+      "precision": 0.3333333333333333,
+      "allarme_difficili": 0.470873786407767,
+      "n_difficili": 206,
+      "allarme_facili": 0.0017761989342806395
+    },
+    {
+      "rappresentazione": "A3      con integrali",
+      "n_colonne": 12,
+      "finestre_ur": 884,
+      "prevalenza": 0.13009049773755657,
+      "pr_auc": 0.4664118868231638,
+      "guadagno": 3.5852878952319718,
+      "roc_auc": 0.8355684966359473,
+      "f2": 0.4793388429752065,
+      "recall": 0.5043478260869565,
+      "precision": 0.4,
+      "allarme_difficili": 0.4174757281553398,
+      "n_difficili": 206,
+      "allarme_facili": 0.0017761989342806395
+    },
+    {
+      "rappresentazione": "DTW     sottoinsieme scelto",
+      "n_colonne": 12,
+      "finestre_ur": 884,
+      "prevalenza": 0.13009049773755657,
+      "pr_auc": 0.6597271186587633,
+      "guadagno": 5.071293677342146,
+      "roc_auc": 0.8664725504607904,
+      "f2": 0.6303724928366763,
+      "recall": 0.7652173913043478,
+      "precision": 0.3697478991596639,
+      "allarme_difficili": 0.5048543689320388,
+      "n_difficili": 206,
+      "allarme_facili": 0.08170515097690942
+    }
+  ]
+}

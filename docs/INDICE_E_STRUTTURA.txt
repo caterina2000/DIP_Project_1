@@ -1,0 +1,367 @@
+RILEVAMENTO AUTOMATICO DI CADUTE SU DISPOSITIVO EDGE
+Indice della tesi, e struttura dei capitoli sperimentali
+
+Caterina Cerretani — 31 agosto 2026, aggiornato l'8 settembre
+
+
+Buongiorno professore,
+
+le mando l'indice aggiornato e la struttura dei capitoli sperimentali, come mi aveva chiesto nella sua email del 20 agosto.
+
+Il documento ha cinque parti. La prima è l'indice. La seconda è la struttura dei capitoli sperimentali, ed è la parte su cui le chiedo di guardare con più attenzione. La terza riporta le cinque verifiche che mi aveva indicato: quattro eseguite, una no. La quarta è una correzione al punto 1 della sua email, perché rifacendo quel confronto a dieci soggetti invece che a cinque la lettura che lei proponeva non regge più ai numeri, e mi sembra corretto dirglielo prima che finisca nel testo. La quinta è cosa resta aperto, e tre domande.
+
+Il testo conta oggi 41.473 parole su cinque capitoli più introduzione e conclusioni; erano 35.491 il 31 agosto, e la differenza è quasi tutta nei capitoli 3, 4 e 5, dove sono entrate le misure di inizio settembre. I conteggi per capitolo che seguono sono quelli di oggi: nella stesura precedente erano rimasti quelli del 31 agosto, e sommavano al totale vecchio. Una stesura precedente di questo documento, del 26 agosto, proponeva di fondere il capitolo sul contesto con quello sullo stato dell'arte: quella fusione NON è stata fatta, e la ragione è nella parte 5.
+
+
+========================================================================
+1. L'INDICE
+========================================================================
+
+I capitoli erano otto fino al 26 agosto. Sono cinque perché ho fuso protocollo con risultati, e deployment con ambiente reale; le conclusioni hanno un file proprio. Nessun contenuto è stato cancellato nella riorganizzazione: ho agito solo sul livello dei titoli, e i rimandi hanno retto perché sono etichette e non numeri.
+
+  INTRODUZIONE                                                    1.041 parole
+  Il problema, l'ipotesi di partenza, e l'annuncio del risultato. È l'unico punto del testo in cui il risultato viene anticipato: i capitoli di sfondo non lo fanno.
+
+  CAPITOLO 1 — Contesto applicativo e formulazione del problema    2.861
+    1.1  Ambient Assisted Living e rilevanza clinica delle cadute
+    1.2  Requisiti di un sistema in esercizio continuo
+    1.3  Criticità del trasferimento dal dato controllato all'ambiente reale
+           1.3.1  Variazione del dominio e geometria di ripresa
+           1.3.2  Occlusioni e qualità della stima della posa
+           1.3.3  Prevalenza dell'evento e frequenza di base dei falsi allarmi
+    1.4  Definizione dell'evento da riconoscere
+    1.5  Ipotesi di lavoro e obiettivi
+
+  CAPITOLO 2 — Stato dell'arte nel rilevamento automatico
+               delle cadute                                        2.724
+    2.1  Tecnologie per il rilevamento delle cadute
+    2.2  Rappresentazione del movimento
+    2.3  Modellazione temporale e classificatori
+    2.4  Dati e protocolli di valutazione
+           2.4.1  Cadute simulate e cadute reali
+           2.4.2  Archivi pubblici e criteri di annotazione
+           2.4.3  Attività negative e definizione delle classi
+           2.4.4  Livelli di generalizzazione
+    2.5  Posizionamento del lavoro
+
+  CAPITOLO 3 — Metodologia: dal video alle feature                10.014
+    3.1  Formulazione del problema come analisi del movimento
+    3.2  Stima della posa e caratterizzazione del rumore
+           3.2.1  Natura e propagazione dell'errore di stima
+           3.2.2  Limiti del filtraggio temporale
+    3.3  Rappresentazioni geometriche del movimento
+           3.3.1  A1 — descrittori della sagoma
+           3.3.2  A2 — descrittori tridimensionali
+           3.3.3  A3 — descrittori riferiti al corpo
+           3.3.4  Insieme completo delle grandezze
+    3.4  Grandezze integrali in alternativa alle derivate istantanee
+           3.4.1  Formulazione
+           3.4.2  Vincolo di causalità e finestra di accumulazione
+    3.5  Stima dell'altezza del bacino dal piano del pavimento
+    3.6  Selezione delle grandezze mediante Dynamic Time Warping
+           3.6.1  Impostazione della misura di distanza
+           3.6.2  Criterio di selezione e controllo della ridondanza
+    3.7  Finestratura e definizione del compito
+           3.7.1  Lunghezza e sovrapposizione della finestra
+           3.7.2  Struttura temporale dell'evento e formulazioni del compito
+           3.7.3  Assegnazione dell'etichetta di finestra
+
+  CAPITOLO 4 — Protocollo di valutazione e risultati sperimentali 12.140
+    4.1  Sbilanciamento delle classi e scelta della metrica
+    4.2  Partizionamento dei dati e validazione leave-one-subject-out
+    4.3  Normalizzazione e selezione della soglia decisionale
+           4.3.1  Stima dei parametri di normalizzazione
+           4.3.2  Regole di scelta della soglia
+    4.4  Effetto congiunto delle correzioni al protocollo
+    4.5  Effetto della geometria di ripresa
+           4.5.1  Origine geometrica del divario fra le viste
+           4.5.2  Trasferimento fra viste e addestramento congiunto
+    4.6  Confronto fra rappresentazioni e fra architetture
+           4.6.1  Confronto fra rappresentazioni
+           4.6.2  Confronto fra architetture a parità di protocollo
+           4.6.3  Analisi di numerosità campionaria
+    4.7  Analisi di sensibilità
+           4.7.1  Dimensione del modello
+           4.7.2  Effetto del frame rate
+           4.7.3  Robustezza all'occlusione
+    4.8  Effetto della definizione del compito
+    4.9  Trasferimento a un dataset esterno
+           4.9.1  Metriche indipendenti dalla soglia
+           4.9.2  Scomposizione fra calibrazione e capacità discriminativa
+
+  CAPITOLO 5 — Implementazione su dispositivo edge e validazione
+               in ambiente reale                                  10.472
+    5.1  Piattaforma hardware e vincoli di porting
+    5.2  Verifica di equivalenza fra calcolatore e dispositivo
+    5.3  Confronto fra stimatori di posa e configurazione operativa
+           5.3.1  La strada dell'acceleratore neurale
+           5.3.2  La catena che va in esercizio
+    5.4  Caratterizzazione del costo computazionale e stabilità termica
+           5.4.1  Costo per fotogramma
+           5.4.2  Latenza di rilevamento e limiti dell'annotazione
+           5.4.3  Comportamento termico e difetti dell'esercizio prolungato
+    5.5  Motivazione e protocollo delle sessioni in ambiente domestico
+           5.5.1  Perché una prova domestica era necessaria
+           5.5.2  Protocollo delle sessioni e prima ora di esercizio
+    5.6  Metriche di evento e prestazioni di sistema
+           5.6.1  Aggregazione delle finestre in eventi
+           5.6.2  La definizione del compito, misurata in abitazione
+           5.6.3  Richiamo, tolleranza di accoppiamento e persistenza
+    5.7  Discordanza fra prestazioni di benchmark e comportamento reale
+           5.7.1  Ampiezza dello scarto, non ordine
+           5.7.2  Analisi della causa
+           5.7.3  Compromesso fra richiamo e falsi allarmi
+    5.8  Effetto della finestra di accumulazione nei due domini
+    5.9  Modalità di fallimento osservate
+
+  CONCLUSIONI                                                      2.221
+    6.1  Contributi
+    6.2  Il risultato che non era atteso
+    6.3  Limiti
+    6.4  Sviluppi
+    6.5  Conclusione
+
+Due titoli su cui le chiedo un parere, perché nei sorgenti non sono quelli che
+avevo scritto nella stesura precedente di questo documento. Il Capitolo 3 si
+intitola «Metodologia: dal video alle feature», ma il capitolo non si ferma
+alle feature: la 3.7 arriva alla definizione del compito, che è la scelta da
+cui dipende il risultato principale del Capitolo 5. «Dalla stima di posa alla
+decisione» direbbe quello che il capitolo fa. Il Capitolo 2 si intitola «Stato
+dell'arte nel rilevamento automatico delle cadute», dove le ultime cinque
+parole ripetono il titolo della tesi.
+
+------------------------------------------------------------------------
+I TITOLI CHE L'INDICE NON MOSTRA
+------------------------------------------------------------------------
+
+L'indice qui sopra si ferma alla sottosezione. Sotto quel livello il testo ha
+altri 131 titoli che in indice non compaiono:
+
+  CAPITOLO 1      5          CAPITOLO 4     46
+  CAPITOLO 2      6          CAPITOLO 5     26
+  CAPITOLO 3     34          CONCLUSIONI    14
+
+Sono `\paragraph`: hanno un nome ma non una voce in indice. La regola che ho
+seguito e' un titolo ogni ~400 parole, e sotto le 250 un blocco non giustifica
+una sottosezione. Servono al lettore che scorre la pagina --- «Quanto costa,
+misurato», «L'ipotesi della velocita', verificata e smentita» --- e in indice
+sarebbero 131 righe in piu', cioe' piu' pagine dei due capitoli di sfondo messi
+insieme.
+
+Vale la pena distinguere due modi diversi di stare fuori dall'indice, perche'
+il primo e' una scelta e il secondo un effetto tecnico.
+
+Un `\paragraph` sta fuori perche' la classe `book` porta in indice fino alla
+sottosezione (`tocdepth` = 2). E' una scelta di struttura, e si cambia con una
+riga sola se preferisce vederli.
+
+Una forma stellata --- `\section*`, `\subsection*` --- sta fuori per
+costruzione: non incrementa il contatore e non scrive nel file `.toc`. E'
+invisibile all'indice anche quando avrebbe il rango per starci, a meno di
+aggiungerla a mano con `\addcontentsline`, che e' esattamente cio' che fa
+l'Introduzione per comparire in indice pur non essendo numerata.
+
+Nel testo attuale di forme stellate ne e' rimasta **una sola**, `L'ambiguita' di
+posa` nella 3.2: le altre sono state convertite in `\paragraph` il 25 agosto,
+quando ho appiattito la gerarchia del Capitolo 2. Lo dico perche' e' il tipo di
+titolo che sparisce dall'indice senza che nessuno se ne accorga.
+
+Aggiornamento dell'8 settembre. La gerarchia era incoerente: sezioni sopra le
+mille parole senza alcuna sottosezione stavano accanto a sezioni della meta'
+che ne avevano tre, e la 5.3 ne aveva una sola --- che e' il caso da evitare,
+perche' una sottosezione unica non divide niente. Sono stati promossi a
+sottosezione undici blocchi che erano `\paragraph`, e la 1.4 «Definizione
+dell'evento da riconoscere» e' diventata una sezione: non e' una criticita' del
+trasferimento come le altre tre, e stava nel posto sbagliato. E' la modifica
+strutturale che la proposta di riordino del 5 settembre suggeriva.
+
+Il Capitolo 5 e' stato rifatto lo stesso giorno, separatamente, perche' era
+quello messo peggio: **66 titoli per 10.400 parole, cioe' uno ogni 158** contro
+i ~400 della regola. Il difetto ricorrente era sempre lo stesso, e si vede
+contando le parole fra un titolo e il successivo di pari livello: **il testo
+appeso**, cioe' blocchi lunghi che stanno fra il titolo di una sezione e la sua
+prima sottosezione, e che quindi in indice non compaiono da nessuna parte.
+
+La 5.4 ne aveva **764 parole**: erano il costo per fotogramma, che e' una delle
+tre misure della sezione e non aveva un titolo mentre le altre due ce
+l'avevano. Ora la sezione ha tre sottosezioni pari --- costo, latenza,
+comportamento termico --- ed e' rimasta una sezione sola, perche' e' una
+caratterizzazione sola: le tre misure rispondono alla stessa domanda, che cosa
+costa tenere questo sistema acceso. La 5.3 aveva lo stesso difetto con **474
+parole**: sono diventate «La strada dell'acceleratore neurale». La 5.5 era la
+sezione piu' lunga del capitolo, **1.312 parole senza divisioni**: ne ha due,
+che sono le due meta' che il suo stesso capoverso di apertura annunciava. La
+5.7 aveva quattro sottosezioni di cui una da **138 parole** accanto a una da
+542: la prima e' rientrata nell'apertura.
+
+Sono stati tolti **venti `\paragraph` su quarantasei**, e questa e' la
+differenza che si sente leggendo. Otto erano titoli per meno di centoventi
+parole, cioe' un'intestazione ogni due frasi: quelli che nominano un caveat o
+una precisazione sono ora una frase in corsivo dentro il testo, che e' la
+forma giusta per un inciso. Sei erano elenchi travestiti da titoli --- i tre
+ostacoli del porting, i tre modi di fallire --- e sono elenchi. **Due
+raccontavano una seconda volta** cose gia' narrate poche pagine prima, la
+sospensione automatica del dispositivo e il crollo del frame rate col numero
+di persone, in una sezione che annunciava «tre risultati» e ne elencava cinque.
+
+Il capitolo passa cosi' da 9 sezioni, 11 sottosezioni e 46 `\paragraph` a
+**9, 13 e 26**: un titolo ogni 216 parole invece che ogni 158, e in indice
+ventidue righe che nominano ciascuna una misura.
+
+I titoli promossi sono stati riscritti nel registro della sezione. Un
+`\paragraph` porta una frase --- «Le cadute simulate sono un vincolo, non una
+scorciatoia» --- perche' vive dentro il flusso del testo; un titolo di indice e'
+un sintagma nominale, perche' e' cio' che si scorre per orientarsi.
+
+Questo elenco non e' trascritto: si rigenera dai sorgenti con
+`python tesi/indice.py`, e con `--titoli` stampa anche tutti e 161. L'indice
+con i numeri di pagina, invece, esiste soltanto nel PDF compilato: fra una
+compilazione e l'altra e' l'unico documento che non si aggiorna da solo.
+
+
+Il capitolo sul dispositivo e quello sull'ambiente reale sono nello stesso capitolo ma in due blocchi distinti, 5.1–5.4 e 5.5–5.9, per la ragione che lei aveva indicato: la prova domestica non è la validazione finale del sistema, è lo strumento con cui il problema è stato riformulato. La transizione fra i due blocchi è esplicita nel testo.
+
+
+========================================================================
+2. LA STRUTTURA DEI CAPITOLI SPERIMENTALI
+========================================================================
+
+Riporto per ogni sezione la tesi che sostiene, non il suo contenuto. Il criterio è che ogni sezione debba lasciare al lettore un'affermazione, e che l'affermazione della sezione successiva ne dipenda.
+
+Il Capitolo 3 è metodologico e non lo riporto sezione per sezione. Vale la pena dire solo dove porta: fissa le trentadue grandezze geometriche, la selezione che ne tiene dodici, e le tre formulazioni del compito. La sezione 3.4 contiene l'unico punto in cui una spiegazione che avevo scritto si è rivelata sbagliata — sostenevo che le grandezze integrali funzionassero perché cancellano il rumore, e non è quello: funzionano perché consegnano informazione temporale a un classificatore che non modella l'ordine. La spiegazione corretta è nel testo, e quella sbagliata è dichiarata come tale.
+
+
+------------------------------------------------------------------------
+CAPITOLO 4 — PROTOCOLLO E RISULTATI
+------------------------------------------------------------------------
+
+Il capitolo apre con il protocollo perché senza quello nessun numero successivo è interpretabile, e la prima misura difendibile arriva solo dopo.
+
+4.1  Gli errori non hanno lo stesso peso e le classi non sono bilanciate, quindi l'accuratezza non è utilizzabile e la metrica è F2, dichiarata prima di guardare i risultati.
+
+4.2  Con dieci soggetti una divisione casuale di finestre sovrapposte mette tutte e dieci le persone da entrambe le parti. Il leave-one-subject-out lo impedisce, e rende visibile la dispersione fra individui che una media nasconde.
+
+4.3  Le scale delle grandezze differiscono di ordini di grandezza; la normalizzazione si stima sui soli soggetti di addestramento e sui fotogrammi, non sulle finestre; la soglia si sceglie su un terzo insieme.
+
+4.4  Applicando le tre correzioni insieme, alla stessa configurazione e sugli stessi dati, l'F1 passa da 0,0000 a 0,234. Il primo valore non era un modello mediocre: era un modello che non aveva mai predetto la classe positiva. È il punto in cui il lettore capisce che il 95% di partenza non era interpretabile.
+
+4.5  Cambiando soltanto il punto di vista, a parità di soggetto, caduta e istante, l'F2 passa da 0,822 a 0,488. La causa è ottica e non algoritmica. Addestrando su entrambe le viste se ne recupera il 73%, e i falsi allarmi calano insieme al recall: il modello ha imparato qualcosa di più generale, non ha spostato una soglia. (Aggiornato il 7 settembre: questa misura era a cinque soggetti ed è stata rifatta a dieci sul dataset riestratto. La versione precedente riportava 0,872 come primo valore, che apparteneva a un'altra architettura ed è stato ritirato come errore; il divario passa quindi da 0,438 a 0,334. Nella stessa esecuzione è caduta anche l'affermazione che addestrare sulla vista buona e trasferire batta l'addestrare direttamente su quella povera: a dieci soggetti il confronto si rovescia.)
+
+4.6  A parità assoluta di protocollo, le architetture cadono entro 0,045 di F2 contro una dispersione fra soggetti di ±0,085. Il confronto che invece separa nettamente vale 0,334, ed è quello fra le due posizioni della telecamera. (Aggiornato il 7 settembre: le sei architetture sono state riaddestrate sul dataset riestratto, e l'escursione fra loro si è STRETTA da 0,066 a 0,045, cioè a metà della dispersione. L'affermazione del capitolo ne esce piu' forte, non piu' debole. Vedi anche la parte 4 per l'aggiornamento del 27 agosto sulla sesta architettura.)
+
+4.7  Tre controlli che chiudono altrettante domande aperte senza aprire filoni: la dimensione del modello, la frequenza dei fotogrammi, e la degradazione al mascheramento progressivo di gruppi di landmark. Le prime due sono a cinque soggetti, la terza a dieci, e il testo lo dice. (Aggiornato il 7 settembre: le occlusioni sono state rimisurate con il motore corrente e la perdita peggiore è raddoppiata, da 0,020 a 0,037 contro una dispersione di 0,071. Nessun gruppo resta critico, ma il margine passa da un fattore quattro a un fattore due, e la causa è il sottoinsieme di grandezze scelto e non i punti del corpo.)
+
+4.8  Le tre formulazioni del compito — riconoscere la transizione, riconoscere lo stato a terra, o accettare entrambe — non sono equivalenti. Distinguerle richiede due soggetti; distinguere una GRU da una LSTM ne richiede centotredici. È il fulcro del capitolo, ed è la formulazione più forte che ho della sua osservazione che l'architettura è una variabile di secondo ordine.
+
+4.9  Il trasferimento a un archivio esterno, con la misura indipendente dalla soglia che lei aveva chiesto e la scomposizione fra calibrazione e perdita reale.
+
+Dove porta il capitolo: le variabili che decidono sono il protocollo, la geometria della ripresa e la definizione del compito. L'architettura no. Il lettore ci arriva perché le sezioni sono ordinate per effetto crescente e ciascuna riporta la dispersione accanto alla media.
+
+
+------------------------------------------------------------------------
+CAPITOLO 5, PRIMO BLOCCO — IL SISTEMA SUL DISPOSITIVO
+------------------------------------------------------------------------
+
+5.1  La catena completa gira su un dispositivo da circa cento euro. Gli ostacoli sono stati tre, tutti silenziosi: un'architettura di processore che rifiuta le versioni recenti della libreria, un'API rimossa, e un modello accelerato che con un tensore di forma sbagliata non solleva alcun errore e semplicemente non esegue l'inferenza.
+
+5.2  Prima di ogni misura sul dispositivo viene verificato che le predizioni coincidano con quelle del calcolatore su duecento finestre precalcolate. La verifica passa con scarto esattamente nullo. Ed è un punto cieco: rifacendo la stessa verifica dai fotogrammi invece che dalle finestre, su 56 clip 55 decisioni coincidono e una no, ed è una caduta vera. La causa non è il classificatore ma lo stimatore di posa, che è un tracciatore e diverge fra architetture. Ne segue che il richiamo sul dispositivo va misurato sul dispositivo.
+
+5.3  Lo stimatore sull'acceleratore neurale costa 0,216 di F2, mentre dimezzare la frequenza dei fotogrammi ne costa 0,041. Il sistema finale non usa l'acceleratore. È un risultato negativo su un lavoro consistente, e resta nel testo.
+
+5.4.1  La percezione è l'85,2% del costo per fotogramma, il classificatore il 14,3%. (Aggiornato il 6 settembre: fino ad allora il capitolo riportava 88,4% e 5,8% per un totale di 37,7 ms, trascritti da una sessione di terminale. Misurati sulla board durante 4,6 ore di esercizio vero, i valori sono 116,38 ms e 19,51 ms per un totale di 136,65 ms: il dispositivo è 3,6 volte più lento di quanto il capitolo dichiarasse. Le proporzioni reggono, i valori assoluti no.) Ne segue che la scelta del classificatore non modifica la frequenza di esercizio, e che la foresta si difende come punto migliore del compromesso fra costo, dipendenze e riproducibilità — non come il classificatore più accurato, che i dati non permettono di dichiarare.
+
+5.4.2  La latenza è dominata dalla finestra di decisione e non dall'hardware: 2,743 secondi di riempimento contro 0,125 di calcolo, un fattore ventidue. È il complemento esatto della sezione precedente — lì il collo di bottiglia era la percezione, qui è la finestra, e in nessuno dei due bilanci il classificatore conta — e porta con sé il proprio limite: sulle registrazioni domestiche il ritardo fra caduta e allarme non è misurabile, perché le cadute sono annotate al minuto e la grandezza vale pochi secondi. In laboratorio lo è, su cinquanta cadute invece di cinque, e la mediana alla regola installata è 2,44 s. È la sottosezione che nella parte 3 le dicevo di dover ancora scrivere: ora c'è.
+
+5.4.3  Cinque ore continue senza gradini nel frame rate, con la temperatura a plateau a 79,5 °C: il dispositivo non si rallenta da solo. I tre difetti che solo l'esercizio prolungato rivela hanno però una proprietà in comune con gli episodi della 5.2, ed è la ragione per cui questa sezione esiste: nessuno dei tre produce un errore. Producono numeri plausibili, e si vedono solo confrontando ciò che il sistema dichiara con una grandezza indipendente — l'orologio, il conteggio dei fotogrammi, la temperatura.
+
+Dove porta il primo blocco: il collo di bottiglia è la percezione, non la classificazione. Tutto il Capitolo 4 agisce su un settimo del problema.
+
+
+------------------------------------------------------------------------
+CAPITOLO 5, SECONDO BLOCCO — LA VALIDAZIONE IN AMBIENTE REALE
+------------------------------------------------------------------------
+
+Questo è il blocco che cambia la definizione del problema, e la sua struttura è costruita perché il lettore ci arrivi nell'ordine in cui ci sono arrivata io.
+
+5.5  Dodici blocchi, quattro giornate, due abitazioni, 9,6 ore, con il consenso dei partecipanti. Il registratore salva in modo continuo soltanto posa e grandezze; le immagini restano sul dispositivo e solo attorno agli allarmi. La riservatezza dichiarata nel Capitolo 1 qui viene mostrata, e ha richiesto di togliere dal prototipo una registrazione video continua che contraddiceva l'argomento della tesi.
+
+5.6  Un sistema installato non produce finestre ma eventi, e sulle stesse registrazioni le due grandezze differiscono di un fattore 44,8 (era 47,8 finché una sessione di 4,6 ore non entrava nel conto per una differenza nel nome dei file). Il richiamo di campo dipende inoltre da due parametri che non erano stati dichiarati — la tolleranza di accoppiamento e la persistenza — e viene quindi riportato come intervallo con i parametri esposti, mai come numero singolo. È la sezione che recepisce il suo punto 9.
+
+5.7  Fra la configurazione di riferimento e quella adottata corrono 0,055 di F2 in laboratorio, cioè dentro la dispersione fra soggetti, e un fattore cinquantadue sui falsi allarmi in una casa. La causa è misurata e non congetturata: fra i negativi orizzontali l'altezza mediana del bacino è +0,02 lunghezze di torso nell'archivio e +1,47 nelle registrazioni domestiche. In laboratorio le persone si sdraiano per terra; in una casa stanno sul divano, e la distinzione che serve — a terra contro superficie rialzata — l'archivio non la contiene perché non ha divani.
+
+5.8  Lo stesso fenomeno su un iperparametro invece che su un intervento progettuale. Da K = 31 a K = 45 l'F2 di laboratorio continua a salire ed è il valore più alto di tutto il lavoro, mentre sul campo si perde una caduta e i falsi allarmi risalgono.
+
+5.9  I modi di fallire, dichiarati: il modello che non guardava la dinamica, il multi-persona che funziona e non è validabile su nessun archivio pubblico, il filtro geometrico in addestramento che è uno scambio netto negativo, e il test di durata che è sembrato riuscire perché il dispositivo si era sospeso da solo.
+
+Dove porta il secondo blocco: un insieme di verifica non può misurare un miglioramento su una condizione che non rappresenta, e usato ugualmente non si limita a sovrastimare — ordina in modo errato le alternative. Preso alla lettera, l'archivio di riferimento avrebbe fatto scartare gli interventi che rendono il sistema utilizzabile in una casa.
+
+
+========================================================================
+3. LE CINQUE VERIFICHE CHE MI AVEVA INDICATO
+========================================================================
+
+PR-AUC NEL PASSAGGIO ALL'ARCHIVIO ESTERNO — fatta, e la risposta è quella meno comoda delle due che lei aveva prospettato. Sull'archivio di addestramento la PR-AUC è 0,990, cioè 18,7 volte la prevalenza; sull'archivio mai visto scende a 0,169, cioè 1,79 volte la prevalenza, con ROC-AUC 0,750. Non è quindi soltanto uno spostamento della distribuzione dei punteggi: c'è perdita reale della capacità di separare. La soglia scelta a posteriori sul dominio di destinazione porta l'F2 da 0,034 a 0,492, e nel testo è chiamata esplicitamente soglia oracolo, come mi aveva indicato, con la dichiarazione che non è una prestazione ottenibile da chi installa il sistema.
+
+CONTROESEMPI DI UNA CASA VERIFICATI SULL'ALTRA — fatta, in entrambe le direzioni. Controesempi della casa dei nonni, verifica a casa mia: da 0,342 a 0,171 eventi all'ora. Controesempi di casa mia, verifica a casa dei nonni: da 1,781 a 0,890. Circa un fattore due in entrambi i versi. Con due sole abitazioni non è una dimostrazione, ma fra le due ipotesi che lei distingueva indica la prima: il modello ha imparato una categoria trasferibile, non le caratteristiche della stanza da cui vengono i controesempi. Nel testo l'effetto è chiamato adattamento al dominio e non generalizzazione. Il costo va dichiarato, e nel testo lo è: in quella configurazione il richiamo scende a due cadute su cinque.
+
+VERIFICA CONTROLLATA SULLE OCCLUSIONI — fatta, nella forma che lei aveva suggerito: mascheramento di gruppi di landmark con il punto congelato all'ultima posizione nota, e misura della degradazione. La perdita massima è 0,020 di F2, sulle spalle, contro una dispersione fra soggetti di 0,078. Nessun gruppo è critico. Il risultato sull'auto-occlusione resta attribuito allo stimatore su cui è stato misurato e non presentato come proprietà del problema.
+
+METRICHE DI CAMPO A LIVELLO DI EVENTO — fatta per la quota di cadute rilevate, i falsi allarmi all'ora e il tempo medio fra falsi allarmi. Sulla latenza, che nella lettera precedente le avevo detto che avrei calcolato, l'ho fatto e la risposta è che nella forma richiesta non è misurabile: le cadute sono annotate al minuto e la grandezza da misurare è di pochi secondi, quindi l'incertezza sull'istante vero arriva a sessanta volte la quantità da stimare. Il dato che lo rende evidente è che la prima finestra sopra soglia cade a +11,8, +19,4, +27,7 e +32,3 secondi dal minuto annotato: quegli scarti non sono ritardi del sistema, sono il punto del minuto in cui la persona è caduta. Ciò che invece si misura è la scomposizione: calcolo per fotogramma 0,125 s, riempimento della finestra 2,743 s, persistenza 0,997 s, e un caso conservativo di 3,865 s. La latenza è dominata dalla finestra di decisione e non dall'hardware, con un fattore ventidue, ed è il complemento del risultato sul costo per fotogramma: lì il collo di bottiglia era la percezione, qui è la finestra, e in entrambi i casi il classificatore non conta. Questi numeri sono ora nel testo, ed è la sottosezione 5.4.2.
+
+(Correzione dell'8 settembre, e la segnalo perché il numero era già stampato. L'addendo di calcolo valeva 0,038 s: era il costo per fotogramma ritirato il 6 settembre, rimasto dentro lo script che produce la tabella. Sulla board misurata quell'addendo vale 0,125 s, il totale conservativo 3,865 s invece di 3,778, e il fattore che separa la finestra dal calcolo è ventidue e non settantatré. La conclusione — la latenza dipende da come è fatta la finestra e non da quanto è veloce il dispositivo — regge, e regge anche il suo corollario, che comprare un dispositivo dieci volte più veloce toglierebbe il 3% della latenza. Era passato inosservato perché un addendo che vale l'1% di un totale non viene riletto.)
+
+PROVA LUNGA SUL DISPOSITIVO CON CONTROLLO DELLA SOSPENSIONE — fatta il 6 settembre, ed era l'ultima delle cinque a restare aperta. Il dispositivo ha girato **4,59 ore** sulla telecamera vera, con sospensione dichiarata dal registratore e pari a zero: il difetto che aveva invalidato silenziosamente il primo tentativo ora si vede, perché il riepilogo porta due orologi e ne stampa la differenza. Risultato: 3,1 eventi di allarme all'ora e 136,65 ms per fotogramma.
+
+Nella stessa sessione si è chiuso l'unico numero del lavoro che non aveva un file a produrlo. La ripartizione del costo per fotogramma era trascritta da una sessione di terminale; ora la scrive il registratore, e ha detto una cosa scomoda: il dispositivo è 3,6 volte più lento di quanto il capitolo dichiarasse. Le proporzioni fra le fasi reggono, i valori assoluti no, ed è il motivo per cui la 5.4 riporta la tabella vecchia accanto a quella nuova invece di sostituirla in silenzio.
+
+Resta però un'annotazione da fare sulla portata di quella prova, perché non copre tutto ciò che serviva: la sessione ha il 35% di pose valide e **nessuna caduta messa in scena**. Misura la durata e il costo, non il richiamo.
+
+
+========================================================================
+4. UNA CORREZIONE AL PUNTO 1 DELLA SUA EMAIL
+========================================================================
+
+La lettura che lei proponeva del confronto prima e dopo le grandezze integrali mi era sembrata, e mi sembra ancora, la spiegazione giusta del meccanismo: le architetture che leggono la sequenza possono costruirsi da sole una rappresentazione della dinamica, mentre un classificatore che riassume la finestra con statistiche non può, e riceve dalle grandezze integrali un'informazione temporale che altrimenti non avrebbe. Sul come sono costruiti gli ingressi della foresta la sua ipotesi è corretta: la finestra viene riassunta con sei statistiche per grandezza, e non c'è alcuna nozione di ordine.
+
+Il problema è che i numeri su cui quella lettura poggiava venivano da cinque soggetti. Ho rifatto il confronto a dieci, ed è cambiato.
+
+Il guadagno di 0,040 sulla foresta non è distinguibile dal caso: con la regola di etichettatura che include gli estremi il segno si rovescia e diventa −0,022, e per distinguere l'effetto servirebbero fra trentaquattro e settanta soggetti a seconda della variante. Sulle reti l'effetto resta nullo come lei aveva notato, ma per dichiararlo sulla GRU servirebbero duecentosettantaquattro soggetti.
+
+Inoltre a dieci soggetti la foresta non è più la prima della tabella ma l'ultima delle cinque, con 0,792 contro 0,858 della LSTM. Resta indistinguibile dalla GRU, con t = −1,74 contro un valore critico di 2,26, quindi la sua indicazione di non dichiarare un vincitore vale ancora, solo nell'altro verso rispetto a quello che avevo scritto.
+
+Ne concludo che l'interpretazione meccanicistica va tenuta come spiegazione plausibile e dichiarata come tale, ma non può essere presentata come un risultato misurato.
+
+AGGIORNAMENTO DEL 27 AGOSTO. Ho aggiunto una sesta architettura, che è la famiglia che il Capitolo 2 dichiarava di non aver provato: una rete a grafo spazio-temporale, addestrata con lo stesso identico protocollo delle altre cinque. Vale la pena dire subito che cosa ho provato, perché limita la portata del risultato: i nodi del grafo sono le dodici grandezze geometriche in ingresso e non i giunti dello scheletro, e l'adiacenza fra essi è appresa invece che fissata sull'anatomia. Una rete a grafo sui giunti richiederebbe le coordinate dei landmark, che il file delle feature non contiene, e cambierebbe insieme architettura e rappresentazione, cioè due variabili invece di una.
+
+Il risultato è F2 0,779 ± 0,122 contro 0,847 della GRU, cioè −0,068, con t = −2,37 e vittoria su due fold su dieci. È il primo confronto fra architetture di tutto il lavoro che supera il valore critico di 2,26, e lo supera nel verso sbagliato. Non sopravvive però alla correzione per molteplicità: i confronti contro lo stesso riferimento sono ora cinque, e con Bonferroni il valore critico passa a 3,25.
+
+La conseguenza sul testo è che la frase «nessuna architettura è statisticamente distinguibile dalla GRU» non regge più alla lettera, e l'ho sostituita con «nessuna architettura fa meglio della GRU, e la sola che si avvicina a essere distinguibile fa peggio». Mi sembra che la tesi centrale non ne esca indebolita ma detta meglio, perché la prima formulazione era una frase che un sesto confronto poteva rompere, mentre la seconda è ciò che i dati sostengono. Su questo le chiedo un parere, perché è un cambiamento di formulazione su una delle affermazioni portanti del lavoro.
+
+Ho misurato nella stessa occasione anche il costo per finestra delle sei architetture, che è la domanda che con dieci soggetti si può decidere mentre quella di accuratezza no. La rete a grafo costa 1,80 ms per finestra con 12.323 parametri; la foresta che gira sul dispositivo ne costa 4,85 con 6.928 nodi, ed è la più lenta delle sei. Non è una contraddizione con la scelta fatta, ma obbliga a dire per esteso che la foresta è stata scelta per costo di addestramento, assenza di dipendenze sul dispositivo e riproducibilità, e non per velocità di inferenza. Quei 4,85 ms sono anche il primo controllo indipendente dei 4,47 ms per finestra dichiarati nel Capitolo 4.
+
+Aggiungo che il confronto fra le tre definizioni del compito, che a differenza di questo richiede due soggetti per essere dichiarato, dice la stessa cosa che lei aveva scritto — l'architettura è di secondo ordine — con una forza che il confronto fra classificatori da solo non ha.
+
+
+========================================================================
+5. COSA RESTA APERTO, E TRE DOMANDE
+========================================================================
+
+Sul lavoro sperimentale: niente. La prova di durata, che nella stesura precedente era l'unica voce di questo paragrafo, è stata fatta il 6 settembre. Quello che resta non è una misura mancante ma una misura troppo piccola, ed è nel paragrafo sui dati più sotto.
+
+Sul testo: i cinque capitoli sono scritti nella forma qui descritta, e le due cose che questo paragrafo elencava sono chiuse. La figura del Capitolo 4 dai fotogrammi delle due telecamere è stata composta il 6 settembre; la scomposizione della latenza è entrata nel Capitolo 5 ed è la sottosezione 5.4.2. Il controllo statico sui sorgenti non trova più figure da produrre né riferimenti orfani — non è la stessa cosa di una compilazione, che non posso fare su questa macchina.
+
+Sulle fonti: il 31 agosto ho ricontrollato sulla fonte i riferimenti del Capitolo 1, e ho trovato due cose che è giusto che lei sappia. La prima è che cinque valori epidemiologici su sette venivano da un'edizione precedente della sorveglianza PASSI d'Argento rispetto a quella che la bibliografia dichiarava; il caso peggiore era il «60% delle cadute in casa», che non corrisponde a nessuna delle due edizioni. Sono stati tutti rifatti sul comunicato del biennio 2023–2024. La seconda è che una voce fondeva due lavori diversi degli stessi autori, e attribuiva a uno di essi un'affermazione — un tasso di falsi allarmi ridotto da 0,049 a 0,025 dopo revisione dell'algoritmo — che sulla fonte non c'è: l'ho ritirata, e al suo posto c'è AIDE-MOI, dove la riduzione è documentata con entrambi i valori. Restano sedici voci su trentadue mai verificate, e ho intenzione di controllarle prima della consegna: delle dodici verificate finora, quattro affermazioni non hanno retto.
+
+Sui dati: cinque cadute reali non stimano un richiamo. L'intervallo di confidenza va da 0,28 a 0,99 e non permette di distinguere alcuna configurazione da un'altra, ed è per questo che nel testo non compare una configurazione vincitrice scelta su quattro su cinque contro tre su cinque. È il limite più serio del lavoro e nelle conclusioni è dichiarato come tale. La sessione da cui vengono tutte e cinque ha il 25,9% di pose valide: rifarla con l'inquadratura giusta è l'intervento a costo più basso che mi resta.
+
+Tre punti su cui vorrei un suo parere.
+
+  A. La riformulazione della frase sulle architetture, dopo la rete a grafo. La tengo come descritto nella parte 4, oppure preferisce che il grafo resti fuori dal confronto principale e compaia solo come controllo?
+
+  B. L'interpretazione sugli ingressi della foresta. La presento come lettura dichiarata e non misurata, oppure la tolgo del tutto?
+
+  C. Ci sono due sistemi installabili e non uno: con i controesempi, 2,5 falsi allarmi all'ora e tre cadute su cinque; senza, 14,0 all'ora e quattro su cinque nella configurazione ottimizzata. Con questi numeri la seconda mi sembra preferibile, perché in un sistema di sicurezza una caduta su cinque pesa più di undici allarmi all'ora in più. Presento la scelta come aperta dichiarando il criterio, oppure indico la configurazione a richiamo pieno come sistema proposto e l'altra come variante?
+
+La ringrazio del tempo. Quando rientra, se le è comodo, ci vediamo.
+
+Caterina Cerretani

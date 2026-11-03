@@ -1,0 +1,489 @@
+<title>Il testo raggiunge le misure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#F1F3F3; --surface:#FFFFFF; --ink:#171B1A; --ink-2:#414847;
+  --muted:#79817F; --rule:#DCE2E0; --blu:#24506B; --blu-soft:#E4EBF0;
+  --verde:#2F6B4F; --verde-soft:#E3EEE8; --ambra:#8A6314; --ambra-soft:#F5EEDF;
+  --rosso:#8E3A38; --rosso-soft:#F5E6E5;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --ground:#101413; --surface:#171C1B; --ink:#E9EEEC; --ink-2:#AFB9B6;
+    --muted:#7E8886; --rule:#262E2C; --blu:#7FB0CE; --blu-soft:#152833;
+    --verde:#7CC09C; --verde-soft:#14271D; --ambra:#D6AD5E; --ambra-soft:#2A2214;
+    --rosso:#DE9490; --rosso-soft:#2E1917;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101413; --surface:#171C1B; --ink:#E9EEEC; --ink-2:#AFB9B6;
+  --muted:#7E8886; --rule:#262E2C; --blu:#7FB0CE; --blu-soft:#152833;
+  --verde:#7CC09C; --verde-soft:#14271D; --ambra:#D6AD5E; --ambra-soft:#2A2214;
+  --rosso:#DE9490; --rosso-soft:#2E1917;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3",system-ui,sans-serif; font-size:16.5px;
+  line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px; margin:0 auto; padding:60px 26px 90px}
+
+.occhiello{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--blu); margin:0 0 14px;
+}
+h1{
+  font-family:Spectral,Georgia,serif; font-weight:600;
+  font-size:clamp(32px,4.8vw,48px); line-height:1.08; margin:0 0 18px;
+  text-wrap:balance; letter-spacing:-.01em;
+}
+.somm{
+  font-family:Spectral,Georgia,serif; font-size:19px; line-height:1.62;
+  color:var(--ink-2); max-width:64ch; margin:0;
+}
+.somm em{color:var(--ink); font-style:italic}
+.meta{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
+  margin-top:24px; padding-top:16px; border-top:1px solid var(--rule);
+  display:flex; flex-wrap:wrap; gap:20px;
+}
+
+/* ---------- cifre in evidenza ---------- */
+.cifre{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); margin:44px 0 8px;
+}
+.cifra{background:var(--surface); padding:20px 18px}
+.cifra b{
+  display:block; font-family:"IBM Plex Mono",monospace; font-size:27px;
+  color:var(--ink); line-height:1.1; font-variant-numeric:tabular-nums;
+}
+.cifra span{
+  display:block; font-size:13.2px; color:var(--muted); margin-top:7px;
+  line-height:1.45;
+}
+
+/* ---------- blocchi ---------- */
+section{margin-top:56px; padding-top:30px; border-top:2px solid var(--ink)}
+section > h2{
+  font-family:Spectral,Georgia,serif; font-size:26px; font-weight:600;
+  margin:0 0 8px; line-height:1.2; text-wrap:balance;
+}
+.guida{font-size:15.5px; color:var(--muted); max-width:66ch; margin:0 0 26px}
+
+h3{
+  font-family:"Source Sans 3",sans-serif; font-size:17px; font-weight:600;
+  margin:32px 0 8px; color:var(--ink);
+}
+p{margin:0 0 13px; max-width:70ch; color:var(--ink-2)}
+p strong, li strong{color:var(--ink); font-weight:600}
+
+/* ---------- tabelle ---------- */
+.tab{overflow-x:auto; margin:16px 0 6px}
+table{border-collapse:collapse; width:100%; font-size:14.6px; min-width:460px}
+th{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  text-align:left; padding:0 14px 9px 0; border-bottom:1px solid var(--rule);
+  vertical-align:bottom;
+}
+td{
+  padding:9px 14px 9px 0; border-bottom:1px solid var(--rule);
+  color:var(--ink-2); vertical-align:top;
+}
+td.n{
+  font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  text-align:right; color:var(--ink); white-space:nowrap;
+}
+tr.evid td{color:var(--ink); font-weight:600}
+tr:last-child td{border-bottom:none}
+
+/* ---------- pastiglie di stato ---------- */
+.p{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+  letter-spacing:.07em; text-transform:uppercase; padding:3px 9px;
+  border-radius:2px; white-space:nowrap; font-weight:500;
+}
+.p.ok{background:var(--verde-soft); color:var(--verde)}
+.p.mezzo{background:var(--ambra-soft); color:var(--ambra)}
+.p.no{background:var(--rosso-soft); color:var(--rosso)}
+.p.info{background:var(--blu-soft); color:var(--blu)}
+
+/* ---------- riquadro ---------- */
+.box{
+  margin:26px 0; padding:20px 24px; background:var(--surface);
+  border-left:3px solid var(--blu); border-radius:2px;
+}
+.box.att{border-left-color:var(--rosso)}
+.box h4{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--blu); margin:0 0 9px; font-weight:500;
+}
+.box.att h4{color:var(--rosso)}
+.box p{margin:0 0 9px; font-size:15.3px}
+.box p:last-child{margin-bottom:0}
+
+ul{margin:0 0 14px; padding-left:20px}
+li{margin-bottom:8px; color:var(--ink-2); max-width:68ch}
+
+.fonte{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted);
+  margin-top:9px;
+}
+@media (max-width:820px){ .cifre{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:520px){ .cifre{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+
+<p class="occhiello">Tesi &middot; punto della situazione</p>
+<h1>Il testo raggiunge le misure</h1>
+<p class="somm">
+  Il lavoro sperimentale &egrave; finito, e da oggi il testo dei capitoli lo segue: quindici numeri aggiornati, cinque sezioni riscritte perch&eacute; la conclusione era cambiata, e sei dichiarate per la misura da cui vengono. <em>Quello che resta &egrave; un capitolo che non esiste, e una prova che non &egrave; stata fatta.</em>
+</p>
+<div class="meta">
+  <span>23 agosto 2026, sera</span>
+  <span>16 esperimenti &middot; 26.955 parole allineate</span>
+  <span>UP-Fall 10 soggetti &middot; UR-Fall &middot; OmniFall &middot; 10,6 h in due case</span>
+</div>
+
+<div class="cifre">
+  <div class="cifra"><b>26.955</b><span>parole nei sette capitoli, ora tutte allineate alle misure correnti</span></div>
+  <div class="cifra"><b>0,953</b><span>F<sub>2</sub> della configurazione migliore, LOSO su 10 soggetti</span></div>
+  <div class="cifra"><b>55/56</b><span>clip su cui board e calcolatore prendono la stessa decisione</span></div>
+  <div class="cifra"><b>0,0%</b><span>falsi allarmi su una persona che si sdraia, con il compito definito bene</span></div>
+</div>
+
+<!-- ================================================================= -->
+<section>
+  <h2>I risultati, in ordine di importanza</h2>
+  <p class="guida">Non in ordine cronologico. Il primo &egrave; quello su cui
+  il relatore ha chiesto di impostare la discussione.</p>
+
+  <h3>1 &middot; L'architettura non &egrave; la variabile che decide</h3>
+  <p>Cinque architetture, stesso protocollo, stesse grandezze, stessi dati,
+  dieci ripetizioni <i>leave-one-subject-out</i>.</p>
+  <div class="tab"><table>
+    <tr><th>architettura</th><th>F<sub>2</sub></th><th>dispersione</th><th>recall</th><th>parametri</th></tr>
+    <tr><td>LSTM</td><td class="n">0,858</td><td class="n">&plusmn;&nbsp;0,082</td><td class="n">0,934</td><td class="n">32.227</td></tr>
+    <tr><td>GRU</td><td class="n">0,847</td><td class="n">&plusmn;&nbsp;0,085</td><td class="n">0,928</td><td class="n">24.483</td></tr>
+    <tr><td>Transformer</td><td class="n">0,846</td><td class="n">&plusmn;&nbsp;0,100</td><td class="n">0,939</td><td class="n">34.499</td></tr>
+    <tr><td>CNN 1D</td><td class="n">0,833</td><td class="n">&plusmn;&nbsp;0,118</td><td class="n">0,937</td><td class="n">46.147</td></tr>
+    <tr><td>Foresta casuale</td><td class="n">0,792</td><td class="n">&plusmn;&nbsp;0,080</td><td class="n">0,807</td><td class="n">12.760</td></tr>
+  </table></div>
+  <p>Fra la migliore e la peggiore corrono <b>0,066</b>; la dispersione fra
+  soggetti della migliore &egrave; <b>0,082</b>. <strong>La differenza fra
+  architetture &egrave; pi&ugrave; piccola della differenza fra persone.</strong>
+  Distinguere GRU da LSTM richiederebbe 113 soggetti; distinguere due
+  definizioni del compito ne richiede 2.</p>
+
+  <h3>2 &middot; La definizione del compito s&igrave;, e di molto</h3>
+  <p>Tre problemi diversi a parit&agrave; di tutto il resto. La colonna a
+  destra &egrave; la quota di finestre in allarme su una persona che si sdraia
+  volontariamente &mdash; il negativo che conta davvero in una casa.</p>
+  <div class="tab"><table>
+    <tr><th>compito</th><th>positivo</th><th>prevalenza</th><th>F<sub>2</sub></th><th>precisione</th><th>persona sdraiata</th></tr>
+    <tr class="evid"><td>evento</td><td>la transizione</td><td class="n">0,047</td><td class="n">0,831</td><td class="n">0,924</td><td class="n">0,0%</td></tr>
+    <tr><td>stato</td><td>persona a terra</td><td class="n">0,089</td><td class="n">0,704</td><td class="n">0,755</td><td class="n">12,5%</td></tr>
+    <tr><td>allarme</td><td>l'uno o l'altro</td><td class="n">0,115</td><td class="n">0,810</td><td class="n">0,833</td><td class="n">13,1%</td></tr>
+  </table></div>
+  <p>Il compito <b>evento</b> ha la prevalenza pi&ugrave; bassa &mdash; meno di
+  un quinto dei positivi del compito <i>allarme</i> &mdash; e nonostante questo
+  ottiene l'F<sub>2</sub> pi&ugrave; alto, la precisione pi&ugrave; alta, e
+  sbaglia sullo <strong>zero per cento</strong> delle 2.234 finestre di persona
+  distesa volontariamente.</p>
+  <p>Misurato in casa, con la regola di allarme dichiarata:</p>
+  <div class="tab"><table>
+    <tr><th>compito</th><th>eventi per ora</th><th>cadute rilevate</th></tr>
+    <tr class="evid"><td>evento</td><td class="n">1,6</td><td class="n">3 / 5</td></tr>
+    <tr><td>stato</td><td class="n">29,5</td><td class="n">0 / 5</td></tr>
+    <tr><td>allarme</td><td class="n">36,4</td><td class="n">4 / 5</td></tr>
+  </table></div>
+  <p>Un fattore <b>23</b> sui falsi allarmi, al costo di una caduta su cinque.
+  &Egrave; il compromesso che decide se un'installazione resta accesa.</p>
+  <p class="fonte">risultati/compiti/foresta_DTW_cam1.json &middot; risultati/campo/compiti_in_casa.json</p>
+
+  <h3>3 &middot; La rappresentazione temporale s&igrave;</h3>
+  <p>Sostituire le derivate istantanee con grandezze accumulate su una
+  finestra mobile. Le configurazioni in laboratorio, su dieci soggetti:</p>
+  <div class="tab"><table>
+    <tr><th>configurazione</th><th>F<sub>2</sub></th><th>recall</th><th>falsi negativi</th><th>falsi positivi</th></tr>
+    <tr class="evid"><td>A3i + controesempi</td><td class="n">0,953 &plusmn; 0,055</td><td class="n">0,980</td><td class="n">14</td><td class="n">124</td></tr>
+    <tr><td>A3i &mdash; con gli integrali</td><td class="n">0,943 &plusmn; 0,064</td><td class="n">0,977</td><td class="n">14</td><td class="n">150</td></tr>
+    <tr><td>A3h + controesempi</td><td class="n">0,942 &plusmn; 0,060</td><td class="n">0,965</td><td class="n">22</td><td class="n">129</td></tr>
+    <tr><td>A3h &mdash; con l'altezza dal pavimento</td><td class="n">0,931 &plusmn; 0,051</td><td class="n">0,962</td><td class="n">22</td><td class="n">137</td></tr>
+    <tr><td>A3 &mdash; riferimento</td><td class="n">0,898 &plusmn; 0,075</td><td class="n">0,929</td><td class="n">45</td><td class="n">172</td></tr>
+  </table></div>
+
+  <div class="box att">
+    <h4>questo &egrave; il risultato che il relatore va avvisato</h4>
+    <p>Nella relazione del 17 agosto &mdash; costruita su <b>cinque</b> soggetti
+    &mdash; A3h con i controesempi risultava la <b>peggiore</b> configurazione
+    in laboratorio, con F<sub>2</sub> 0,780, e il punto §3 era costruito su
+    quel &laquo;rovesciamento&raquo;: gli interventi pensati per la casa
+    peggiorano il laboratorio.</p>
+    <p>Con dieci soggetti la stessa configurazione fa <b>0,942</b>, e le cinque
+    configurazioni si ordinano allo stesso modo in laboratorio e in casa.
+    <strong>Il rovesciamento era in larga parte un effetto della scarsit&agrave;
+    di dati</strong>, non una propriet&agrave; del problema.</p>
+    <p>Non &egrave; una brutta notizia: &egrave; un risultato migliore e pi&ugrave;
+    difendibile. Ma va detto, e cambia un capitolo.</p>
+  </div>
+
+  <h3>4 &middot; Ci&ograve; che si &egrave; misurato non contare</h3>
+  <p>Ognuna di queste &egrave; una misura, non un'impressione, ed
+  &egrave; utile quanto un risultato positivo: circoscrive dove il problema
+  <em>non</em> sta.</p>
+  <div class="tab"><table>
+    <tr><th>variabile</th><th>effetto misurato</th><th>metro di confronto</th></tr>
+    <tr><td>lunghezza della finestra (22 &rarr; 44 campioni)</td><td class="n">0,817 &ndash; 0,881</td><td class="n">dispersione 0,08&ndash;0,15</td></tr>
+    <tr><td>occlusione di un gruppo di punti</td><td class="n">peggiora al pi&ugrave; 0,020</td><td class="n">dispersione 0,078</td></tr>
+    <tr><td>rumore indipendente sui punti</td><td class="n">perde al pi&ugrave; 0,031</td><td class="n">a &sigma; quadruplo del reale</td></tr>
+    <tr><td>numero di parametri del modello</td><td colspan="2">non ordina il risultato: il pi&ugrave; piccolo non &egrave; il peggiore</td></tr>
+  </table></div>
+  <p>Sull'occlusione c'&egrave; un risultato che non era atteso: congelare le
+  <b>anche</b> &mdash; il riferimento rispetto a cui A3 normalizza ogni
+  grandezza &mdash; <strong>migliora</strong> la prestazione di 0,012. Un
+  riferimento stabile produce grandezze meno rumorose di uno ristimato a ogni
+  fotogramma: congelarlo equivale a filtrarlo.</p>
+
+  <h3>5 &middot; Il punto di vista della telecamera s&igrave;</h3>
+  <p>Stesso soggetto, stessa caduta, stesso istante, due telecamere:
+  F<sub>2</sub> da <b>0,872</b> a <b>0,434</b>. Addestrando su entrambe le
+  viste se ne recupera il 56%, e i falsi allarmi calano <em>insieme</em> al
+  recall &mdash; segno che il modello ha imparato qualcosa di pi&ugrave;
+  generale, non che si &egrave; spostata una soglia.</p>
+  <div class="box att">
+    <h4>l'unico risultato ancora a cinque soggetti</h4>
+    <p>Queste run non sono state ripetute: in <code>risultati/addestramento</code>
+    non esiste alcuna esecuzione <i>cam1to2</i>. La <b>conclusione</b> regge
+    comodamente &mdash; il divario fra due punti di vista &egrave; dieci volte
+    quello fra due architetture, e nessun riallineamento pu&ograve; ribaltare
+    un fattore dieci &mdash; ma i <b>numeri</b> vanno rifatti prima di
+    stamparli accanto a quelli a dieci soggetti.</p>
+  </div>
+
+  <h3>6 &middot; Il trasferimento a un archivio esterno fallisce, e si sa come</h3>
+  <div class="tab"><table>
+    <tr><th>rappresentazione</th><th>PR-AUC</th><th>guadagno sul caso</th><th>F<sub>2</sub></th></tr>
+    <tr><td>A3base &mdash; senza integrali</td><td class="n">0,440</td><td class="n">3,4&times;</td><td class="n">0,404</td></tr>
+    <tr><td>A3 &mdash; con integrali</td><td class="n">0,466</td><td class="n">3,6&times;</td><td class="n">0,479</td></tr>
+    <tr class="evid"><td>sottoinsieme scelto per allineamento</td><td class="n">0,660</td><td class="n">5,1&times;</td><td class="n">0,630</td></tr>
+  </table></div>
+  <p>Il modello mantiene <b>capacit&agrave; discriminativa</b> su UR-Fall &mdash;
+  cinque volte il caso &mdash; ma perde la <b>calibrazione</b>: la soglia
+  scelta su UP-Fall non &egrave; la soglia giusta altrove. &Egrave; una
+  diagnosi, non un fallimento generico, e indica l'intervento.</p>
+
+  <h3>7 &middot; Il sistema sul dispositivo</h3>
+  <p>Catena completa a <b>26,5 fps</b> su una board da cento euro, telecamera
+  USB compresa. La stima della posa &egrave; l'88,4% del tempo, il
+  classificatore il 5,8%: <strong>il collo di bottiglia non &egrave; il
+  modello</strong>, e ridurre il modello non serve a niente.</p>
+  <p>La verifica di trasferimento, fatta ieri sulle stesse 56 clip:</p>
+  <div class="tab"><table>
+    <tr><th></th><th>calcolatore</th><th>board</th></tr>
+    <tr><td>allarmi emessi</td><td class="n">2</td><td class="n">1</td></tr>
+    <tr><td>pose valide</td><td class="n">96,4%</td><td class="n">96,3%</td></tr>
+    <tr class="evid"><td>clip con decisione identica</td><td class="n" colspan="2">55 / 56</td></tr>
+  </table></div>
+  <p>La parit&agrave; sulle finestre precalcolate &egrave; <b>esatta</b>
+  &mdash; scarto 0,000e+00 &mdash; ma le due macchine divergono su una clip, e
+  <strong>&egrave; una caduta vera</strong>. La causa non &egrave; il
+  classificatore: &egrave; lo stimatore di posa, che &egrave; un
+  <em>tracciatore</em> e accumula stato fra fotogrammi. Scarto sui punti:
+  0,0001 al primo fotogramma, 0,0755 all'undicesimo.</p>
+  <p>Ne segue una regola di metodo: <strong>i numeri del calcolatore non sono i
+  numeri della board</strong>, e la verifica di trasferimento deve partire dai
+  fotogrammi, non dalle grandezze gi&agrave; calcolate.</p>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <h2>Le richieste del relatore, una per una</h2>
+  <p class="guida">Le quattro della prima email, pi&ugrave; le tre della
+  risposta di agosto.</p>
+
+  <div class="tab"><table>
+    <tr><th>richiesta</th><th>stato</th><th>che cosa c'&egrave;</th></tr>
+    <tr>
+      <td><b>Resilienza al cambio di telecamera e ambiente</b></td>
+      <td><span class="p mezzo">da rifare</span></td>
+      <td>Due misure complementari, ma solo una &egrave; aggiornata. <i>Cross-dataset</i>: UR-Fall, guadagno 5,1&times; sul caso con la calibrazione persa &mdash; <b>dieci soggetti</b>. <i>Cross-view</i>: F<sub>2</sub> da 0,872 a 0,434 cambiando telecamera, e se ne recupera il 56% addestrando su entrambe le viste &mdash; ma quelle run sono a <b>cinque</b> soggetti e non sono state ripetute. La conclusione &egrave; robusta (il divario &egrave; dieci volte quello fra architetture), il numero no.</td>
+    </tr>
+    <tr>
+      <td><b>Resilienza alle occlusioni</b></td>
+      <td><span class="p ok">fatto</span></td>
+      <td>Mascheramento controllato di undici gruppi di punti, anatomici e casuali. Nessuno &egrave; critico: il peggioramento massimo &egrave; 0,020 contro una dispersione fra soggetti di 0,078.</td>
+    </tr>
+    <tr>
+      <td><b>Porting su edge, senza video verso l'esterno</b></td>
+      <td><span class="p ok">fatto</span></td>
+      <td>26,5 fps, bilancio computazionale fase per fase, parit&agrave; verificata a livello di fotogramma. Nessuna immagine lascia il dispositivo.</td>
+    </tr>
+    <tr>
+      <td><b>Prova lunga in una casa vera</b></td>
+      <td><span class="p mezzo">quasi</span></td>
+      <td>10,6 ore in due abitazioni, gi&agrave; misurate. Manca la prova <i>continuativa</i> con l'antirimbalzo a bordo, che ora &egrave; implementato: prevista domani mattina.</td>
+    </tr>
+    <tr>
+      <td><b>Confronto con architetture pi&ugrave; pesanti</b></td>
+      <td><span class="p ok">fatto</span></td>
+      <td>Cinque architetture compreso un encoder ad attenzione, confronto appaiato su dieci ripetizioni, con il calcolo di quanti soggetti servirebbero perch&eacute; ciascuna differenza diventi significativa.</td>
+    </tr>
+    <tr>
+      <td><b>Normalizzazione delle grandezze</b></td>
+      <td><span class="p ok">fatto</span></td>
+      <td><code>log1p</code> sulle asimmetriche pi&ugrave; standardizzazione, stimata sui soli <b>fotogrammi</b> di addestramento del fold. Salvata insieme al modello e verificata sulla board.</td>
+    </tr>
+    <tr>
+      <td><b>Indice e struttura del capitolo sperimentale</b></td>
+      <td><span class="p ok">fatto</span></td>
+      <td>Quattro parti, sette capitoli, costruiti sul fulcro che ha indicato lui. In un documento a parte.</td>
+    </tr>
+  </table></div>
+
+  <div class="box att">
+    <h4>una cosa da comunicargli</h4>
+    <p>Il <b>§3</b> della sua email discuteva il rovesciamento
+    laboratorio/casa. Quel risultato &egrave; cambiato con i dieci soggetti,
+    come descritto sopra. Va detto prima che ci costruisca sopra un
+    ragionamento.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <h2>Che cosa si pu&ograve; scrivere senza toccarlo</h2>
+  <p class="guida">Il criterio: un capitolo &egrave; usabile cos&igrave;
+  com'&egrave; se ogni numero che contiene regge ancora al controllo contro i
+  risultati a dieci soggetti.</p>
+
+  <div class="tab"><table>
+    <tr><th>capitolo</th><th>parole</th><th>stato</th><th>che cosa &egrave; stato fatto oggi</th></tr>
+    <tr class="evid">
+      <td><b>2</b> &mdash; Metodologia</td><td class="n">8.919</td>
+      <td><span class="p ok">pronto</span></td>
+      <td>Nulla: non conteneva numeri di laboratorio. Dieci sezioni, due figure.</td>
+    </tr>
+    <tr>
+      <td><b>1</b> &mdash; Il problema</td><td class="n">2.386</td>
+      <td><span class="p ok">pronto</span></td>
+      <td>Da cinque a dieci soggetti, con il rimando alla numerosit&agrave; necessaria che il Capitolo&nbsp;4 calcola.</td>
+    </tr>
+    <tr>
+      <td><b>3</b> &mdash; Il protocollo</td><td class="n">2.976</td>
+      <td><span class="p ok">pronto</span></td>
+      <td>Dataset, finestre e tabella dei dieci fold rifatti. <b>Sezione sulla soglia riscritta</b>: non pi&ugrave; la mediana scelta sul validation, ma la soglia fissa dichiarata a priori, con il confronto fra sei regole e l'avvertenza che quel confronto &egrave; a sua volta selezione sul test.</td>
+    </tr>
+    <tr>
+      <td><b>4</b> &mdash; I risultati</td><td class="n">5.362</td>
+      <td><span class="p ok">pronto</span></td>
+      <td><b>Due sezioni riscritte.</b> Le architetture ora sono cinque su dieci fold, con il calcolo di quanti soggetti servirebbero; il trasferimento esterno usa il guadagno di PR-AUC invece dell'F<sub>2</sub> misurato contro una verit&agrave; sbagliata. Cinque figure, tre segnaposto.</td>
+    </tr>
+    <tr>
+      <td><b>5</b> &mdash; Il dispositivo</td><td class="n">2.586</td>
+      <td><span class="p ok">pronto</span></td>
+      <td>I tempi restano validi &mdash; sono misure sulla board. La tabella di F<sub>2</sub> ora <b>dichiara</b> di venire dalle run a cinque soggetti, e che la conclusione su quale stimatore adottare va confermata.</td>
+    </tr>
+    <tr>
+      <td><b>6</b> &mdash; La casa</td><td class="n">4.572</td>
+      <td><span class="p ok">pronto</span></td>
+      <td><b>Sezione centrale riscritta</b>, ed &egrave; il cambiamento pi&ugrave; grosso della giornata. Aggiunte due sezioni nuove: finestre contro eventi, e i tre compiti misurati in casa.</td>
+    </tr>
+    <tr>
+      <td><b>7</b> &mdash; Le conclusioni</td><td class="n">2.182</td>
+      <td><span class="p ok">pronto</span></td>
+      <td>Contributi 3 e 7 riscritti. Il testo dichiara esplicitamente che una versione precedente sosteneva il contrario, e perch&eacute;.</td>
+    </tr>
+  </table></div>
+
+  <div class="box att">
+    <h4>il cambiamento che conta, e che va detto al relatore</h4>
+    <p>Il Capitolo&nbsp;6 sosteneva che l'archivio di laboratorio
+    <b>ordinasse in modo errato</b> le configurazioni: la peggiore in
+    laboratorio era quasi la migliore in casa. Su dieci soggetti
+    <strong>non &egrave; pi&ugrave; vero</strong>. Le due graduatorie
+    concordano.</p>
+    <p>L'affermazione &egrave; stata sostituita da una pi&ugrave; debole in
+    apparenza e pi&ugrave; solida in sostanza. Fra la configurazione di
+    riferimento e quella adottata corrono <b>0,055</b> di F<sub>2</sub> in
+    laboratorio &mdash; dentro la dispersione fra soggetti, quindi una
+    differenza che il protocollo non autorizza a dichiarare &mdash; e un
+    fattore <b>52</b> sulle finestre in allarme in una casa.</p>
+    <p><strong>Il laboratorio non ordina male: comprime.</strong> E l'effetto
+    pratico coincide, perch&eacute; chi sceglie sul solo F<sub>2</sub> non ha
+    ragione statistica di preferire la configurazione buona, prende la
+    pi&ugrave; semplice, e installa un sistema che sbaglia cinquantadue volte
+    tanto &mdash; avendo seguito la procedura corretta fino in fondo.</p>
+  </div>
+
+  <div class="box">
+    <h4>come sono stati trattati i numeri non ripetibili</h4>
+    <p>Sei misure non sono state rifatte a dieci soggetti perch&eacute; i dati
+    per farlo non ci sono: punto di vista, confronto fra rappresentazioni,
+    dimensione del modello, frame rate, scansione di <i>K</i>, confronto fra
+    stimatori di posa. <strong>Non sono stati inventati numeri.</strong> Ogni
+    sezione dichiara ora da quale impianto viene e perch&eacute; la
+    conclusione regge lo stesso.</p>
+    <p>Nel Capitolo&nbsp;5 la distinzione &egrave; esplicita, ed &egrave;
+    quella giusta: le misure di <b>tempo</b> non dipendono da quanti soggetti
+    abbia il dataset e restano valide come sono; i valori di F<sub>2</sub>
+    no.</p>
+  </div>
+
+</section>
+
+<!-- ================================================================= -->
+<section>
+  <h2>Che cosa manca davvero</h2>
+  <p class="guida">In ordine di quanto blocca il resto.</p>
+
+  <div class="tab"><table>
+    <tr><th></th><th>cosa</th><th>perch&eacute; blocca</th></tr>
+    <tr class="evid">
+      <td class="n">1</td>
+      <td><b>Il capitolo sullo stato dell'arte</b><br><span style="color:var(--muted);font-size:13.5px">non esiste: nove righe nel Capitolo&nbsp;1</span></td>
+      <td>&Egrave; il capitolo che una commissione apre per primo, ed &egrave; dove si giustifica perch&eacute; la domanda sull'architettura fosse ragionevole da porsi.</td>
+    </tr>
+    <tr>
+      <td class="n">2</td>
+      <td><b>La prova di durata sulla board</b><br><span style="color:var(--muted);font-size:13.5px">domani mattina</span></td>
+      <td>&Egrave; l'unica richiesta esplicita del relatore ancora aperta. Ha senso farla ora perch&eacute; l'antirimbalzo &egrave; a bordo: prima avrebbe misurato finestre invece di eventi.</td>
+    </tr>
+    <tr>
+      <td class="n">3</td>
+      <td><b>Nuove registrazioni domestiche</b><br><span style="color:var(--muted);font-size:13.5px">servono 15&ndash;20 cadute</span></td>
+      <td>Cinque cadute reali non permettono di dire nulla su un recall. &Egrave; il limite dichiarato pi&ugrave; serio del lavoro.</td>
+    </tr>
+    <tr>
+      <td class="n">4</td>
+      <td><b>Rifare le due run <i>cross-view</i></b><br><span style="color:var(--muted);font-size:13.5px">a dieci soggetti</span></td>
+      <td>&Egrave; l'ultimo risultato rimasto a cinque soggetti, e sta in una delle quattro richieste del relatore. La conclusione non cambier&agrave;: il divario &egrave; troppo grande perch&eacute; possa farlo.</td>
+    </tr>
+    <tr>
+      <td class="n">5</td>
+      <td><b>Tre figure e tre segnaposto</b></td>
+      <td>Due si riempiono rifacendo due run a dieci soggetti; la terza va composta dai fotogrammi delle due telecamere.</td>
+    </tr>
+  </table></div>
+
+  <div class="box">
+    <h4>quello che consiglierei di fare per primo</h4>
+    <p>Il capitolo sullo stato dell'arte. Ora che i numeri sono fermi,
+    &egrave; il solo pezzo di tesi che non esiste affatto &mdash; e il
+    riallineamento di oggi ha reso pi&ugrave; facile scriverlo, perch&eacute;
+    la domanda a cui quel capitolo deve rispondere &egrave; diventata
+    precisa: <em>perch&eacute; era ragionevole aspettarsi che l'architettura
+    contasse?</em></p>
+    <p>In parallelo, domani mattina, la prova di durata sulla board: non
+    dipende da quanto si scrive, e l&#39;unica cosa che serve &egrave;
+    lasciarla accesa.</p>
+  </div>
+</section>
+
+</div>

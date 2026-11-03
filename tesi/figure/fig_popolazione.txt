@@ -1,0 +1,60 @@
+fig_popolazione.png — testo da mettere in LaTeX
+================================================
+
+Va nel Capitolo 1, sezione «Ambient Assisted Living e rilevanza clinica delle
+cadute», subito dopo il paragrafo che cita il 25,1% e l'11,3%.
+
+Prodotta da: pipeline/figura_popolazione.py
+Dimensioni: 2275 x 1306 px, 300 dpi, sfondo bianco
+
+
+DIDASCALIA
+----------
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.88\linewidth]{figure/fig_popolazione.png}
+\caption{Popolazione italiana per fascia d'età, 2016--2026, in migliaia. La
+divaricazione fra le due curve è la ragione strutturale per cui la domanda di
+assistenza domiciliare cresce: nello stesso decennio gli ultra 65enni passano
+da 13,3 a 14,8 milioni ($+11{,}3\%$) mentre la fascia 0--14 scende da 8,2 a
+6,9 ($-16{,}5\%$). Elaborazione su dati ISTAT~\cite{IS}.}
+\label{fig:popolazione}
+\end{figure}
+
+
+FRASE DA AGGIUNGERE NEL TESTO
+-----------------------------
+
+In coda al paragrafo sul 25,1%:
+
+La Figura~\ref{fig:popolazione} mostra le due fasce a confronto sullo stesso
+decennio: il sorpasso non è imminente, è già avvenuto, e le due curve
+continuano ad allontanarsi.
+
+
+DA SAPERE
+---------
+
+I valori sono LETTI DAL GRAFICO pubblicato da ISTAT, non da una tabella. La
+lettura è accurata a circa ±30 mila unità: regge per la forma delle curve e
+per i due valori agli estremi citati nel testo, non per citare un singolo
+anno intermedio come dato puntuale.
+
+Per questo la didascalia dice «elaborazione su dati ISTAT» e non «Fonte:
+ISTAT»: la seconda formula prometterebbe una precisione che questi numeri non
+hanno.
+
+Se recuperi la tabella ISTAT, i due elenchi GIOVANI e ANZIANI in testa allo
+script vanno sostituiti e basta rigenerare — non c'è altro da toccare, e la
+didascalia può allora diventare «Fonte: ISTAT».
+
+Controllo che è tornato: gli estremi digitalizzati danno +11,3% sugli over 65,
+che è esattamente il valore già scritto nel testo del capitolo.
+
+
+PER RIGENERARLA
+---------------
+
+python pipeline/figura_popolazione.py
+python pipeline/figura_popolazione.py --dpi 600     # per la stampa

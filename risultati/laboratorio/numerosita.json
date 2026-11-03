@@ -1,0 +1,121 @@
+{
+ "csv": "feature_v5.csv",
+ "modello": "foresta casuale, 50 alberi",
+ "soglia": 0.5,
+ "potenza": 0.8,
+ "alfa": 0.05,
+ "test": "appaiato, due code",
+ "valutazione": "etichetta di allarme, comune a tutte le modalita di etichettatura",
+ "righe": [
+  {
+   "confronto": "Etichettatura: scarta contro tre classi",
+   "che_cosa": "che cosa il modello vede in addestramento",
+   "media_a": 0.46416144640736867,
+   "media_b": 0.8246952450356971,
+   "differenza": -0.3605337986283284,
+   "dev_differenza": 0.15867230430148682,
+   "t": -7.185299174654545,
+   "n_80": 2,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Finestra: 44 campioni contro 22",
+   "che_cosa": "quanta storia entra in una decisione",
+   "media_a": 0.9154244338263926,
+   "media_b": 0.8246952450356971,
+   "differenza": 0.09072918879069564,
+   "dev_differenza": 0.0792175690794204,
+   "t": 3.6218087751515147,
+   "n_80": 6,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Architettura: rete a grafo contro GRU",
+   "che_cosa": "solo il classificatore",
+   "media_a": 0.7942554949862404,
+   "media_b": 0.8567893628307338,
+   "differenza": -0.06253386784449344,
+   "dev_differenza": 0.0630632877280338,
+   "t": -3.1357301595403015,
+   "n_80": 8,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Architettura: LSTM contro GRU",
+   "che_cosa": "solo il classificatore",
+   "media_a": 0.8294352533324135,
+   "media_b": 0.8567893628307338,
+   "differenza": -0.027354109498320244,
+   "dev_differenza": 0.02900994459464978,
+   "t": -2.9817805786602904,
+   "n_80": 9,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Architettura: foresta casuale contro GRU",
+   "che_cosa": "solo il classificatore",
+   "media_a": 0.8246952450356971,
+   "media_b": 0.8567893628307338,
+   "differenza": -0.032094117795036736,
+   "dev_differenza": 0.08209521080978818,
+   "t": -1.2362537439754822,
+   "n_80": 52,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Architettura: Transformer contro GRU",
+   "che_cosa": "solo il classificatore",
+   "media_a": 0.8369399056966683,
+   "media_b": 0.8567893628307338,
+   "differenza": -0.019849457134065385,
+   "dev_differenza": 0.05161626834014264,
+   "t": -1.2160796756535026,
+   "n_80": 54,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Architettura: CNN 1D contro GRU",
+   "che_cosa": "solo il classificatore",
+   "media_a": 0.8376561192510804,
+   "media_b": 0.8567893628307338,
+   "differenza": -0.01913324357965328,
+   "dev_differenza": 0.052025298337921314,
+   "t": -1.162984753023429,
+   "n_80": 58,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Etichettatura: caduta contro tre classi",
+   "che_cosa": "che cosa il modello vede in addestramento",
+   "media_a": 0.8383450118858553,
+   "media_b": 0.8246952450356971,
+   "differenza": 0.01364976685015824,
+   "dev_differenza": 0.0470543915362153,
+   "t": 0.9173288904084745,
+   "n_80": 94,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Selezione DTW: dodici grandezze contro A3",
+   "che_cosa": "quali grandezze il modello riceve",
+   "media_a": 0.8246952450356971,
+   "media_b": 0.831979523502342,
+   "differenza": -0.007284278466644989,
+   "dev_differenza": 0.11136867503312686,
+   "t": -0.20683474108554534,
+   "n_80": 1833,
+   "n_fold": 10
+  },
+  {
+   "confronto": "Grandezze integrali: A3 contro A3base",
+   "che_cosa": "nove grandezze accumulate in piu",
+   "media_a": 0.831979523502342,
+   "media_b": 0.831045322355674,
+   "differenza": 0.0009342011466680234,
+   "dev_differenza": 0.01625236894822291,
+   "t": 0.18177063452248277,
+   "n_80": 2373,
+   "n_fold": 10
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+  "blocco": "fps",
+  "inizio": "2026-08-10T16:51:51",
+  "fine": "2026-08-10T16:53:38",
+  "durata_h": 0.028,
+  "pose_estimator": "mediapipe",
+  "soglia": 0.45,
+  "window": 22,
+  "stride": 2,
+  "frame_totali": 750,
+  "pose_valide": 102,
+  "quota_pose": 0.136,
+  "fps_medio": 7.5,
+  "allarmi": 34,
+  "allarmi_per_ora": 1223.7,
+  "clip_salvate": 0,
+  "cambi_di_persona_sospetti": 0,
+  "interrotta_da_utente": false
+}

@@ -106,6 +106,49 @@ def feature_dtw(percorso: Optional[str] = None) -> List[str]:
         return [r.strip() for r in f if r.strip()]
 
 
+def colonne_di(nome: str, scelte: Optional[str] = None):
+    """
+    L'insieme di grandezze che corrisponde a un nome.
+
+    'DTW' legge il file dell'analisi; 'DTWH' vi aggiunge l'altezza dal
+    pavimento; gli altri sono i bacini.
+
+    Sta qui e non in `addestra.py` perche' serve anche a chi esporta il
+    pacchetto per la board, e `addestra.py` importa TensorFlow: chiedergli il
+    nome di dodici colonne significherebbe caricare un motore di calcolo.
+    Averla in due copie sarebbe peggio --- e' il difetto che questo progetto
+    ha gia' commesso tre volte.
+    """
+    if nome.upper() == 'DTW':
+        return feature_dtw(scelte)
+    if nome.upper() == 'DTWH':
+        # Le dodici del DTW piu' l'altezza del bacino dal pavimento.
+        #
+        # Esiste come insieme a se' perche' il DTW la ESCLUDE, e il motivo
+        # merita di essere ripetibile invece che spiegato a voce: il criterio
+        # di selezione e' il MINIMO fra le due telecamere, e questa grandezza
+        # vale 1,530 sulla laterale --- terza su trentatre --- e 1,147 sulla
+        # rialzata. Il divario, 0,383, e' il piu' grande di tutte: dall'alto
+        # chi e' a terra non si proietta piu' in basso.
+        #
+        # Il criterio protegge dalla variabilita' di installazione. Ma il
+        # protocollo di ripresa PRESCRIVE la vista laterale, e il sistema e'
+        # installato cosi'. Questo insieme serve a misurare che cosa si perde
+        # rispettando un criterio che difende da un'installazione vietata.
+        c = list(feature_dtw(scelte))
+        if 'A3_h_pavimento' not in c:
+            c.append('A3_h_pavimento')
+        return c
+    # Prima il nome esatto, poi maiuscolo: i bacini si chiamano A1/A2/A3 ma le
+    # varianti senza integrali A1base/A2base/A3base, e un .upper() secco le
+    # renderebbe irraggiungibili.
+    for chiave in (nome, nome.upper()):
+        if chiave in FEATURE:
+            return FEATURE[chiave]
+    raise ValueError(f'insieme di feature sconosciuto: {nome!r} '
+                     f'(attesi: DTW, DTWH, {", ".join(FEATURE)})')
+
+
 # Grandezze non negative con code lunghe: log1p prima della standardizzazione,
 # altrimenti lo StandardScaler viene dominato dagli outlier.
 #

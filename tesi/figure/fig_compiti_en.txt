@@ -1,0 +1,32 @@
+FIGURA — fig_compiti_en.png
+===========================
+
+CHE COSA MOSTRA
+---------------
+Le tre definizioni possibili del compito, a parita' assoluta di tutto il
+resto. A sinistra quanto ciascuna riconosce (F2); a destra quante finestre
+manda in allarme su una persona che si sdraia volontariamente, cioe' su un
+falso positivo.
+
+COME SI LEGGE
+-------------
+I tre compiti sono: riconoscere la TRANSIZIONE (l'atto di cadere),
+riconoscere lo STATO (essere a terra), oppure accettare entrambi. Vanno
+letti i due pannelli INSIEME: il compito che riconosce di piu' non e' quello
+che sbaglia di meno, ed e' esattamente il punto della figura.
+
+I NUMERI
+--------
+Il compito «evento» e' l'unico che azzera i falsi allarmi sui distesi
+volontari, su 2.234 finestre. Distinguere due definizioni del compito
+richiede due soggetti; distinguere una GRU da una LSTM ne richiede
+centotredici.
+
+PROVENIENZA
+-----------
+Dieci soggetti, foresta sul sottoinsieme DTW.
+
+PRODOTTA DA
+-----------
+pipeline/figure_tesi.py
+su compiti/foresta_DTW_cam1.json
